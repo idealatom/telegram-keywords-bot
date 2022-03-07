@@ -71,7 +71,14 @@ def kwhandler(client, message):
             save_keywords(keywords)
 
 
-# process incoming messages ~filters.me
+# process incoming messages
+# limit to <not me> : ~filters.me
+# limit to some types of updates (text?)
+# limit to private chats / groups / channels
+
+# b1: search for keywords
+# b2: limit to mentions
+
 @user.on_message()
 def echo(client, message):
     message.forward(keywords_bot_name)
