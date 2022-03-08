@@ -28,7 +28,8 @@ user_info = user.get_me()
 if(not config.has_section('bot_params')):
     config.add_section('bot_params')
 
-keywords = set(filter(None, config.get('bot_params', 'keywords', fallback='').split(',')))
+keywords = set(filter(None, config.get(
+    'bot_params', 'keywords', fallback='').split(',')))
 
 # store
 
@@ -72,6 +73,7 @@ def kwhandler(client, message):
             keywords.clear()
             save_keywords(keywords)
 
+
 @mbot.on_message()
 def mhandler(client, message):
     if message.from_user.id != user_info.id:
@@ -88,17 +90,21 @@ def mhandler(client, message):
 
 
 # process incoming messages
-# limit to <not me> : ~filters.me
-# exclude forwards
-# limit to some types of updates (text?)
-# limit to private chats / groups / channels
+# limit to <not me> : ~filters.me (by config?)
+# exclude forwards ?
+# limit to some types of updates (plain text?)
+# limit to private chats / groups / channels (by config?)
 
 # b1: search for keywords
 # b2: limit to mentions
 
-@user.on_message()
+@user.on_message(~filters.me)
 def echo(client, message):
     # print(message)
+    # we don't want to process messages from our bots
+    if message.from_user.username in (keywords_bot_name, mention_bot_name):
+        return
+
     if message.text:
         # search keywords
         if len(keywords) and re.search("|".join(keywords), message.text, re.IGNORECASE):
