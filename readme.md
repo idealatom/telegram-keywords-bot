@@ -1,3 +1,5 @@
+## wip
+
 ## setup
 - install pyrogram and tgcrypto
 - copy config_sample.ini to config.ini and edit it with your personal ids and hashes
