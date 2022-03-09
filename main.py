@@ -7,22 +7,11 @@ from configparser import ConfigParser
 # read config
 config = ConfigParser()
 config.read('config.ini')
-keywords_bot_name = config.get('pyrogram', 'keywords_bot_name', fallback=None)
-keywords_bot_token = config.get(
-    'pyrogram', 'keywords_bot_token', fallback=None)
-mention_bot_name = config.get('pyrogram', 'mention_bot_name', fallback=None)
-mention_bot_token = config.get('pyrogram', 'mention_bot_token', fallback=None)
 
 # start apps
 user = Client('user')
-kwbot = Client('kwbot', bot_token=keywords_bot_token)
-mbot = Client('mbot', bot_token=mention_bot_token)
-
 
 user.start()
-kwbot.start()
-mbot.start()
-
 user_info = user.get_me()
 
 if(not config.has_section('bot_params')):
@@ -30,6 +19,11 @@ if(not config.has_section('bot_params')):
 
 keywords = set(filter(None, config.get(
     'bot_params', 'keywords', fallback='').split(',')))
+
+dummy_bot_name = config.get('bot_params', 'dummy_bot_name', fallback='SearchKeywordsBot')
+keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
+mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
+following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
 
 # store
 
@@ -41,9 +35,7 @@ def save_keywords(keywords):
         config.write(configfile)
 
 
-# bots handlers
-
-@kwbot.on_message()
+# bot commands handler
 def kwhandler(client, message):
     if message.from_user.id != user_info.id:
         return
@@ -54,8 +46,6 @@ def kwhandler(client, message):
     comm = args.pop(0)
 
     match comm:
-        case '/start':
-            message.reply_text('bot started')
         case '/add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -73,22 +63,6 @@ def kwhandler(client, message):
             keywords.clear()
             save_keywords(keywords)
 
-
-@mbot.on_message()
-def mhandler(client, message):
-    if message.from_user.id != user_info.id:
-        return
-    if not message.text or message.text[0] != "/":
-        return
-
-    args = message.text.split(' ')
-    comm = args.pop(0)
-
-    match comm:
-        case '/start':
-            message.reply_text('bot started')
-
-
 # process incoming messages
 # limit to <not me> : ~filters.me (by config?)
 # exclude forwards ?
@@ -100,30 +74,41 @@ def mhandler(client, message):
 
 @user.on_message(~filters.me)
 def echo(client, message):
-    # print(message)
-    # we don't want to process messages from our bots
-    if message.from_user.username in (keywords_bot_name, mention_bot_name):
-        return
-
     if message.text:
         # search keywords
         if len(keywords) and re.search("|".join(keywords), message.text, re.IGNORECASE):
-            message.forward(keywords_bot_name)
+            keywords_forward(message)
 
+    # message can be a reply with attachment with no text
     if message.mentioned:
-        message.forward(mention_bot_name)
+        mentions_forward(message)
+
+    
 
 
-# init dialogs with bots, so that they can start sending messages to you
-user.send_message(keywords_bot_name, '/start')
-user.send_message(mention_bot_name, '/start')
+
+def keywords_forward(message):
+    message.forward(keywords_chat_id)
+
+
+def mentions_forward(message):
+    message.forward(mentions_chat_id)
+
+def following_forward(message):
+    message.forward(following_chat_id)
+
+
+
+# init message
+user.send_message(keywords_chat_id, 'bot started')
+user.send_message(mentions_chat_id, 'bot started')
+# user.send_message(following_chat_id, 'bot started')
 
 idle()
 
-
-kwbot.send_message(user_info.id, 'stopping bot')
-mbot.send_message(user_info.id, 'stopping bot')
+# stop message
+user.send_message(keywords_chat_id, 'bot stopped')
+user.send_message(mentions_chat_id, 'bot stopped')
+# user.send_message(following_chat_id, 'bot stopped')
 
 user.stop()
-kwbot.stop()
-mbot.stop()
