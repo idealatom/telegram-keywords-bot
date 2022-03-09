@@ -8,6 +8,16 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config.ini')
 
+# store
+def save_keywords(keywords):
+    keywords = set(filter(None, keywords))
+    config_set_and_save('bot_params', 'keywords', ','.join(keywords))
+
+def config_set_and_save(section, param_name, param_value):
+    config.set(section, param_name, param_value)
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
 # start apps
 user = Client('user')
 
@@ -17,22 +27,24 @@ user_info = user.get_me()
 if(not config.has_section('bot_params')):
     config.add_section('bot_params')
 
-keywords = set(filter(None, config.get(
-    'bot_params', 'keywords', fallback='').split(',')))
+keywords = set(filter(None, config.get('bot_params', 'keywords', fallback='').split(',')))
 
-dummy_bot_name = config.get('bot_params', 'dummy_bot_name', fallback='SearchKeywordsBot')
+dummy_bot_name = config.get('bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
 
-# store
-
-
-def save_keywords(keywords):
-    keywords = set(filter(None, keywords))
-    config.set('bot_params', 'keywords', ','.join(keywords))
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
+# init chats
+chat_dict = {
+    "Keywords": keywords_chat_id,
+    "Mentions": mentions_chat_id,
+    "Following": following_chat_id
+}
+for k in chat_dict:
+    if not chat_dict[k]:
+        keywords_chat = user.create_group('Keywords', dummy_bot_name)
+        keywords_chat_id = keywords_chat.id
+        config_set_and_save('bot_params', 'keywords_chat_id', keywords_chat_id)
 
 
 # bot commands handler
@@ -74,15 +86,17 @@ def kwhandler(client, message):
 
 @user.on_message(~filters.me)
 def echo(client, message):
+    # process keywords
     if message.text:
-        # search keywords
         if len(keywords) and re.search("|".join(keywords), message.text, re.IGNORECASE):
             keywords_forward(message)
 
+    # process mentions
     # message can be a reply with attachment with no text
     if message.mentioned:
         mentions_forward(message)
 
+    # process following
     
 
 
