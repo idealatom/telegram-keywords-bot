@@ -133,7 +133,7 @@ def keywords_forward(client, message, keyword):
     if(message.from_user):
         # ??? make link from id ???
         source_name = " ".join(
-            set(filter(None, (message.from_user.first_name, message.from_user.first_name))))
+            set(filter(None, (message.from_user.first_name, message.from_user.last_name))))
 
     client.send_message(
         keywords_chat_id, 'Замечен тег #{} в канале/чате {} от {}'.format(keyword, source_chat, source_name))
@@ -143,12 +143,12 @@ def keywords_forward(client, message, keyword):
 
 def mentions_forward(client, message):
     message.forward(mentions_chat_id)
-    client.mark_unread(keywords_chat_id)
+    client.mark_chat_unread(keywords_chat_id)
 
 
 def following_forward(client, message):
     message.forward(following_chat_id)
-    client.mark_unread(keywords_chat_id)
+    client.mark_chat_unread(keywords_chat_id)
 
 
 # init message
