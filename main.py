@@ -93,8 +93,8 @@ def kwhandler(client, message):
                 return
             dialogs = []
             for dialog in client.iter_dialogs():
-                searchStr = str(dialog.chat.title) + str(dialog.chat.first_name) + \
-                    str(dialog.chat.last_name) + str(dialog.chat.username)
+                searchStr = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
+                                     str(dialog.chat.last_name), '@' + str(dialog.chat.username)))
                 if re.search(' '.join(args), searchStr, re.IGNORECASE):
                     dialogs.append('{} - {}'.format(dialog.chat.id, dialog.chat.title if dialog.chat.title else str(
                         dialog.chat.first_name) + ' ' + dialog.chat.last_name))
