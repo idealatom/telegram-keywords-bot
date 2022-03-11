@@ -122,18 +122,33 @@ def echo(client, message):
 
 
 def keywords_forward(client, message, keyword):
+    # личные
+    if message.chat.type == 'private':
+        source_name = str(str(message.from_user.first_name) + ' ' +
+                          str(message.from_user.last_name)).strip()
+        source_link = '@' + \
+            str(message.from_user.username) if message.from_user.username else ''
+        source = 'в личном сообщении от {} {}'.format(source_name, source_link)
+    # каналы
+    elif message.chat.type == 'channel':
+        source = 'в канале {} @{}'.format(message.chat.title,
+                                          message.chat.username)
+    # группы и супергруппы
+    else:
+        source_chat_name = str(
+            message.chat.title) if message.chat.title else '<без имени>'
+        source_chat_link = '@' + \
+            str(message.chat.username) if message.chat.username else ''
+        source_name = str(str(message.from_user.first_name) + ' ' +
+                          str(message.from_user.last_name)).strip()
+        source_link = '@' + \
+            str(message.from_user.username) if message.from_user.username else ''
 
-    source_chat_name = str(message.chat.title) if message.chat.title else ''
-    source_chat_link = '@' + \
-        str(message.chat.username) if message.chat.username else ''
-
-    source_name = str(str(message.from_user.first_name) + ' ' +
-                      str(message.from_user.last_name)).strip()
-    source_link = '@' + \
-        str(message.from_user.username) if message.from_user.username else ''
+        source = 'в чате {} {} от {} {}'.format(
+            source_chat_name, source_chat_link, source_name, source_link)
 
     client.send_message(
-        keywords_chat_id, 'Замечен тег #{} в канале/чате {} {} от {} {}'.format(keyword, source_chat_name, source_chat_link, source_name, source_link))
+        keywords_chat_id, 'Замечен тег #{} {}'.format(keyword, source))
     message.forward(keywords_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
