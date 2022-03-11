@@ -53,41 +53,42 @@ for k in chat_dict:
         config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
 
-# bot commands handler
+# bot commands handlers
+# keywords chat
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'removeall']))
 def kwhandler(client, message):
-    if not message.text or message.text[0] != "/":
+    # print(message)
+    # accept commands only for keywords chat
+    if not message.chat or str(message.chat.id) != str(keywords_chat_id):
         return
 
-    args = message.text.split(' ')
+    args = message.command
     comm = args.pop(0)
 
     match comm:
-        case '/help':
-            message.reply_text('''
-/add keyword1 keyword2
-/show
-/remove keyword1 keyword2
-/removeall
-            ''')
-        case '/add':
+        case 'help':
+            message.reply_text(
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall')
+        case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
             message.reply_text('processed ' + str(len(args)) + ' keywords')
             save_keywords(keywords)
-        case '/show':
+        case 'show':
             if not keywords:
                 message.reply_text('no keywords, add with /add command')
             else:
                 message.reply_text('keywords: #' + ', #'.join(keywords))
-        case '/remove':
+        case 'remove':
             for keyword in args:
                 keywords.discard(keyword.strip().replace(',', ''))
             message.reply_text('processed ' + str(len(args)) + ' keywords')
             save_keywords(keywords)
-        case '/removeall':
+        case 'removeall':
             message.reply_text('removed ' + str(len(keywords)) + ' keywords')
             keywords.clear()
             save_keywords(keywords)
+
 
 # process incoming messages
 # limit to <not me> : ~filters.me (by config?)
@@ -100,49 +101,39 @@ def kwhandler(client, message):
 
 # TODO skip reactions and message edits
 
-@user.on_message()
+
+@user.on_message(~filters.me & ~filters.edited)
 def echo(client, message):
     print(message)
+    # process keywords
+    if message.text:
+        # maybe search -> findall and mark all keywords?
+        keyword = re.search("|".join(keywords),
+                            message.text, re.IGNORECASE)
+        if len(keywords) and keyword:
+            keywords_forward(client, message, keyword.group())
 
-    # skip edits
-    if message.edit_date:
-        return
-    
-    # 
-    if message.from_user and message.from_user.id == user_info.id:
-        # process commands
-        if message.chat and str(message.chat.id) == str(keywords_chat_id):
-            kwhandler(client, message)
-    else:
-        # process keywords
-        if message.text:
-            # maybe search -> findall and mark all keywords?
-            keyword = re.search("|".join(keywords),
-                                message.text, re.IGNORECASE)
-            if len(keywords) and keyword:
-                keywords_forward(client, message, keyword.group())
+    # process mentions
+    # message can be a reply with attachment with no text
+    if message.mentioned:
+        mentions_forward(client, message)
 
-        # process mentions
-        # message can be a reply with attachment with no text
-        if message.mentioned:
-            mentions_forward(client, message)
-
-        # process following
+    # process following
 
 
 def keywords_forward(client, message, keyword):
-    source_chat = 'Личное'
-    if(message.chat):
-        source_chat = message.chat.title
 
-    source_name = ''
-    if(message.from_user):
-        # ??? make link from id ???
-        source_name = " ".join(
-            set(filter(None, (message.from_user.first_name, message.from_user.last_name))))
+    source_chat_name = str(message.chat.title) if message.chat.title else ''
+    source_chat_link = '@' + \
+        str(message.chat.username) if message.chat.username else ''
+
+    source_name = str(str(message.from_user.first_name) + ' ' +
+                      str(message.from_user.last_name)).strip()
+    source_link = '@' + \
+        str(message.from_user.username) if message.from_user.username else ''
 
     client.send_message(
-        keywords_chat_id, 'Замечен тег #{} в канале/чате {} от {}'.format(keyword, source_chat, source_name))
+        keywords_chat_id, 'Замечен тег #{} в канале/чате {} {} от {} {}'.format(keyword, source_chat_name, source_chat_link, source_name, source_link))
     message.forward(keywords_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
