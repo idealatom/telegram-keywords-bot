@@ -64,10 +64,10 @@ def kwhandler(client, message):
     match comm:
         case '/help':
             message.reply_text('''
-                /add keyword1 keyword2\n
-                /show\n
-                /remove keyword1 keyword2\n
-                /removeall
+/add keyword1 keyword2
+/show
+/remove keyword1 keyword2
+/removeall
             ''')
         case '/add':
             for keyword in args:
@@ -98,11 +98,17 @@ def kwhandler(client, message):
 # b1: search for keywords
 # b2: limit to mentions
 
+# TODO skip reactions and message edits
 
 @user.on_message()
 def echo(client, message):
     print(message)
 
+    # skip edits
+    if message.edit_date:
+        return
+    
+    # 
     if message.from_user and message.from_user.id == user_info.id:
         # process commands
         if message.chat and str(message.chat.id) == str(keywords_chat_id):
