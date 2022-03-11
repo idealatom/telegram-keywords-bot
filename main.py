@@ -55,7 +55,7 @@ for k in chat_dict:
 
 # bot commands handlers
 # keywords chat
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'removeall']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat']))
 def kwhandler(client, message):
     # print(message)
     # accept commands only for keywords chat
@@ -88,6 +88,18 @@ def kwhandler(client, message):
             message.reply_text('removed ' + str(len(keywords)) + ' keywords')
             keywords.clear()
             save_keywords(keywords)
+        case 'findchat':
+            if(not args[0]):
+                return
+            dialogs = []
+            for dialog in client.iter_dialogs():
+                searchStr = str(dialog.chat.title) + str(dialog.chat.first_name) + \
+                    str(dialog.chat.last_name) + str(dialog.chat.username)
+                if re.search(' '.join(args), searchStr, re.IGNORECASE):
+                    dialogs.append('{} - {}'.format(dialog.chat.id, dialog.chat.title if dialog.chat.title else str(
+                        dialog.chat.first_name) + ' ' + dialog.chat.last_name))
+            message.reply_text('\n'.join(dialogs) if len(
+                dialogs) else 'Ничего не найдено')
 
 
 # process incoming messages
@@ -99,12 +111,9 @@ def kwhandler(client, message):
 # b1: search for keywords
 # b2: limit to mentions
 
-# TODO skip reactions and message edits
-
-
 @user.on_message(~filters.me & ~filters.edited)
 def echo(client, message):
-    print(message)
+    # print(message)
     # process keywords
     if message.text:
         # maybe search -> findall and mark all keywords?
@@ -124,11 +133,11 @@ def echo(client, message):
 def keywords_forward(client, message, keyword):
     # личные
     if message.chat.type == 'private':
-        source_name = str(str(message.from_user.first_name) + ' ' +
-                          str(message.from_user.last_name)).strip()
-        source_link = '@' + \
-            str(message.from_user.username) if message.from_user.username else ''
-        source = 'в личном сообщении от {} {}'.format(source_name, source_link)
+        # source_name = str(str(message.from_user.first_name) + ' ' +
+        #                   str(message.from_user.last_name)).strip()
+        # source_link = '@' + \
+        #     str(message.from_user.username) if message.from_user.username else ''
+        source = 'в личном сообщении'
     # каналы
     elif message.chat.type == 'channel':
         source = 'в канале {} @{}'.format(message.chat.title,
@@ -139,16 +148,16 @@ def keywords_forward(client, message, keyword):
             message.chat.title) if message.chat.title else '<без имени>'
         source_chat_link = '@' + \
             str(message.chat.username) if message.chat.username else ''
-        source_name = str(str(message.from_user.first_name) + ' ' +
-                          str(message.from_user.last_name)).strip()
-        source_link = '@' + \
-            str(message.from_user.username) if message.from_user.username else ''
+        # source_name = str(str(message.from_user.first_name) + ' ' +
+        #                   str(message.from_user.last_name)).strip()
+        # source_link = '@' + \
+        #     str(message.from_user.username) if message.from_user.username else ''
 
-        source = 'в чате {} {} от {} {}'.format(
-            source_chat_name, source_chat_link, source_name, source_link)
+        source = 'в чате {} {}'.format(
+            source_chat_name, source_chat_link)
 
     client.send_message(
-        keywords_chat_id, 'Замечен тег #{} {}'.format(keyword, source))
+        keywords_chat_id, '#{} {}'.format(keyword, source))
     message.forward(keywords_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
@@ -167,7 +176,6 @@ def following_forward(client, message):
 # user.send_message(keywords_chat_id, 'bot started')
 # user.send_message(mentions_chat_id, 'bot started')
 # user.send_message(following_chat_id, 'bot started')
-
 idle()
 
 # stop message
