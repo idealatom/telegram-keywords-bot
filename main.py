@@ -8,7 +8,13 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config.ini')
 
-# store
+
+def is_id(val):
+    try:
+        int(val)
+        return True
+    except ValueError:
+        return False
 
 
 def save_keywords(keywords):
@@ -16,8 +22,23 @@ def save_keywords(keywords):
     config_set_and_save('bot_params', 'keywords', str(','.join(keywords)))
 
 
-def config_set_and_save(section, param_name, param_value):
-    config.set(section, param_name, param_value)
+def save_excluded_chats(excluded_chats):
+    excluded_chats = set(filter(None, excluded_chats))
+    config_set_and_save('bot_params', 'excluded_chats',
+                        str(','.join(excluded_chats)))
+
+
+def save_includes(includes):
+    includes = set(filter(None, includes))
+    for include in includes:
+        config.set('chat_specific_keywords', include['id'], str(
+            ','.join(include['keywords'])))
+    config_set_and_save(skip_set=True)
+
+
+def config_set_and_save(section, param_name, param_value, skip_set=False):
+    if(not skip_set):
+        config.set(section, param_name, param_value)
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
@@ -33,12 +54,15 @@ if(not config.has_section('bot_params')):
 
 keywords = set(filter(None, config.get(
     'bot_params', 'keywords', fallback='').split(',')))
+excluded_chats = set(filter(None, config.get(
+    'bot_params', 'excluded_chats', fallback='').split(',')))
 
 dummy_bot_name = config.get(
     'bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
+
 
 # init chats
 chat_dict = {
@@ -53,9 +77,29 @@ for k in chat_dict:
         config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
 
+def find_chat(client, args):
+    dialogs = []
+    if len(args) == 1 and (is_id(args[0] or args[0][0] == '@')):
+        try:
+            chat = client.get_chat(args[0])
+            dialogs.append([str(chat.id), str(chat.title) if chat.title else str(
+                chat.first_name) + ' ' + str(chat.last_name)])
+        except:
+            return dialogs
+    else:
+        for dialog in client.iter_dialogs():
+            searchStr = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
+                                  str(dialog.chat.last_name), '@' + str(dialog.chat.username)))
+            if re.search(' '.join(args), searchStr, re.IGNORECASE):
+                dialogs.append([str(dialog.chat.id), str(dialog.chat.title) if dialog.chat.title else str(
+                    dialog.chat.first_name) + ' ' + str(dialog.chat.last_name)])
+    return dialogs
+
 # bot commands handlers
 # keywords chat
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat']))
+
+
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude']))
 def kwhandler(client, message):
     # print(message)
     # accept commands only for keywords chat
@@ -68,7 +112,7 @@ def kwhandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findchat name|id|@username\n/exclude name|id|@username')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -89,17 +133,21 @@ def kwhandler(client, message):
             keywords.clear()
             save_keywords(keywords)
         case 'findchat':
-            if(not args[0]):
+            if(not args):
                 return
-            dialogs = []
-            for dialog in client.iter_dialogs():
-                searchStr = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
-                                     str(dialog.chat.last_name), '@' + str(dialog.chat.username)))
-                if re.search(' '.join(args), searchStr, re.IGNORECASE):
-                    dialogs.append('{} - {}'.format(dialog.chat.id, dialog.chat.title if dialog.chat.title else str(
-                        dialog.chat.first_name) + ' ' + dialog.chat.last_name))
-            message.reply_text('\n'.join(dialogs) if len(
+            dialogs = find_chat(client, args)
+            message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Ничего не найдено')
+        case 'exclude':
+            if(not args):
+                return
+            dialogs = find_chat(client, args)
+            if(len(dialogs) != 1):
+                message.reply_text('Найдено больше одного чата:\n' + '\n'.join([' - '.join(
+                    dialog) for dialog in dialogs]) if len(dialogs) else 'Ничего не найдено')
+            else:
+                message.reply_text(
+                    'Чат добавлен в список исключений:\n' + ' - '.join(dialogs[0]))
 
 
 # process incoming messages
@@ -163,6 +211,24 @@ def keywords_forward(client, message, keyword):
 
 
 def mentions_forward(client, message):
+    # личные
+    if message.chat.type == 'private':
+        source = 'в личном сообщении'
+    # каналы
+    elif message.chat.type == 'channel':
+        source = 'в канале {} @{}'.format(message.chat.title,
+                                          message.chat.username)
+    # группы и супергруппы
+    else:
+        source_chat_name = str(
+            message.chat.title) if message.chat.title else '<без имени>'
+        source_chat_link = '@' + \
+            str(message.chat.username) if message.chat.username else ''
+        source = 'в чате {} {}'.format(
+            source_chat_name, source_chat_link)
+
+    client.send_message(
+        mentions_chat_id, 'Уведомление {}'.format(source))
     message.forward(mentions_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
