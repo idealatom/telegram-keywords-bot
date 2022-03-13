@@ -286,8 +286,6 @@ def following_forward(client, message):
     client.mark_chat_unread(keywords_chat_id)
 
 
-# user.send_message(keywords_chat_id, '[inline mention of a user2](tg://user?id=202428404)')
-
 # init message
 # user.send_message(keywords_chat_id, 'bot started')
 # user.send_message(mentions_chat_id, 'bot started')
