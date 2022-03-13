@@ -220,6 +220,8 @@ def notmyHandler(client, message):
 
 @user.on_message(filters.me & ~filters.edited)
 def myHandler(client, message):
+    if str(message.chat.id) != following_chat_id:
+        return
     if message.forward_from:
         if str(message.forward_from.id) in following_set:
             message.reply('Уже следим за id {}'.format(
@@ -231,14 +233,15 @@ def myHandler(client, message):
                 message.forward_from.id))
 
 
+def makeUserMention(user):
+    name = str(user.first_name) + ' ' + str(user.last_name).strip()
+    return '[{}](tg://user?id={})'.format(name, user.id)
+
+
 def makeMessageDescription(message):
     # личные
     if message.chat.type == 'private':
-        # source_name = str(str(message.from_user.first_name) + ' ' +
-        #                   str(message.from_user.last_name)).strip()
-        # source_link = '@' + \
-        #     str(message.from_user.username) if message.from_user.username else ''
-        source = 'в личном сообщении'
+        source = 'в лс ({})'.format(makeUserMention(message.from_user))
     # каналы
     elif message.chat.type == 'channel':
         source = 'в канале {} @{}'.format(message.chat.title,
@@ -247,15 +250,14 @@ def makeMessageDescription(message):
     else:
         source_chat_name = str(
             message.chat.title) if message.chat.title else '<без имени>'
-        source_chat_link = '@' + \
+        source_chat_link = ' @' + \
             str(message.chat.username) if message.chat.username else ''
-        # source_name = str(str(message.from_user.first_name) + ' ' +
-        #                   str(message.from_user.last_name)).strip()
-        # source_link = '@' + \
-        #     str(message.from_user.username) if message.from_user.username else ''
+        source = 'в чате {}{} от {}'.format(
+            source_chat_name, source_chat_link, makeUserMention(message.from_user))
 
-        source = 'в чате {} {}'.format(
-            source_chat_name, source_chat_link)
+    # forward of forward loses the first person
+    if message.forward_from:
+        return '{}, форвард от - {}'.format(source, makeUserMention(message.forward_from))
 
     return source
 
@@ -279,10 +281,12 @@ def mentions_forward(client, message):
 def following_forward(client, message):
     source = makeMessageDescription(message)
     client.send_message(
-        following_chat_id, 'Новое сообщение пользователя {}'.format(source))
+        following_chat_id, 'Активность {}'.format(source))
     message.forward(following_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
+
+# user.send_message(keywords_chat_id, '[inline mention of a user2](tg://user?id=202428404)')
 
 # init message
 # user.send_message(keywords_chat_id, 'bot started')
