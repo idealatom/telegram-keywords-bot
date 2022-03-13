@@ -79,7 +79,7 @@ for k in chat_dict:
 
 def find_chat(client, args):
     dialogs = []
-    if len(args) == 1 and (is_id(args[0] or args[0][0] == '@')):
+    if len(args) == 1 and (is_id(args[0]) or args[0][0] == '@'):
         try:
             chat = client.get_chat(args[0])
             dialogs.append([str(chat.id), str(chat.title) if chat.title else str(
