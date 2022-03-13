@@ -28,6 +28,12 @@ def save_excluded_chats(excluded_chats):
                         str(','.join(excluded_chats)))
 
 
+def save_following(following):
+    following = set(filter(None, following))
+    config_set_and_save('bot_params', 'following',
+                        str(','.join(following)))
+
+
 def save_includes(includes):
     includes = set(filter(None, includes))
     for include in includes:
@@ -56,6 +62,8 @@ keywords = set(filter(None, config.get(
     'bot_params', 'keywords', fallback='').split(',')))
 excluded_chats = set(filter(None, config.get(
     'bot_params', 'excluded_chats', fallback='').split(',')))
+following_set = set(filter(None, config.get(
+    'bot_params', 'following', fallback='').split(',')))
 
 dummy_bot_name = config.get(
     'bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
@@ -99,13 +107,22 @@ def find_chat(client, args):
 # keywords chat
 
 
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude']))
-def kwhandler(client, message):
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude', 'follow', 'unfollow']))
+def commHandler(client, message):
     # print(message)
     # accept commands only for keywords chat
-    if not message.chat or str(message.chat.id) != str(keywords_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id):
         return
 
+    chat_id = str(message.chat.id)
+
+    if chat_id == keywords_chat_id:
+        kwHandler(client, message)
+    elif chat_id == following_chat_id:
+        fwHandler(client, message)
+
+
+def kwHandler(client, message):
     args = message.command
     comm = args.pop(0)
 
@@ -146,8 +163,29 @@ def kwhandler(client, message):
                 message.reply_text('Найдено больше одного чата:\n' + '\n'.join([' - '.join(
                     dialog) for dialog in dialogs]) if len(dialogs) else 'Ничего не найдено')
             else:
+                excluded_chats.add(dialogs[0][0])
+                save_excluded_chats(excluded_chats)
                 message.reply_text(
                     'Чат добавлен в список исключений:\n' + ' - '.join(dialogs[0]))
+
+
+def fwHandler(client, message):
+    if str(message.chat.id) != following_chat_id:
+        return
+    # print(message)
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'show':
+            message.reply(', '.join(following_set)
+                          if following_set else 'Список пуст')
+        case 'unfollow':
+            if not args or not args[0] in following_set:
+                message.reply('Не найден')
+            else:
+                following_set.discard(args[0])
+                save_following(following_set)
+                message.reply('{} удален из подписок'.format(args[0]))
 
 
 # process incoming messages
@@ -160,10 +198,10 @@ def kwhandler(client, message):
 # b2: limit to mentions
 
 @user.on_message(~filters.me & ~filters.edited)
-def echo(client, message):
+def notmyHandler(client, message):
     # print(message)
     # process keywords
-    if message.text:
+    if message.text and not str(message.chat.id) in excluded_chats:
         # maybe search -> findall and mark all keywords?
         keyword = re.search("|".join(keywords),
                             message.text, re.IGNORECASE)
@@ -176,9 +214,24 @@ def echo(client, message):
         mentions_forward(client, message)
 
     # process following
+    if message.from_user and str(message.from_user.id) in following_set:
+        following_forward(client, message)
 
 
-def keywords_forward(client, message, keyword):
+@user.on_message(filters.me & ~filters.edited)
+def myHandler(client, message):
+    if message.forward_from:
+        if str(message.forward_from.id) in following_set:
+            message.reply('Уже следим за id {}'.format(
+                message.forward_from.id))
+        else:
+            following_set.add(str(message.forward_from.id))
+            save_following(following_set)
+            message.reply('id {} добавлен в список отслеживания'.format(
+                message.forward_from.id))
+
+
+def makeMessageDescription(message):
     # личные
     if message.chat.type == 'private':
         # source_name = str(str(message.from_user.first_name) + ' ' +
@@ -204,6 +257,11 @@ def keywords_forward(client, message, keyword):
         source = 'в чате {} {}'.format(
             source_chat_name, source_chat_link)
 
+    return source
+
+
+def keywords_forward(client, message, keyword):
+    source = makeMessageDescription(message)
     client.send_message(
         keywords_chat_id, '#{} {}'.format(keyword, source))
     message.forward(keywords_chat_id)
@@ -211,22 +269,7 @@ def keywords_forward(client, message, keyword):
 
 
 def mentions_forward(client, message):
-    # личные
-    if message.chat.type == 'private':
-        source = 'в личном сообщении'
-    # каналы
-    elif message.chat.type == 'channel':
-        source = 'в канале {} @{}'.format(message.chat.title,
-                                          message.chat.username)
-    # группы и супергруппы
-    else:
-        source_chat_name = str(
-            message.chat.title) if message.chat.title else '<без имени>'
-        source_chat_link = '@' + \
-            str(message.chat.username) if message.chat.username else ''
-        source = 'в чате {} {}'.format(
-            source_chat_name, source_chat_link)
-
+    source = makeMessageDescription(message)
     client.send_message(
         mentions_chat_id, 'Уведомление {}'.format(source))
     message.forward(mentions_chat_id)
@@ -234,6 +277,9 @@ def mentions_forward(client, message):
 
 
 def following_forward(client, message):
+    source = makeMessageDescription(message)
+    client.send_message(
+        following_chat_id, 'Новое сообщение пользователя {}'.format(source))
     message.forward(following_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
