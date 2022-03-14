@@ -8,6 +8,34 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config.ini')
 
+# start app
+user = Client('user')
+
+user.start()
+user_info = user.get_me()
+
+if(not config.has_section('bot_params')):
+    config.add_section('bot_params')
+
+if(not config.has_section('includes_dict')):
+    config.add_section('includes_dict')
+
+keywords = set(filter(None, config.get(
+    'bot_params', 'keywords', fallback='').split(',')))
+excluded_chats = set(filter(None, config.get(
+    'bot_params', 'excluded_chats', fallback='').split(',')))
+following_set = set(filter(None, config.get(
+    'bot_params', 'following', fallback='').split(',')))
+includes_dict = dict(config.items('includes_dict'))
+for chat in includes_dict:
+    includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
+
+dummy_bot_name = config.get(
+    'bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
+keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
+mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
+following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
+
 
 def is_id(val):
     try:
@@ -34,6 +62,23 @@ def save_following(following):
                         str(','.join(following)))
 
 
+def add_keywords_to_includes(chat, keywords):
+    if not chat in includes_dict:
+        includes_dict[chat] = set()
+    for keyword in keywords:
+        includes_dict[chat].add(keyword)
+
+
+def remove_keywords_from_includes(chat, keywords):
+    if not chat in includes_dict:
+        return
+    for keyword in keywords:
+        includes_dict[chat].discard(keyword)
+
+    if keywords == ['all'] or len(includes_dict[chat]) == 0:
+        del includes_dict[chat]
+
+
 def save_includes(includes):
     includes = set(filter(None, includes))
     for include in includes:
@@ -47,29 +92,6 @@ def config_set_and_save(section, param_name, param_value, skip_set=False):
         config.set(section, param_name, param_value)
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
-
-
-# start app
-user = Client('user')
-
-user.start()
-user_info = user.get_me()
-
-if(not config.has_section('bot_params')):
-    config.add_section('bot_params')
-
-keywords = set(filter(None, config.get(
-    'bot_params', 'keywords', fallback='').split(',')))
-excluded_chats = set(filter(None, config.get(
-    'bot_params', 'excluded_chats', fallback='').split(',')))
-following_set = set(filter(None, config.get(
-    'bot_params', 'following', fallback='').split(',')))
-
-dummy_bot_name = config.get(
-    'bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
-keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
-mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
-following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
 
 
 # init chats
@@ -118,7 +140,7 @@ def find_users(client, args):
 # keywords chat
 
 
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
     # print(message)
     # accept commands only for keywords chat
@@ -140,7 +162,7 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findchat name|id|@username\n/exclude name|id|@username')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findchat name|id|@username\n/exclude name|id|@username\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -167,7 +189,7 @@ def kwHandler(client, message):
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Ничего не найдено')
         case 'exclude':
-            if(not args):
+            if not args:
                 return
             dialogs = find_chats(client, args)
             if(len(dialogs) != 1):
@@ -178,6 +200,18 @@ def kwHandler(client, message):
                 save_excluded_chats(excluded_chats)
                 message.reply_text(
                     'Чат добавлен в список исключений:\n' + ' - '.join(dialogs[0]))
+        case 'include':
+            if len(args) < 2:
+                return
+            chat_name = args.pop(0)
+            dialogs = find_chats(client, [chat_name])
+            if(len(dialogs) != 1):
+                message.reply_text('Найдено больше одного чата:\n' + '\n'.join([' - '.join(
+                    dialog) for dialog in dialogs]) if len(dialogs) else 'Ничего не найдено')
+            else:
+                add_keywords_to_includes(dialogs[0][0], args)
+                message.reply_text('Ключевые слова #{} для чата:\n'.format(', #'.join(
+                    includes_dict[dialogs[0][0]])) + ' - '.join(dialogs[0]))
 
 
 def fwHandler(client, message):
