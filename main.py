@@ -85,7 +85,7 @@ for k in chat_dict:
         config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
 
-def find_chat(client, args):
+def find_chats(client, args):
     dialogs = []
     if len(args) == 1 and (is_id(args[0]) or args[0][0] == '@'):
         try:
@@ -103,6 +103,17 @@ def find_chat(client, args):
                     dialog.chat.first_name) + ' ' + str(dialog.chat.last_name)])
     return dialogs
 
+
+def find_users(client, args):
+    result = []
+    users = client.get_users(args)
+    for user in users:
+        result.append(
+            [str(user.id),
+             ' '.join(list(filter(None, [user.first_name, user.last_name])))
+             ]
+        )
+    return result
 # bot commands handlers
 # keywords chat
 
@@ -152,13 +163,13 @@ def kwHandler(client, message):
         case 'findchat':
             if(not args):
                 return
-            dialogs = find_chat(client, args)
+            dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Ничего не найдено')
         case 'exclude':
             if(not args):
                 return
-            dialogs = find_chat(client, args)
+            dialogs = find_chats(client, args)
             if(len(dialogs) != 1):
                 message.reply_text('Найдено больше одного чата:\n' + '\n'.join([' - '.join(
                     dialog) for dialog in dialogs]) if len(dialogs) else 'Ничего не найдено')
@@ -177,8 +188,8 @@ def fwHandler(client, message):
     comm = args.pop(0)
     match comm:
         case 'show':
-            message.reply(', '.join(following_set)
-                          if following_set else 'Список пуст')
+            message.reply('\n'.join([' - '.join(user) for user in find_users(
+                client, following_set)]) if following_set else 'Список пуст')
         case 'unfollow':
             if not args or not args[0] in following_set:
                 message.reply('Не найден')
