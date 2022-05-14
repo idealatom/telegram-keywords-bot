@@ -11,6 +11,7 @@ config.read('config.ini')
 # start app
 user = Client('user')
 
+# TODO catch 401 error when session is expired / removed, delete user.session file and try again
 user.start()
 user_info = user.get_me()
 
