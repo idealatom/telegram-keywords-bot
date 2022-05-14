@@ -136,14 +136,14 @@ def find_users(client, args):
              ]
         )
     return result
-# bot commands handlers
-# keywords chat
 
 
+############## bot commands handlers #################
+
+# command messages listener
 @user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findchat', 'exclude', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
-    # print(message)
-    # accept commands only for keywords chat
+    # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id):
         return
 
@@ -153,6 +153,8 @@ def commHandler(client, message):
         kwHandler(client, message)
     elif chat_id == following_chat_id:
         fwHandler(client, message)
+
+# keywords chat handler
 
 
 def kwHandler(client, message):
@@ -212,6 +214,10 @@ def kwHandler(client, message):
                 add_keywords_to_includes(dialogs[0][0], args)
                 message.reply_text('Ключевые слова #{} для чата:\n'.format(', #'.join(
                     includes_dict[dialogs[0][0]])) + ' - '.join(dialogs[0]))
+        case _:
+            message.reply_text('Неизвестная команда')
+
+# forwards chat handler
 
 
 def fwHandler(client, message):
@@ -231,6 +237,8 @@ def fwHandler(client, message):
                 following_set.discard(args[0])
                 save_following(following_set)
                 message.reply('{} удален из подписок'.format(args[0]))
+        case _:
+            message.reply('Неизвестная команда')
 
 
 # process incoming messages
@@ -242,6 +250,8 @@ def fwHandler(client, message):
 # b1: search for keywords
 # b2: limit to mentions
 
+# listen to only other users' messages;
+# skip message edits for now (TODO: handle edited messages)
 @user.on_message(~filters.me & ~filters.edited)
 def notmyHandler(client, message):
     # print(message)
@@ -261,6 +271,8 @@ def notmyHandler(client, message):
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
+
+# listen to user messages to catch forwards for following chat
 
 
 @user.on_message(filters.me & ~filters.edited)
@@ -335,11 +347,13 @@ def following_forward(client, message):
 # user.send_message(keywords_chat_id, 'bot started')
 # user.send_message(mentions_chat_id, 'bot started')
 # user.send_message(following_chat_id, 'bot started')
+print('bot started')
 idle()
 
 # stop message
 # user.send_message(keywords_chat_id, 'bot stopped')
 # user.send_message(mentions_chat_id, 'bot stopped')
 # user.send_message(following_chat_id, 'bot stopped')
-
+print('stopping bot...')
 user.stop()
+print('bot stopped')
