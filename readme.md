@@ -2,7 +2,9 @@
 
 ### setup
 - install python (https://www.python.org/downloads/)
-- install pyrogram and tgcrypto (pip3 install -U pyrogram tgcrypto), more info here: https://docs.pyrogram.org/intro/install
+- install pyrogram and tgcrypto, more info here: https://docs.pyrogram.org/intro/install
+  - `pip3 install  pyrogram==v1.4.0`
+  - `pip3 install  pip3 install  tgcrypto`
 - clone this repo
 - copy config_sample.ini to config.ini and edit it with your personal api id and api hash (get here: https://my.telegram.org/auth?to=apps)
 - start with python ./main.py
