@@ -9,13 +9,12 @@
 - copy config_sample.ini to config.ini and edit it with your personal api id and api hash (get here: https://my.telegram.org/auth?to=apps)
 - start with python3.10 ./main.py
 
-### First login to your Telegram account 
-During the first session of running the bot via Terminal:
+### During the first session of running the bot with Python via Terminal:
 - Pyrogram asks you to enter the phone number (attached to your Telegram account) 
 - You’ll receive a confirmation code from Telegram
 - If your Telegram account has two-step verification enabled - your password will be required 
 - If you see ‘bot started’ phrase in Terminal - the bot is working 
-- Three group chats will be created automatically in your Telegram account: ‘Keywords’, ‘Following’, ‘Mentions’ 
+- Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
 ### commands
 #### I. Keywords bot
