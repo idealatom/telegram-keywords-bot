@@ -234,7 +234,7 @@ def makeMessageDescription(message):
             message.chat.title) if message.chat.title else '<без имени>'
         source_chat_link = ' @' + \
             str(message.chat.username) if message.chat.username else ''
-        source = 'в чате {}{} от {}'.format(   # ?
+        source = 'в чате {}{} от {}'.format(
             source_chat_name, source_chat_link, makeUserMention(message.from_user))
 
     # forward of forward loses the first person
