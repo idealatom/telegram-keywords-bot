@@ -17,8 +17,8 @@
 
 ### Commands
 #### I. Keywords bot
-Forwards messages that contain specified keywords to 'Keywords' chat
-In ‘Keywords’ chat:
+Forwards messages that contain specified keywords to 'Keywords' chat  
+##### In ‘Keywords’ chat:
 - /add keyword1 keyword2 ... - add new keyword(s) to global listener
 - /remove keyword1 keyword2 ... - remove keyword(s) from global listener
 - /removeall - remove all keywords from global listener (turned off currently)
@@ -26,12 +26,11 @@ In ‘Keywords’ chat:
 - /findchat username|first name last name|chat title
 
 #### II. Mentions bot
-Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned) 
-Replies to your messages are also counted as mentions 
+Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
 
 #### III. Following Bot
-Forwards all messages from specified users to Following chat
-In ‘Following’ chat:
+Forwards all messages from specified users to Following chat  
+##### In ‘Following’ chat:
 - To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
 - /show - to check IDs of all Telegram users you are currently following
 - /unfollow user_ID - to remove a user from the list of who you follow
