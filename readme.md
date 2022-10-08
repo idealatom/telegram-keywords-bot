@@ -1,11 +1,10 @@
 ## wip
 
-### setup
+### Setup
 - clone this repo
 - create & activate a virtual environment named `env`
 - install python3.10 (https://www.python.org/downloads/) # Python version 3.10 is necessary to run the bot 
 - run `pip install -r requirements.txt`
-- pay attention: [Pyrogram framework](https://docs.pyrogram.org/) is used in the bot
 - copy config_sample.ini to config.ini and edit it with your personal api id and api hash (get here: https://my.telegram.org/auth?to=apps)
 - start the bot with `python3.10 ./main.py`
 
@@ -16,19 +15,27 @@
 - If you see ‘bot started’ phrase in Terminal - the bot is working 
 - Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
-### commands
+### Commands
 #### I. Keywords bot
-forwards messages that contain specified keywords to Keywords chat
-- /add keyword1 keyword2 ...etc - add new keyword(s) to global listener
-- /remove keyword1 keyword2 ...etc - remove keyword(s) from global listener
+Forwards messages that contain specified keywords to 'Keywords' chat
+In ‘Keywords’ chat:
+- /add keyword1 keyword2 ... - add new keyword(s) to global listener
+- /remove keyword1 keyword2 ... - remove keyword(s) from global listener
 - /removeall - remove all keywords from global listener (turned off currently)
 - /show - show all keywords
 - /findchat username|first name last name|chat title
 
 #### II. Mentions bot
-forwards all your mentions and message replies (counts as mentions) to Mentions chat
-wip
+Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned) 
+Replies to your messages are also counted as mentions 
 
 #### III. Following Bot
-forwards all messages from specified users to Following chat
-todo
+Forwards all messages from specified users to Following chat
+In ‘Following’ chat:
+- To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
+- /show - to check IDs of all Telegram users you are currently following
+- /unfollow user_ID - to remove a user from the list of who you follow
+
+### Pay attention:
+- [Pyrogram framework](https://docs.pyrogram.org/) is used in the bot
+- This bot is an additional TG client, NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather
