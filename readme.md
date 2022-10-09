@@ -9,7 +9,7 @@
 - start the bot with `python3.10 ./main.py`
 
 ### During the first session of running the bot with Python via Terminal:
-- Pyrogram asks you to enter the phone number (attached to your Telegram account) 
+- Pyrogram asks you to enter the phone number attached to your Telegram account including your Country Code (the plus + and minus - symbols can be omitted)
 - You’ll receive a confirmation code from Telegram
 - If your Telegram account has two-step verification enabled - your password will be required 
 - If you see ‘bot started’ phrase in Terminal - the bot is working 
@@ -29,7 +29,7 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
 
 #### III. Following Bot
-Forwards all messages from specified users to Following chat  
+Forwards all messages from specified users to 'Following' chat  
 ##### In ‘Following’ chat:
 - To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
 - /show - to check IDs of all Telegram users you are currently following

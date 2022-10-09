@@ -257,7 +257,7 @@ def mentions_forward(client, message):
     client.send_message(
         mentions_chat_id, 'Уведомление {}'.format(source))
     message.forward(mentions_chat_id)
-    client.mark_chat_unread(keywords_chat_id)
+    client.mark_chat_unread(mentions_chat_id)
 
 
 def following_forward(client, message):
@@ -265,7 +265,7 @@ def following_forward(client, message):
     client.send_message(
         following_chat_id, 'Активность {}'.format(source))
     message.forward(following_chat_id)
-    client.mark_chat_unread(keywords_chat_id)
+    client.mark_chat_unread(following_chat_id)
 
 
 def start_bot():
