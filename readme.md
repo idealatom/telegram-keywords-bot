@@ -16,14 +16,17 @@
 - Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
 ### Commands
+- /help - shows a list of commands to use
 #### I. Keywords bot
 Forwards messages that contain specified keywords to 'Keywords' chat  
 ##### In ‘Keywords’ chat:
 - /add keyword1 keyword2 ... - add new keyword(s) to global listener
 - /remove keyword1 keyword2 ... - remove keyword(s) from global listener
-- /removeall - remove all keywords from global listener (turned off currently)
+- /exclude chat_name | chat_id | @username - exclude a chat from being monitored by Keywords feature  
 - /show - show all keywords
-- /findchat username | first_name last_name | chat_title - find Telegram IDs of individuals or chats or channels   
+- /findid @username | first_name last_name | chat_title - find Telegram IDs of individuals or chats or channels (may work slowly)  
+- /removeall - remove all keywords from global listener (turned off currently)
+
 
 #### II. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
