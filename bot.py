@@ -89,7 +89,7 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findidt name|id|@username\n/exclude name|id|@username\n/include name|id|@username keywords')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid name|id|@username\n/exclude name|id|@username\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
