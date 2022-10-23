@@ -1,5 +1,10 @@
 ## wip
 
+### Prerequisites
+- Docker # Install Docker Engine for your OS 
+- Docker Compose  
+- ... 
+
 ### Setup
 - clone this repo
 - create & activate a virtual environment named `env`
@@ -18,7 +23,7 @@
 - Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
 ### Commands
-- /help - shows a list of commands to use
+- /help - show a list of bot commands 
 #### I. Keywords bot
 Forwards messages that contain specified keywords to 'Keywords' chat  
 ##### In ‘Keywords’ chat:
@@ -43,4 +48,4 @@ Forwards all messages from specified users to 'Following' chat
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’, so do NOT create a new bot via BotFather 
 - [Pyrogram](https://docs.pyrogram.org/) is used in the bot. It is [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
-- Info about your keywords & Telegram users who you follow is saved to config.ini file 
+- Data about your keywords & Telegram users who you follow is saved to config.ini file 
