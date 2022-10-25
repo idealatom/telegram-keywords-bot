@@ -66,7 +66,7 @@ def find_users(client, args):
 ############## bot commands handlers #################
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude', 'include', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude', 'excludedlist', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id):
@@ -89,7 +89,7 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid name|id|@username\n/exclude name|id|@username\n/include name|id|@username keywords')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid name|id|@username\n/exclude name|id|@username\n/excludedlist\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -97,7 +97,7 @@ def kwHandler(client, message):
             save_keywords(keywords)
         case 'show':
             if not keywords:
-                message.reply_text('no keywords, add with /add command')
+                message.reply_text('No keywords, add with /add command')
             else:
                 message.reply_text('keywords: #' + ', #'.join(keywords))
         case 'remove':
@@ -126,7 +126,12 @@ def kwHandler(client, message):
                 excluded_chats.add(dialogs[0][0])
                 save_excluded_chats(excluded_chats)
                 message.reply_text(
-                    'This chat was added to excluded chat list:\n' + ' - '.join(dialogs[0]))
+                    'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
+        case 'excludedlist':
+            if not excluded_chats:
+                message.reply_text('No excluded chats yet')
+            else:
+                message.reply_text('Excluded chats:\n' + '\n'.join(excluded_chats))
         case 'include':
             if len(args) < 2:
                 return
@@ -198,8 +203,6 @@ def notmyHandler(client, message):
         following_forward(client, message)
 
 # listen to user messages to catch forwards for following chat
-
-
 @user.on_message(filters.me & ~filters.edited)
 def myHandler(client, message):
     if str(message.chat.id) != following_chat_id:

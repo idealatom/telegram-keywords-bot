@@ -1,5 +1,3 @@
-## wip
-
 ### Prerequisites
 - Docker # Install Docker Engine for your OS 
 - Docker Compose  
@@ -23,22 +21,20 @@
 - Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
 ### Commands
-- /help - show a list of bot commands 
-#### I. Keywords bot
+#### 1. Keywords bot
 Forwards messages that contain specified keywords to 'Keywords' chat  
 ##### In ‘Keywords’ chat:
+- /help - show a list of Keywords bot commands
 - /add keyword1 keyword2 ... - add new keyword(s) to global listener
 - /remove keyword1 keyword2 ... - remove keyword(s) from global listener
-- /exclude chat_name | chat_id | @username - exclude a chat from being monitored by Keywords feature  
 - /show - show all keywords
-- /findid @username | first_name last_name | chat_title - find Telegram IDs of individuals or chats or channels (may work slowly)  
+- /exclude chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot's response)
+- /excludedlist - show all excluded chats 
+- /findid chat_title | first_name last_name | @username - find Telegram IDs of chats or users or channels (may work slowly, wait for bot's response) 
 - /removeall - remove all keywords from global listener (turned off currently)
-
-
-#### II. Mentions bot
+#### 2. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
-
-#### III. Following Bot
+#### 3. Following Bot
 Forwards all messages from specified users to 'Following' chat  
 ##### In ‘Following’ chat:
 - To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
