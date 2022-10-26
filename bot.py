@@ -66,7 +66,7 @@ def find_users(client, args):
 ############## bot commands handlers #################
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude', 'excludedlist', 'include', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id):
@@ -89,7 +89,7 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid name|id|@username\n/exclude name|id|@username\n/excludedlist\n/include name|id|@username keywords')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -114,24 +114,31 @@ def kwHandler(client, message):
                 return
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
-                dialogs) else 'Sorry, nothing is found')
-        case 'exclude':
+                dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | chat_id | @username')
+        case 'exclude_chat':
             if not args:
                 return
             dialogs = find_chats(client, args)
             if(len(dialogs) != 1):
                 message.reply_text('More than one chat is found:\n' + '\n'.join([' - '.join(
-                    dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found')
+                    dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found. Paste manually after /exclude_chat - chat_title | chat_id | @username')
             else:
                 excluded_chats.add(dialogs[0][0])
                 save_excluded_chats(excluded_chats)
                 message.reply_text(
                     'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
-        case 'excludedlist':
+        case 'excluded_chats_list':
             if not excluded_chats:
                 message.reply_text('No excluded chats yet')
             else:
                 message.reply_text('Excluded chats:\n' + '\n'.join(excluded_chats))
+        case 'delete_from_excluded_chats':
+            if not args or not args[0] in excluded_chats:
+                message.reply('Not found, use chat_id from your list of excluded chats')
+            else:
+                excluded_chats.discard(args[0])
+                save_excluded_chats(excluded_chats)
+                message.reply('{} was deleted from your list of excluded chats'.format(args[0]))
         case 'include':
             if len(args) < 2:
                 return

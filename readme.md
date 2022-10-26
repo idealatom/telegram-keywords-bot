@@ -28,9 +28,10 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 - /add keyword1 keyword2 ... - add new keyword(s) to global listener
 - /remove keyword1 keyword2 ... - remove keyword(s) from global listener
 - /show - show all keywords
-- /exclude chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot's response)
-- /excludedlist - show all excluded chats 
-- /findid chat_title | first_name last_name | @username - find Telegram IDs of chats or users or channels (may work slowly, wait for bot's response) 
+- /exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot's response)
+- /excluded_chats_list - show IDs of all excluded chats 
+- /delete_from_excluded_chats chat_id - delete a chat from your excluded chats list
+- /findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
 - /removeall - remove all keywords from global listener (turned off currently)
 #### 2. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
