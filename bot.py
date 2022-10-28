@@ -127,18 +127,34 @@ def kwHandler(client, message):
                 save_excluded_chats(excluded_chats)
                 message.reply_text(
                     'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
+
         case 'excluded_chats_list':
+            dialogs = find_chats(client, args)  # ?
             if not excluded_chats:
                 message.reply_text('No excluded chats yet')
             else:
-                message.reply_text('Excluded chats:\n' + '\n'.join(excluded_chats))
+                # message.reply_text('(v0)Excluded chats:\n' + '\n'.join(excluded_chats))
+
+                # message.reply_text('(v1)Excluded chats:\n' + '\n'.join([' - '.join(dialog) for dialog in dialogs]))
+                # message.reply_text('(v2)Excluded chats:\n' + '\n'.join([' - '.join(dialog) for dialog in dialogs[0]]))
+                # message.reply_text('(v3)Excluded chats:\n' + ' - '.join(dialogs[1]))
+                # message.reply_text('(v4)Excluded chats:\n' + ' - '.join(dialogs[1][0]))
+                # message.reply_text('(v5)Excluded chats:\n' + dialogs[1][1])
+                # message.reply_text('(v6)Excluded chats:\n' + '\n'.join([' - '.join(e_1) for e_1 in excluded_chats]))
+                # message.reply_text('(v7)Excluded chats:\n' + '\n'.join([e_1 for e_1 in excluded_chats]))
+                # print(excluded_chats)
+                # print(dialogs)
+                # message.reply_text('(v8)Excluded chats:\n' + '\n'.join([e_1 for excluded_chats in dialogs]))
+                # message.reply_text('(v9)Excluded chats:\n' + '\n'.join(excluded_chats, dialogs[excluded_chats][1]))  #TypeError: list indices must be integers or slices, not set
+
+
         case 'delete_from_excluded_chats':
             if not args or not args[0] in excluded_chats:
                 message.reply('Not found, use chat_id from your list of excluded chats')
             else:
                 excluded_chats.discard(args[0])
                 save_excluded_chats(excluded_chats)
-                message.reply('{} was deleted from your list of excluded chats'.format(args[0]))
+                message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
         case 'include':
             if len(args) < 2:
                 return
