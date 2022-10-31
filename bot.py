@@ -133,12 +133,25 @@ def kwHandler(client, message):
             if not excluded_chats:
                 message.reply_text('No excluded chats yet')
             else:
-                chatid_chatname = {} # (?) Simplify the code block below, as now - too many 'for' loops
+                # Draft v15:
+                chatid_chatname_string = ""
                 for chat_id in excluded_chats:
                     for dialog in dialogs:
                         if dialog[0] == chat_id:
-                            chatid_chatname[chat_id] = dialog[1]
-                message.reply_text('(v14) Excluded chats:\n' + '\n'.join([f'Chat ID: {k} \tChat name: {v}' for k,v in chatid_chatname.items()]))
+                            chatid_chatname_string += 'Chat ID: ' + str(chat_id) + ' \tChat name: ' + str(dialog[1]) + '\n'
+                message.reply_text('Excluded chats:\n' + chatid_chatname_string)
+                
+                # chatid_chatname = {} # (?) Simplify the code block below, as now - too many 'for' loops
+                # for chat_id in excluded_chats:
+                #     for dialog in dialogs:
+                #         if dialog[0] == chat_id:
+                #             chatid_chatname[chat_id] = dialog[1]
+                # message.reply_text('(v14) Excluded chats:\n' + '\n'.join([f'Chat ID: {k} \tChat name: {v}' for k,v in chatid_chatname.items()]))
+
+
+
+
+
 
                 # message.reply_text('(v12) Excluded chats:\n' + '\n'.join(chatid_chatname.items()))
                 # message.reply_text('(v11) Excluded chats:\n' + '\n'.join(excluded_chats))
