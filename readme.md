@@ -1,24 +1,22 @@
 ### Prerequisites
-- Docker # Install Docker Engine for your OS 
-- Docker Compose  
+- [Docker](https://www.docker.com/)) installed on your machine
 - ... 
 
-### Setup
-- clone this repo
-- create & activate a virtual environment named `env`
-- install python3.10 (https://www.python.org/downloads/) # Python version 3.10 is necessary to run the bot 
-- run `pip install -r requirements.txt`
-- copy config_sample.ini to config.ini and edit it with your personal App api_id and api_hash (get here: https://my.telegram.org/auth?to=apps)
-- start the bot with:
-  - a) `python3.10 ./main.py` - to run the bot temporarily 
-  - b) `nohup python3.10 ./main.py &` - to run the bot 24/7 on server as a background process
+### v2. Setup
+- clone this repo 
+- copy manually config_sample.ini to config.ini 
+- create new Telegram App [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web')  
+- edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps)) 
+- run `docker build -t your_docker_image_name .` to build Docker image 
+- run `docker run -d your_docker_image_name` to run the bot in a container
+- ..??.. 
 
 ### During the first session of running the bot with Python via Terminal:
 - Pyrogram asks you to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - You’ll receive a confirmation code from Telegram
 - If your Telegram account has two-step verification enabled - your password will be required 
 - If you see ‘bot started’ phrase in Terminal - the bot is working 
-- Three group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
+- Three new group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
 
 ### Commands
 #### 1. Keywords bot
@@ -46,3 +44,14 @@ Forwards all messages from specified users to 'Following' chat
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’, so do NOT create a new bot via BotFather 
 - [Pyrogram](https://docs.pyrogram.org/) is used in the bot. It is [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
 - Data about your keywords & Telegram users who you follow is saved to config.ini file 
+
+
+~~### v1. Setup
+- clone this repo
+- create & activate a virtual environment named `env`
+- install python3.10 (https://www.python.org/downloads/) # Python version 3.10 is necessary to run the bot 
+- run `pip install -r requirements.txt`
+- copy config_sample.ini to config.ini and edit it with your personal App api_id and api_hash (get here: https://my.telegram.org/auth?to=apps)
+- start the bot with:
+  - a) `python3.10 ./main.py` - to run the bot temporarily 
+  - b) `nohup python3.10 ./main.py &` - to run the bot 24/7 on server as a background process~~
