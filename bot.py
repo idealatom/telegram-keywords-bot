@@ -133,50 +133,12 @@ def kwHandler(client, message):
             if not excluded_chats:
                 message.reply_text('No excluded chats yet')
             else:
-                # Draft v15:
                 chatid_chatname_string = ""
                 for chat_id in excluded_chats:
                     for dialog in dialogs:
                         if dialog[0] == chat_id:
                             chatid_chatname_string += 'Chat ID: ' + str(chat_id) + ' \tChat name: ' + str(dialog[1]) + '\n'
                 message.reply_text('Excluded chats:\n' + chatid_chatname_string)
-                
-                # chatid_chatname = {} # (?) Simplify the code block below, as now - too many 'for' loops
-                # for chat_id in excluded_chats:
-                #     for dialog in dialogs:
-                #         if dialog[0] == chat_id:
-                #             chatid_chatname[chat_id] = dialog[1]
-                # message.reply_text('(v14) Excluded chats:\n' + '\n'.join([f'Chat ID: {k} \tChat name: {v}' for k,v in chatid_chatname.items()]))
-
-
-
-
-
-
-                # message.reply_text('(v12) Excluded chats:\n' + '\n'.join(chatid_chatname.items()))
-                # message.reply_text('(v11) Excluded chats:\n' + '\n'.join(excluded_chats))
-                # message.reply_text('(v10) Excluded chats:\n')
-
-        # print(chat_id, dialog[1])
-        #             message.reply_text('Chat ID: ' + chat_id + ' Chat name: ' + dialog[1])
-
-                            # message.reply_text('(v10) Excluded chats:\n' + chat_id + dialog[1] + '\n')
-                            # print(chat_id, dialog[1])
-
-                # message.reply_text('(v0)Excluded chats:\n' + '\n'.join(excluded_chats))
-
-                # message.reply_text('(v1)Excluded chats:\n' + '\n'.join([' - '.join(dialog) for dialog in dialogs]))
-                # message.reply_text('(v2)Excluded chats:\n' + '\n'.join([' - '.join(dialog) for dialog in dialogs[0]]))
-                # message.reply_text('(v3)Excluded chats:\n' + ' - '.join(dialogs[1]))
-                # message.reply_text('(v4)Excluded chats:\n' + ' - '.join(dialogs[1][0]))
-                # message.reply_text('(v5)Excluded chats:\n' + dialogs[1][1])
-                # message.reply_text('(v6)Excluded chats:\n' + '\n'.join([' - '.join(e_1) for e_1 in excluded_chats]))
-                # message.reply_text('(v7)Excluded chats:\n' + '\n'.join([e_1 for e_1 in excluded_chats]))
-                # print(excluded_chats)
-                # print(dialogs)
-                # message.reply_text('(v8)Excluded chats:\n' + '\n'.join([e_1 for excluded_chats in dialogs]))
-                # message.reply_text('(v9)Excluded chats:\n' + '\n'.join(excluded_chats, dialogs[excluded_chats][1]))  #TypeError: list indices must be integers or slices, not set
-
 
         case 'delete_from_excluded_chats':
             if not args or not args[0] in excluded_chats:

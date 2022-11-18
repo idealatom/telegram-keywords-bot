@@ -1,15 +1,28 @@
 ### Prerequisites
-- [Docker](https://www.docker.com/)) installed on your machine
+- [Docker](https://www.docker.com/) installed on your machine
 - ... 
 
 ### v2. Setup
-- clone this repo 
-- copy manually config_sample.ini to config.ini 
-- create new Telegram App [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web')  
+- clone this repo  
+- create new Telegram App [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
+- copy manually config_sample.ini to config.ini
 - edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps)) 
-- run `docker build -t your_docker_image_name .` to build Docker image 
-- run `docker run -d your_docker_image_name` to run the bot in a container
+- 
+- `docker volume create your_volume_name` 
+- ? run `docker run -d --rm -v "$(pwd)":/(?)your_volume_name (??)my_docker_image_registry_link` - to create persistence directory 
+- ? run `docker run -it --rm (??)--name=Telegram_BOT -v "$(pwd)":/(?)your_volume_name (??)ubuntu` - to login to your Telegram account
+- ? perform authorization: ...   
+- (...)
+- ? After entering confirmation code, you can exit from container 
+- ? `docker run -d  -e script=main.py -v "$(pwd)":/your_volume_name --restart unless-stopped` - (??) to run container with your own script
+
+
+~~- ?? run `docker build -t your_docker_image_name .` to build Docker image 
+- ?? run `docker run -d your_docker_image_name` to run the bot in a container~~
 - ..??.. 
+- ``
+
+- 
 
 ### During the first session of running the bot with Python via Terminal:
 - Pyrogram asks you to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
