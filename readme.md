@@ -15,7 +15,7 @@
 - ? After entering confirmation code, you can exit from container
 - ? run `docker run -d --rm -v your_volume_name:/app --restart unless-stopped (?!)my_docker_image_registry_link` - to mount (?)host directory to a container & (?) to create persistence directory (?)where
 
-### During the first session of running the bot with Python via Terminal:
+### (?) During the first session of running the bot with Python via Terminal:
 - Pyrogram asks you to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - You’ll receive a confirmation code from Telegram
 - If your Telegram account has two-step verification enabled - your password will be required 
@@ -34,6 +34,9 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 - /excluded_chats_list - show IDs of all excluded chats 
 - /delete_from_excluded_chats chat_id - delete a chat from your excluded chats list
 - /findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
+- 
+- (??) /forward_all_messages_from_chat (?)chat_id - forward all messages from specific chat (selected by ID) to another chat. Use /findid command to get chats' IDs    
+- 
 - /removeall - remove all keywords from global listener (turned off currently)
 #### 2. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
