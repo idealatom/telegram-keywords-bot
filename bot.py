@@ -4,6 +4,7 @@ from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
     dummy_bot_name, config_set_and_save
+from threading import Timer
 
 # start app
 user = Client('user')
@@ -66,15 +67,31 @@ def find_users(client, args):
 
 
 def forward_all_messages_from_chat(client, from_chat_id):
+    forward_all_messages_chat_size = client.get_history_count(forward_all_messages_chat_id)
+    skipped_service_messages = 0
+    counter = 0
+    current_time = int(datetime.now().timestamp())
+    print(datetime.now(), current_time)
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        counter += 1
         if message.service:
+            skipped_service_messages += 1
             continue
-        message_datetime = datetime.fromtimestamp(message.date)
-        client.send_message(chat_id=forward_all_messages_chat_id,
-                            text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-        message.forward(forward_all_messages_chat_id)
+        # message_datetime = datetime.fromtimestamp(message.date)
+        # client.send_message(chat_id=forward_all_messages_chat_id,
+        #                     text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
+        # Timer(counter * 50, message.forward(forward_all_messages_chat_id)).start()
+        # message.forward(forward_all_messages_chat_id, schedule_date=current_time + counter);
+        forwarded_message = message.forward(forward_all_messages_chat_id)
+        print(forwarded_message.id, forwarded_message.text)
 
-       # async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
+    # print(type(client.iter_history(from_chat_id))) # <class 'pyrogram.types.list.List'>
+    print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
+    print('Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
+    print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
+    # client.send_message(chat_id=forward_all_messages_chat_id, text=..??..)
+
+    # async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
         #     async with client:
         #         async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         #             if message.service:
@@ -171,12 +188,7 @@ def kwHandler(client, message):
             if not args:  # ?? Add other necessary conditions
                 message.reply_text('Please, use this format: /forward_all_messages_from_chat from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
             else:
-                forward_all_messages_from_chat(user, args[0])  # ?!
-
-#            user.run(forward_all_messages_from_chat(user, 5481261145,-1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
-                # from_chat_id = ??
-                # to_chat_id = ??
-
+                forward_all_messages_from_chat(user, args[0])
         case 'include':
             if len(args) < 2:
                 return
