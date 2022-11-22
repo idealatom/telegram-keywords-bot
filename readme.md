@@ -34,9 +34,7 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 - /excluded_chats_list - show IDs of all excluded chats 
 - /delete_from_excluded_chats chat_id - delete a chat from your excluded chats list
 - /findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
-- 
-- (??) /forward_all_messages_from_chat (?)chat_id - forward all messages from specific chat (selected by ID) to another chat. Use /findid command to get chats' IDs    
-- 
+- /forward_all_messages_from_chat from_chat_id - forward all messages from specific chat (use /findid command manually to get chat's ID) to 'Forward_all_messages_from_chat' chat (created automatically in your TG account) 
 - /removeall - remove all keywords from global listener (turned off currently)
 #### 2. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 

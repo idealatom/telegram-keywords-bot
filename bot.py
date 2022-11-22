@@ -1,43 +1,12 @@
 import re
 from pyrogram import Client, filters, idle
 from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, keywords, save_keywords, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
     dummy_bot_name, config_set_and_save
 
 # start app
 user = Client('user')
-
-async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
-    async with client:
-        async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
-            if message.service:
-                continue
-            message_datetime = datetime.fromtimestamp(message.date)
-            await client.send_message(chat_id=to_chat_id, text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-            await message.forward(to_chat_id)
-
-user.run(forward_all_messages_from_chat(user, from_chat_id, to_chat_id))  # Substitute_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
-
-            # print(message.date, message_datetime)
-
-# @user.on_message()
-# async def my_handler(client, message):
-#     await message.forward("me")  # (in real time!) Forwards ALL incomming messages to myself (to 'Saved messages' chat):
-#
-# user.run()
-
-# def main():
-    # "me" refers to your own chat (Saved Messages)
-    # for message in app.get_chat_history("me"):
-    #     print(message)
-
-# for message in user.get_chat_history():
-            #print(message.text)
-
-# for message in user.get_history():
-            #print(message.text)
-
 
 # TODO catch 401 error when session is expired / removed, delete user.session file and try again
 user.start()
@@ -47,8 +16,10 @@ user_info = user.get_me()
 chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
-    "Following": "following_chat_id"
+    "Following": "following_chat_id",
+    "Forward_all_messages_from_chat": "forward_all_messages_chat_id"
 }
+
 for k in chat_dict:
     if not globals()[chat_dict[k]]:
         new_chat = user.create_group(k, dummy_bot_name)
@@ -94,13 +65,34 @@ def find_users(client, args):
     return result
 
 
+def forward_all_messages_from_chat(client, from_chat_id):
+    for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        if message.service:
+            continue
+        message_datetime = datetime.fromtimestamp(message.date)
+        client.send_message(chat_id=forward_all_messages_chat_id,
+                            text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
+        message.forward(forward_all_messages_chat_id)
+
+       # async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
+        #     async with client:
+        #         async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        #             if message.service:
+        #                 continue
+        #             message_datetime = datetime.fromtimestamp(message.date)
+        #             await client.send_message(chat_id=to_chat_id, text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
+        #             await message.forward(to_chat_id)
+        #
+        # user.run(forward_all_messages_from_chat(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
+
+
 ############## bot commands handlers #################
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'include', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages_from_chat', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
         return
 
     chat_id = str(message.chat.id)
@@ -111,8 +103,6 @@ def commHandler(client, message):
         fwHandler(client, message)
 
 # keywords chat handler
-
-
 def kwHandler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -120,7 +110,7 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/include name|id|@username keywords')
+                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages_from_chat from_chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -158,7 +148,6 @@ def kwHandler(client, message):
                 save_excluded_chats(excluded_chats)
                 message.reply_text(
                     'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
-
         case 'excluded_chats_list':
             dialogs = find_chats(client, args)  # ?
             if not excluded_chats:
@@ -170,7 +159,6 @@ def kwHandler(client, message):
                         if dialog[0] == chat_id:
                             chatid_chatname_string += 'Chat ID: ' + str(chat_id) + ' \tChat name: ' + str(dialog[1]) + '\n'
                 message.reply_text('Excluded chats:\n' + chatid_chatname_string)
-
         case 'delete_from_excluded_chats':
             if not args or not args[0] in excluded_chats:
                 message.reply('Not found, use chat_id from your list of excluded chats')
@@ -178,6 +166,17 @@ def kwHandler(client, message):
                 excluded_chats.discard(args[0])
                 save_excluded_chats(excluded_chats)
                 message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
+
+        case 'forward_all_messages_from_chat':
+            if not args:  # ?? Add other necessary conditions
+                message.reply_text('Please, use this format: /forward_all_messages_from_chat from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
+            else:
+                forward_all_messages_from_chat(user, args[0])  # ?!
+
+#            user.run(forward_all_messages_from_chat(user, 5481261145,-1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
+                # from_chat_id = ??
+                # to_chat_id = ??
+
         case 'include':
             if len(args) < 2:
                 return
@@ -194,8 +193,6 @@ def kwHandler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 # forwards chat handler
-
-
 def fwHandler(client, message):
     if str(message.chat.id) != following_chat_id:
         return
