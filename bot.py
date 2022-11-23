@@ -66,12 +66,16 @@ def find_users(client, args):
     return result
 
 
+def get_history_count(from_chat_id):
+    pass
+
+
 def forward_all_messages_from_chat(client, from_chat_id):
     forward_all_messages_chat_size = client.get_history_count(forward_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
-    current_time = int(datetime.now().timestamp())
-    print(datetime.now(), current_time)
+    # current_time = int(datetime.now().timestamp())
+    # print(datetime.now(), current_time)
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         counter += 1
         if message.service:
@@ -81,14 +85,33 @@ def forward_all_messages_from_chat(client, from_chat_id):
         # client.send_message(chat_id=forward_all_messages_chat_id,
         #                     text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
         # Timer(counter * 50, message.forward(forward_all_messages_chat_id)).start()
-        # message.forward(forward_all_messages_chat_id, schedule_date=current_time + counter);
-        forwarded_message = message.forward(forward_all_messages_chat_id)
-        print(forwarded_message.id, forwarded_message.text)
+        message.forward(forward_all_messages_chat_id)
+        #message.forward(forward_all_messages_chat_id, schedule_date=current_time + counter);
+        #forwarded_message = message.forward(forward_all_messages_chat_id)
+        #print(forwarded_message.id, forwarded_message.text)
+    from_chat_full_message_history = client.get_history_count(from_chat_id)
+    forward_chat_full_message_history = client.get_history_count(forward_all_messages_chat_id)
+    client.send_message(keywords_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
+    client.send_message(keywords_chat_id, f"Number of messages forwarded by bot (to 'Forward_all_messages_from_chat' chat in your TG account): {forward_chat_full_message_history - forward_all_messages_chat_size}")
+    client.send_message(keywords_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
+    client.send_message(keywords_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {forward_all_messages_chat_id} is finished")
+
+    # from_chat = client.get_chat(from_chat_id)
+    # forward_all_messages_chat = client.get_chat(forward_all_messages_chat_id)
+    # client.send_message(keywords_chat_id, f"Forwarding from chat [{from_chat.first_name} {from_chat.last_name}](tg://resolve?domain={from_chat_id}) to chat {forward_all_messages_chat.title} is finihsed", "markdown")
+
+
+    # user.send_message(keywords_chat_id, 'Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
+    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
+    # user.send_message(keywords_chat_id, "Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
+    # client.send_message(keywords_chat_id, 'aCCept')
+
+
+    # print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
+    # print('Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
+    # print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
 
     # print(type(client.iter_history(from_chat_id))) # <class 'pyrogram.types.list.List'>
-    print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    print('Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
-    print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
     # client.send_message(chat_id=forward_all_messages_chat_id, text=..??..)
 
     # async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
@@ -183,9 +206,8 @@ def kwHandler(client, message):
                 excluded_chats.discard(args[0])
                 save_excluded_chats(excluded_chats)
                 message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
-
         case 'forward_all_messages_from_chat':
-            if not args:  # ?? Add other necessary conditions
+            if not args:
                 message.reply_text('Please, use this format: /forward_all_messages_from_chat from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
             else:
                 forward_all_messages_from_chat(user, args[0])
