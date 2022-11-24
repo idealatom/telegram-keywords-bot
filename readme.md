@@ -4,16 +4,16 @@
 
 ### v2. Setup
 - clone this repo  
-- create new Telegram App [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
+- create a new App attached to your Telegram account [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
 - copy manually config_sample.ini to config.ini
 - edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps)) 
 - 
-- run `docker volume create your_volume_name` - to create Docker volume on the host 
-- ? run `docker run -it --rm -v your_volume_name:/app (?!)my_docker_image_registry_link` - to login to your Telegram account
+- run `docker volume create your_volume_name` - to create Docker volume on your host 
+- ? run `docker run -it -v your_volume_name:/app (?!)my_docker_image_registry_link` - to login to your Telegram account
 - ? perform authorization: ...   
 - (...)
 - ? After entering confirmation code, you can exit from container
-- ? run `docker run -d --rm -v your_volume_name:/app --restart unless-stopped (?!)my_docker_image_registry_link` - to mount (?)host directory to a container & (?) to create persistence directory (?)where
+- ? run `docker run -d --rm -v your_volume_name:/app --restart unless-stopped (?!)my_docker_image_registry_link` - to mount (?)host directory to a container & (?) to create persistence directory (?)where(?)
 
 ### (?) During the first session of running the bot with Python via Terminal:
 - Pyrogram asks you to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
