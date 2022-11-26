@@ -5,11 +5,11 @@
 ### v2. Setup
 - clone this repo  
 - create a new App attached to your Telegram account [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
-- copy manually config_sample.ini to config.ini
-- edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps)) 
+~~- copy manually config_sample.ini to config.ini~~
+~~- edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps))~~ 
 - 
 - run `docker volume create your_volume_name` - to create Docker volume on your host 
-- ? run `docker run -it -v your_volume_name:/app (?!)my_docker_image_registry_link` - to login to your Telegram account
+- ? run `docker run -it -v your_volume_name:/app my_docker_image_registry_link` - to login to your Telegram account
 - ? perform authorization: ...   
 - (...)
 - ? After entering confirmation code, you can exit from container
@@ -21,6 +21,7 @@
 - If your Telegram account has two-step verification enabled - your password will be required 
 - If you see ‘bot started’ phrase in Terminal - the bot is working 
 - Three new group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
+- ? You can now remove the api_id and api_hash values from config.ini as they are not needed anymore.
 
 ### Commands
 #### 1. Keywords bot
