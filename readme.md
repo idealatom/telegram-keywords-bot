@@ -2,26 +2,19 @@
 - [Docker](https://www.docker.com/) installed on your machine
 - ... 
 
-### v2. Setup
+### Setup and authorization via Terminal
 - clone this repo  
 - create a new App attached to your Telegram account [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
-~~- copy manually config_sample.ini to config.ini~~
-~~- edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps))~~ 
-- 
-- run `docker volume create your_volume_name` - to create Docker volume on your host 
-- ? run `docker run -it -v your_volume_name:/app my_docker_image_registry_link` - to login to your Telegram account
-- ? perform authorization: ...   
-- (...)
-- ? After entering confirmation code, you can exit from container
-- ? run `docker run -d --rm -v your_volume_name:/app --restart unless-stopped (?!)my_docker_image_registry_link` - to mount (?)host directory to a container & (?) to create persistence directory (?)where(?)
-
-### (?) During the first session of running the bot with Python via Terminal:
-- Pyrogram asks you to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
-- You’ll receive a confirmation code from Telegram
+- Run `docker volume create your_volume_name` - to create Docker volume on your host 
+- Run `docker run -it --rm -v your_volume_name:/app ghcr.io/ds-jr/telegram-keywords-bot-image_3` - to login to your Telegram account 
+- Paste your Telegram App's `api_id` and `api_hash`. Get them from 'App configuration' at https://my.telegram.org/apps 
+- Pyrogram asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
+- Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
-- If you see ‘bot started’ phrase in Terminal - the bot is working 
-- Three new group chats (‘Keywords’, ‘Following’, ‘Mentions’) will appear in your Telegram account with @MyLittleDummyBot in every chat  
-- ? You can now remove the api_id and api_hash values from config.ini as they are not needed anymore.
+- When you see ‘bot started’ phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'Forward_all_messages_from_chat') will appear in your Telegram account  
+- Stop the script (Ctrl+C)
+- Run `docker run -d -v your_volume_name:/app --restart unless-stopped ghcr.io/ds-jr/telegram-keywords-bot-image_3` - to mount (?)host directory to a container ( ? to create persistence directory)  (?)where(?)
+- The bot should be working inside the last container
 
 ### Commands
 #### 1. Keywords bot
@@ -51,7 +44,6 @@ Forwards all messages from specified users to 'Following' chat
 - [Pyrogram](https://docs.pyrogram.org/) is used in the bot. It is [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
 - Data about your keywords & Telegram users who you follow is saved to config.ini file 
 
-
 ~~### v1. Setup
 - clone this repo
 - create & activate a virtual environment named `env`
@@ -61,3 +53,15 @@ Forwards all messages from specified users to 'Following' chat
 - start the bot with:
   - a) `python3.10 ./main.py` - to run the bot temporarily 
   - b) `nohup python3.10 ./main.py &` - to run the bot 24/7 on server as a background process~~
+
+~~- ? You can now remove the api_id and api_hash values from config.ini as they are not needed anymore~~
+~~- ? After entering confirmation code, you can exit from container~~
+~~### (?) During the first session of running the bot with Python via Terminal:~~
+~~- ? Run the script again. If you see ‘bot started’ phrase in Terminal - the bot is working~~
+
+~~- copy manually config_sample.ini to config.ini~~
+~~- edit config.ini: paste manually your Telegram App's `api_id` and `api_hash` (get from 'App configuration' [here](https://my.telegram.org/apps))~~
+
+~~#### 4. 'Forward_all_messages_from_chat' Bot
+Forwards to 'Forward_all_messages_from_chat' chat all the messages~~ 
+

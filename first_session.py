@@ -1,37 +1,34 @@
 from configparser import ConfigParser
-from config import config_set_and_save
-
-config = ConfigParser()
-config.read('config.ini')
-
-# if not config.has_section('pyrogram'):
-#     print("1")
-#     config.add_section('pyrogram')  # ?? This line does NOT work, if NO '[pyrogram]' section in config.ini created manually in advance
-
-# closure
 
 def first_session_func():
-    if not config.has_section('pyrogram'):
-        config.add_section('pyrogram')  # ?? This line does NOT work, if NO '[pyrogram]' section in config.ini created manually in advance
+    config = ConfigParser()
+    config.read('config.ini')  # ? Can config.ini file be read, if it has NOT been created yet?
+
+    if not config.has_section('pyrogram'):  # ? How does the script understand that config.ini file should be opened?
+        config.add_section('pyrogram')  # ? Can 'pyrogram' section be added, if config.ini file has NOT been created yet?
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
-    api_id = config.get('pyrogram', 'api_id', fallback=None)
-    api_hash = config.get('pyrogram', 'api_hash', fallback=None)
+    api_id = config.get('pyrogram', 'api_id', fallback=None)  # ? Is this line vital now? If yes - is it in the right place?
+    api_hash = config.get('pyrogram', 'api_hash', fallback=None)  # ? Is this line vital now? If yes - is it in the right place?
 
     if not api_id:
-        inputed_api_id = input("Write api_id: ")
+        inputed_api_id = input("Paste your Telegram App's `api_id' here: ")
         # check if the string inputed_api_id is empty
         config.set('pyrogram', 'api_id', inputed_api_id)
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
     if not api_hash:
-        inputed_api_hash = input("Write api_hash: ")
+        inputed_api_hash = input("Paste your Telegram App's `api_hash' here: ")
         # check if the string inputed_api_hash is empty
         config.set('pyrogram', 'api_hash', inputed_api_hash)
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
+
+
+# first_session_func()   #  for testing
+
 
     # 0. Check if config.ini file exists, if it's not - create it.
     # with open('config.ini', 'a') as config_ini_file:
