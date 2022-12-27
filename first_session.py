@@ -1,8 +1,8 @@
 from configparser import ConfigParser
 
-def first_session_func():
+def create_configini_file():  # Is this a good naming for the function?  ***Also: check bot.py file
     config = ConfigParser()
-    config.read('config.ini')  # ? Can config.ini file be read, if it has NOT been created yet?
+    econfig.read('config.ini')  # ? Can config.ini file be read, if it has NOT been created yet?
 
     if not config.has_section('pyrogram'):  # ? How does the script understand that config.ini file should be opened?
         config.add_section('pyrogram')  # ? Can 'pyrogram' section be added, if config.ini file has NOT been created yet?
@@ -27,9 +27,8 @@ def first_session_func():
             config.write(configfile)
 
 
-# first_session_func()   #  for testing
 
-
+# configini_file()   #  for testing
     # 0. Check if config.ini file exists, if it's not - create it.
     # with open('config.ini', 'a') as config_ini_file:
     #     if not api_id and api_hash in config_ini_file:
