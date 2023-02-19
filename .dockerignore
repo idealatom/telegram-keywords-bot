@@ -7,3 +7,4 @@ env/
 .idea/
 __pycache__/
 nohup.out
+.git
