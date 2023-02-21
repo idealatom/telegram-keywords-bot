@@ -228,6 +228,38 @@ def fwHandler(client, message):
         case 'show':
             message.reply('\n'.join([' - '.join(user) for user in find_users(
                 client, following_set)]) if following_set else 'The list is empty')
+
+        # (Variant 2) (How to follow a TG user) Follow via inputing manually user's TG id
+        case 'follow:
+            if not args:
+                message.reply('Enter ID of TG user via "/follow user_ID" command')
+
+            # (Add code)  If the ID is wrong  =>  print("ID is NOT found. Try another ID")
+
+            if str(message.chat.id) in following_set:  # ..??..  (Substitute "message" )
+                        message.reply('Following already works for id {}'.format(
+                            message.forward_from.id))  # ..??..  (Substitute forward_from !)
+                    else:
+                        following_set.add(str(message.forward_from.id))  # ..??..  (Substitute forward_from !)
+                        save_following(following_set)
+                        message.reply('id {} is added to Following list'.format(
+                            message.forward_from.id))  # ..??..  (Substitute forward_from !)
+
+    # listen to user messages to catch forwards for following chat
+    # @user.on_message(filters.me & ~filters.edited)
+    # def myHandler(client, message):
+    #     if str(message.chat.id) != following_chat_id:
+    #         return
+    #     if message.forward_from:
+    #         if str(message.forward_from.id) in following_set:
+    #             message.reply('Following already works for id {}'.format(
+    #                 message.forward_from.id))
+    #         else:
+    #             following_set.add(str(message.forward_from.id))
+    #             save_following(following_set)
+    #             message.reply('id {} is added to Following list'.format(
+    #                 message.forward_from.id))
+
         case 'unfollow':
             if not args or not args[0] in following_set:
                 message.reply('Not found')
@@ -270,6 +302,7 @@ def notmyHandler(client, message):
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
 
+# (Variant 1) (How to follow a TG user) Follow via forwarding manually any message from this user to ‘Following’ chat
 # listen to user messages to catch forwards for following chat
 @user.on_message(filters.me & ~filters.edited)
 def myHandler(client, message):
