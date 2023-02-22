@@ -12,7 +12,7 @@
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
 - When you see ‘bot started’ phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'Forward_all_messages_from_chat') will appear in your Telegram account  
-- Stop the script (Ctrl+C)
+- Stop the running script (Ctrl+C)
 - Run `docker run -d -v your_volume_name:/app --restart unless-stopped ghcr.io/ds-jr/telegram-keywords-bot-image_3` - launch bot in a container 
 
 ### Commands
@@ -32,7 +32,7 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 #### 2. Mentions bot
 Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
 #### 3. Following Bot
-Forwards all messages from specified users to 'Following' chat  
+Forwards all messages from specified TG users to 'Following' chat  
 ##### In ‘Following’ chat:
 - To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
 - /show - to check IDs of all Telegram users you are currently following

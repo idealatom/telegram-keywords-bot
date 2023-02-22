@@ -230,20 +230,57 @@ def fwHandler(client, message):
                 client, following_set)]) if following_set else 'The list is empty')
 
         # (Variant 2) (How to follow a TG user) Follow via inputing manually user's TG id
-        case 'follow:
+        case 'follow':
             if not args:
                 message.reply('Enter ID of TG user via "/follow user_ID" command')
+            print(args)
+            # print(comm)
 
-            # (Add code)  If the ID is wrong  =>  print("ID is NOT found. Try another ID")
+            # dialogs = find_chats(client, args) # Finds list of lists with  ID & name of all contacts of this user
+            # print(dialogs, dialogs[0][0], " - priNted from bot.py foR tEsting purPoses, CDL!")   #  ?  (CDL this line!)
 
-            if str(message.chat.id) in following_set:  # ..??..  (Substitute "message" )
-                        message.reply('Following already works for id {}'.format(
-                            message.forward_from.id))  # ..??..  (Substitute forward_from !)
-                    else:
-                        following_set.add(str(message.forward_from.id))  # ..??..  (Substitute forward_from !)
-                        save_following(following_set)
-                        message.reply('id {} is added to Following list'.format(
-                            message.forward_from.id))  # ..??..  (Substitute forward_from !)
+# (!!) (PROCEED)  Probably it's necessary to delete ALL "dialogs"  =>  Use "args" & write code on my own.  ***Check the latest output in iTerm
+            # if dialogs in following_set:  # ..??..
+            #     message.reply('Following already works for id {}'.format(
+            #         dialogs))  # ..??..
+            #
+            # if(len(dialogs) != 1):
+            #     message.reply_text('More than one chat is found:\n' + '\n'.join([' - '.join(
+            #         dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found. Paste manually "user_ID" after /follow ')  # chat_title | chat_id | @username
+            # else:
+            #     following_set.add(dialogs[0][0])
+            #     save_following(following_set)
+            #     message.reply_text(
+            #         'This chat was added to "following" chats list:\n' + ' - '.join(dialogs[0]))
+
+
+
+            # Example block of code: DELETE it later!
+            # if str(message.chat.id) in following_set:  # ..??..  (Substitute "message" )
+            #             message.reply('Following already works for id {}'.format(
+            #                 message.forward_from.id))  # ..??..  (Substitute forward_from !)
+                    # else:
+                    #     following_set.add(str(message.forward_from.id))  # ..??..  (Substitute forward_from !)
+                    #     save_following(following_set)
+                    #     message.reply('id {} is added to Following list'.format(
+                    #         message.forward_from.id))  # ..??..  (Substitute forward_from !)
+
+
+        # case 'exclude_chat':  # Example block of code: DELETE it later!
+        #     if not args:
+        #         return
+        #     dialogs = find_chats(client, args)
+        #     if(len(dialogs) != 1):
+        #         message.reply_text('More than one chat is found:\n' + '\n'.join([' - '.join(
+        #             dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found. Paste manually after /exclude_chat - chat_title | chat_id | @username')
+        #     else:
+        #         excluded_chats.add(dialogs[0][0])
+        #         save_excluded_chats(excluded_chats)
+        #         message.reply_text(
+        #             'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
+
+
+
 
     # listen to user messages to catch forwards for following chat
     # @user.on_message(filters.me & ~filters.edited)
