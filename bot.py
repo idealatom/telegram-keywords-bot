@@ -231,28 +231,28 @@ def fwHandler(client, message):
 
         # (Variant 2) (How to follow a TG user) Follow via inputing manually user's TG id
         case 'follow':
-            if not args:
-                message.reply('Enter ID of TG user via "/follow user_ID" command')
-            print(args)
-            # print(comm)
-
-            # dialogs = find_chats(client, args) # Finds list of lists with  ID & name of all contacts of this user
-            # print(dialogs, dialogs[0][0], " - priNted from bot.py foR tEsting purPoses, CDL!")   #  ?  (CDL this line!)
+            print(args, " - printed 'args'")  # CDL
+            # print(args[0], " - printed 'args[0]'")  # CDL
+            # print(comm)  # CDL
 
 # (!!) (PROCEED)  Probably it's necessary to delete ALL "dialogs"  =>  Use "args" & write code on my own.  ***Check the latest output in iTerm
-            # if dialogs in following_set:  # ..??..
-            #     message.reply('Following already works for id {}'.format(
-            #         dialogs))  # ..??..
-            #
-            # if(len(dialogs) != 1):
-            #     message.reply_text('More than one chat is found:\n' + '\n'.join([' - '.join(
-            #         dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found. Paste manually "user_ID" after /follow ')  # chat_title | chat_id | @username
-            # else:
-            #     following_set.add(dialogs[0][0])
-            #     save_following(following_set)
-            #     message.reply_text(
-            #         'This chat was added to "following" chats list:\n' + ' - '.join(dialogs[0]))
+            if len(args) == 0:
+                message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow')  # chat_title | chat_id | @username
+            if len(args) > 1:
+                message.reply_text('More than one ID entered:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid ID after /follow')
+            if len(args) == 1:
+                if args[0] in following_set:  # ..??..  ***OR just "if" is necessary here?
+                    message.reply('Following already works for id {}'.format(args[0]))  # ..??..
+                else:
+                    following_set.add(args[0])
+                    save_following(following_set)
+                    message.reply_text('This ID was added to "following" list:\n' + args[0])
 
+            # dialogs = find_chats(client, args) # Finds list of lists with ID & name of all contacts of this user
+            # print(dialogs, dialogs[0][0], " - priNted from bot.py foR tEsting purPoses, CDL!")   #  ?  (CDL this line!)
+
+            # if not args:
+            #     message.reply('Enter ID of TG user via "/follow user_ID" command')
 
 
             # Example block of code: DELETE it later!
@@ -278,9 +278,6 @@ def fwHandler(client, message):
         #         save_excluded_chats(excluded_chats)
         #         message.reply_text(
         #             'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
-
-
-
 
     # listen to user messages to catch forwards for following chat
     # @user.on_message(filters.me & ~filters.edited)
