@@ -141,7 +141,17 @@ def kwHandler(client, message):
     match comm:
         case 'help':
             message.reply_text(
-                '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages_from_chat from_chat_id\n/include name|id|@username keywords')
+                '/help - show Help options\n'
+                '/add keyword1 keyword2 ... - add new keyword(s)\n'
+                '/remove keyword1 keyword2 ... - remove keyword(s)\n'
+                '/show - show all keywords monitored by bot\n'
+                '/exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot\'s response)\n'
+                '/excluded_chats_list - show IDs of all excluded chats\n' 
+                '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
+                '/findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot\'s response)\n' 
+                '/removeall - remove all keywords (turned off currently)\n'
+                '/forward_all_messages_from_chat from_chat_id - forward all messages from specific chat to "Forward_all_messages_from_chat" chat (was created automatically in your TG account). Use /findid command manually to get chat\'s ID')
+                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages_from_chat from_chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -225,17 +235,36 @@ def fwHandler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
+        case 'help':
+            message.reply_text(
+                '/help - show Help options\n\n'
+                'To follow a Telegram user:\n'
+                '\ta) forward manually any message of this user to your "Following" chat\n'
+                '\tb) /follow user_ID   # Use /findid command manually to get user_ID\n\n'
+                '/show - check IDs of all Telegram users in your current "Following" list\n'
+                '/unfollow user_ID - remove a user from your "Following" list\n'
+                '/findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)')
+        case 'findid':
+            if (not args):
+                return
+            dialogs = find_chats(client, args)
+            message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
+                dialogs) else 'Sorry, nothing is found. Paste manually after /findid - @username | first_name last_name | chat_title')
         case 'show':
             message.reply('\n'.join([' - '.join(user) for user in find_users(
                 client, following_set)]) if following_set else 'The list is empty')
-
+        case 'unfollow':
+            if not args or not args[0] in following_set:
+                message.reply('Not found')
+            else:
+                following_set.discard(args[0])
+                save_following(following_set)
+                message.reply('{} Deleted from Following'.format(args[0]))
         # (Variant 2) (How to follow a TG user) Follow via inputing manually user's TG id
         case 'follow':
-            print(args, " - printed 'args'")  # CDL
+            # print(args, " - printed 'args'")  # CDL
             # print(args[0], " - printed 'args[0]'")  # CDL
             # print(comm)  # CDL
-
-# (!!) (PROCEED)  Probably it's necessary to delete ALL "dialogs"  =>  Use "args" & write code on my own.  ***Check the latest output in iTerm
             if len(args) == 0:
                 message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow')  # chat_title | chat_id | @username
             if len(args) > 1:
@@ -247,8 +276,10 @@ def fwHandler(client, message):
                     following_set.add(args[0])
                     save_following(following_set)
                     message.reply_text('This ID was added to "following" list:\n' + args[0])
+        case _:
+            message.reply('Sorry, this command is not valid')
 
-            # dialogs = find_chats(client, args) # Finds list of lists with ID & name of all contacts of this user
+        # dialogs = find_chats(client, args) # Finds list of lists with ID & name of all contacts of this user
             # print(dialogs, dialogs[0][0], " - priNted from bot.py foR tEsting purPoses, CDL!")   #  ?  (CDL this line!)
 
             # if not args:
@@ -294,15 +325,10 @@ def fwHandler(client, message):
     #             message.reply('id {} is added to Following list'.format(
     #                 message.forward_from.id))
 
-        case 'unfollow':
-            if not args or not args[0] in following_set:
-                message.reply('Not found')
-            else:
-                following_set.discard(args[0])
-                save_following(following_set)
-                message.reply('{} Deleted from Following'.format(args[0]))
-        case _:
-            message.reply('Sorry, this command is not valid')
+
+
+
+
 
 
 # process incoming messages

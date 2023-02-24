@@ -11,32 +11,38 @@
 - Pyrogram asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
-- When you see ‘bot started’ phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'Forward_all_messages_from_chat') will appear in your Telegram account  
-- Stop the running script (Ctrl+C)
+- When you see `bot started` phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'Forward_all_messages_from_chat') will appear in your Telegram account  
+- Stop the running script: `Ctrl+C`
 - Run `docker run -d -v your_volume_name:/app --restart unless-stopped ghcr.io/ds-jr/telegram-keywords-bot-image_3` - launch bot in a container 
 
 ### Commands
 #### 1. Keywords bot
 Forwards messages that contain specified keywords to 'Keywords' chat  
 ##### In ‘Keywords’ chat:
-- /help - show a list of Keywords bot commands
-- /add keyword1 keyword2 ... - add new keyword(s) to global listener
-- /remove keyword1 keyword2 ... - remove keyword(s) from global listener
-- /show - show all keywords
+- /help - shows Help options
+- /add keyword1 keyword2 ... - add new keyword(s)
+- /remove keyword1 keyword2 ... - remove keyword(s)
+- /show - show all keywords monitored by bot
 - /exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot's response)
 - /excluded_chats_list - show IDs of all excluded chats 
 - /delete_from_excluded_chats chat_id - delete a chat from your excluded chats list
 - /findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
-- /forward_all_messages_from_chat from_chat_id - forward all messages from specific chat to 'Forward_all_messages_from_chat' chat (was created automatically in your TG account). Use /findid command manually to get chat's ID
 - /removeall - remove all keywords from global listener (turned off currently)
+- /forward_all_messages_from_chat from_chat_id - forward all messages from specific chat to 'Forward_all_messages_from_chat' chat (was created automatically in your TG account). Use /findid command manually to get chat's ID
+
 #### 2. Mentions bot
-Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned). Replies to your messages are also counted as mentions 
+Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned)  
+Replies to your messages are also counted as mentions 
 #### 3. Following Bot
 Forwards all messages from specified TG users to 'Following' chat  
 ##### In ‘Following’ chat:
-- To follow a Telegram user: forward manually any message from this user to ‘Following’ chat
-- /show - to check IDs of all Telegram users you are currently following
-- /unfollow user_ID - to remove a user from the list of who you follow
+- /help - show Help options
+- To follow a Telegram user:
+  - a) forward manually any message of this user to your "Following" chat
+  - b) /follow user_ID   # Use /findid command manually to get user_ID
+- /show - check IDs of all Telegram users in your current "Following" list
+- /unfollow user_ID - remove a user from your "Following" list
+- /findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’, so do NOT create a new bot via BotFather 
