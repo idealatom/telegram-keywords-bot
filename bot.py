@@ -14,7 +14,7 @@ chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
-    "Forward_all_messages_from_chat": "forward_all_messages_chat_id"
+    "forward_all_messages": "forward_all_messages_chat_id"
 }
 
 
@@ -61,7 +61,7 @@ def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
     pass
 
 
-def forward_all_messages_from_chat(client, from_chat_id):
+def forward_all_messages(client: object, from_chat_id: object) -> object:
     forward_all_messages_chat_size = client.get_history_count(forward_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
@@ -83,7 +83,7 @@ def forward_all_messages_from_chat(client, from_chat_id):
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     forward_chat_full_message_history = client.get_history_count(forward_all_messages_chat_id)
     client.send_message(keywords_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
-    client.send_message(keywords_chat_id, f"Number of messages forwarded by bot (to 'Forward_all_messages_from_chat' chat in your TG account): {forward_chat_full_message_history - forward_all_messages_chat_size}")
+    client.send_message(keywords_chat_id, f"Number of messages forwarded by bot (to 'forward_all_messages' chat in your TG account): {forward_chat_full_message_history - forward_all_messages_chat_size}")
     client.send_message(keywords_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
     client.send_message(keywords_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {forward_all_messages_chat_id} is finished")
 
@@ -93,19 +93,19 @@ def forward_all_messages_from_chat(client, from_chat_id):
 
 
     # user.send_message(keywords_chat_id, 'Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
+    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "forward_all_messages" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
     # user.send_message(keywords_chat_id, "Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
     # client.send_message(keywords_chat_id, 'aCCept')
 
 
     # print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # print('Number of messages forwarded by bot (to "Forward_all_messages_from_chat" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
+    # print('Number of messages forwarded by bot (to "forward_all_messages" chat in your TG account): ', client.get_history_count(forward_all_messages_chat_id) - forward_all_messages_chat_size)
     # print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
 
     # print(type(client.iter_history(from_chat_id))) # <class 'pyrogram.types.list.List'>
     # client.send_message(chat_id=forward_all_messages_chat_id, text=..??..)
 
-    # async def forward_all_messages_from_chat(client, from_chat_id, to_chat_id):
+    # async def forward_all_messages(client, from_chat_id, to_chat_id):
         #     async with client:
         #         async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         #             if message.service:
@@ -114,13 +114,13 @@ def forward_all_messages_from_chat(client, from_chat_id):
         #             await client.send_message(chat_id=to_chat_id, text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
         #             await message.forward(to_chat_id)
         #
-        # user.run(forward_all_messages_from_chat(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
+        # user.run(forward_all_messages(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
 
 
 ############## bot commands handlers #################
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages_from_chat', 'include', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow']))
 def commHandler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
@@ -129,15 +129,51 @@ def commHandler(client, message):
     chat_id = str(message.chat.id)
 
     if chat_id == keywords_chat_id:
-        kwHandler(client, message)
+        keywordsHandler(client, message)
     elif chat_id == following_chat_id:
-        fwHandler(client, message)
+        followingHandler(client, message)
+    elif chat_id == mentions_chat_id:
+        mentionsHandler(client, message)
+    elif chat_id == forward_all_messages_chat_id:
+        forwardAllMessagesHandler(client, message)
 
-# keywords chat handler
-def kwHandler(client, message):
+
+# "Mentions" chat handler
+def mentionsHandler(client, message):
     args = message.command
     comm = args.pop(0)
+    match comm:
+        case 'help':
+            message.reply_text(
+                '"Mentions" chat works automatically\n'
+                'No need to enter any input in "Mentions" chat\n\n'
+                'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "Mentions" chat\n'
+                'Replies to your messages are also counted as mentions'
+            )
+        case _:
+            message.reply_text('Sorry, this command is not valid')
 
+
+# "forward_all_messages" chat handler
+def forwardAllMessagesHandler(client, message):
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'help':
+            message.reply_text(
+                'To forward all messages from some chat to "forward_all_messages" chat:\n'
+                'Type in "Keywords" chat: /forward_all_messages from_chat_id\n\n'
+                'To get chat ID:\n'
+                'Type in "Keywords" chat: /findid chat_title | first_name last_name | @username'
+            )
+        case _:
+            message.reply_text('Sorry, this command is not valid')
+
+
+# "Keywords" chat handler
+def keywordsHandler(client, message):
+    args = message.command
+    comm = args.pop(0)
     match comm:
         case 'help':
             message.reply_text(
@@ -150,8 +186,9 @@ def kwHandler(client, message):
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
                 '/findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot\'s response)\n' 
                 '/removeall - remove all keywords (turned off currently)\n'
-                '/forward_all_messages_from_chat from_chat_id - forward all messages from specific chat to "Forward_all_messages_from_chat" chat (was created automatically in your TG account). Use /findid command manually to get chat\'s ID')
-                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages_from_chat from_chat_id\n/include name|id|@username keywords')
+                '/forward_all_messages from_chat_id - forward all messages from specific chat to "forward_all_messages" chat (was created automatically in your TG account). Use /findid command manually to get chat\'s ID'
+            )
+                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages from_chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -207,11 +244,11 @@ def kwHandler(client, message):
                 excluded_chats.discard(args[0])
                 save_excluded_chats(excluded_chats)
                 message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
-        case 'forward_all_messages_from_chat':
+        case 'forward_all_messages':
             if not args:
-                message.reply_text('Please, use this format: /forward_all_messages_from_chat from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
+                message.reply_text('Please, use this format: /forward_all_messages from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
             else:
-                forward_all_messages_from_chat(user, args[0])
+                forward_all_messages(user, args[0])
         case 'include':
             if len(args) < 2:
                 return
@@ -227,8 +264,8 @@ def kwHandler(client, message):
         case _:
             message.reply_text('Sorry, this command is not valid')
 
-# forwards chat handler
-def fwHandler(client, message):
+# "Following" chat handler
+def followingHandler(client, message):
     if str(message.chat.id) != following_chat_id:
         return
     # print(message)
@@ -239,11 +276,12 @@ def fwHandler(client, message):
             message.reply_text(
                 '/help - show Help options\n\n'
                 'To follow a Telegram user:\n'
-                '\ta) forward manually any message of this user to your "Following" chat\n'
-                '\tb) /follow user_ID   # Use /findid command manually to get user_ID\n\n'
+                '\tVariant 1: forward manually any message of this user to your "Following" chat\n'
+                '\tVariant 2: /follow user_ID   # Enter /findid manually to get user_ID\n\n'
                 '/show - check IDs of all Telegram users in your current "Following" list\n'
                 '/unfollow user_ID - remove a user from your "Following" list\n'
-                '/findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)')
+                '/findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)'
+            )
         case 'findid':
             if (not args):
                 return

@@ -11,7 +11,7 @@
 - Pyrogram asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
-- When you see `bot started` phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'Forward_all_messages_from_chat') will appear in your Telegram account  
+- When you see `bot started` phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'forward_all_messages') will appear in your Telegram account  
 - Stop the running script: `Ctrl+C`
 - Run `docker run -d -v your_volume_name:/app --restart unless-stopped ghcr.io/ds-jr/telegram-keywords-bot-image_3` - launch bot in a container 
 
@@ -28,20 +28,20 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 - /delete_from_excluded_chats chat_id - delete a chat from your excluded chats list
 - /findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
 - /removeall - remove all keywords from global listener (turned off currently)
-- /forward_all_messages_from_chat from_chat_id - forward all messages from specific chat to 'Forward_all_messages_from_chat' chat (was created automatically in your TG account). Use /findid command manually to get chat's ID
+- /forward_all_messages from_chat_id - forward all messages from some chat to 'forward_all_messages' chat. Use /findid command manually to get chat ID
 
 #### 2. Mentions bot
-Forwards to 'Mentions' chat all the messages where you were tagged (your TG account was mentioned)  
+Messages from all chats where your TG account was mentioned (tagged) will be forwarded to 'Mentions' chat
 Replies to your messages are also counted as mentions 
 #### 3. Following Bot
-Forwards all messages from specified TG users to 'Following' chat  
+Forwards all messages from specified TG user(s) to 'Following' chat  
 ##### In ‘Following’ chat:
 - /help - show Help options
 - To follow a Telegram user:
-  - a) forward manually any message of this user to your "Following" chat
-  - b) /follow user_ID   # Use /findid command manually to get user_ID
-- /show - check IDs of all Telegram users in your current "Following" list
-- /unfollow user_ID - remove a user from your "Following" list
+  - Variant 1: forward manually any message of this user to your 'Following' chat
+  - Variant 2: /follow user_ID   # Enter /findid manually to get user_ID
+- /show - check IDs of all Telegram users in your current 'Following' list
+- /unfollow user_ID - remove a user from your 'Following' list
 - /findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)
 
 ### Pay attention:
