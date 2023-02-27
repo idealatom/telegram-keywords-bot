@@ -61,7 +61,7 @@ def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
     pass
 
 
-def forward_all_messages(client: object, from_chat_id: object) -> object:
+def forward_all_messages(client, from_chat_id):
     forward_all_messages_chat_size = client.get_history_count(forward_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
@@ -120,7 +120,7 @@ def forward_all_messages(client: object, from_chat_id: object) -> object:
 ############## bot commands handlers #################
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow']))
+@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow'])) # Commands from all four chats must be listed here
 def commHandler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
@@ -142,6 +142,10 @@ def commHandler(client, message):
 def mentionsHandler(client, message):
     args = message.command
     comm = args.pop(0)
+
+    # print("priNt 'args':", args) # CDL (for testing purposes)
+    # print("priNt 'comm':", comm) # CDL (for testing purposes)
+
     match comm:
         case 'help':
             message.reply_text(
@@ -150,8 +154,12 @@ def mentionsHandler(client, message):
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
+        # case 's':  # CDL
+        #     message.reply_text('bEcome an IMperfectionist') # CDL
         case _:
             message.reply_text('Sorry, this command is not valid')
+
+    # return message.reply_text("args & comm aRe reTurned") # CDL (for testing purposes)
 
 
 # "forward_all_messages" chat handler
@@ -186,7 +194,7 @@ def keywordsHandler(client, message):
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
                 '/findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot\'s response)\n' 
                 '/removeall - remove all keywords (turned off currently)\n'
-                '/forward_all_messages from_chat_id - forward all messages from specific chat to "forward_all_messages" chat (was created automatically in your TG account). Use /findid command manually to get chat\'s ID'
+                '/forward_all_messages from_chat_id - forward all messages from specific chat to "forward_all_messages" chat (was created automatically in your TG account). Use /findid command manually to get chat ID'
             )
                 # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/forward_all_messages from_chat_id\n/include name|id|@username keywords')
         case 'add':
