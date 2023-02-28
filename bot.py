@@ -138,6 +138,57 @@ def commHandler(client, message):
         forwardAllMessagesHandler(client, message)
 
 
+# (?)  Processing all random / wrong input from Telegram user BESIDES the allowed useful commands in all four chats (Keywords; Mentions; Following; Forwarding)
+# (?) Variant N1:
+# def notAllowedInputHandler(client, message):  # (?) Draft
+#     args = message.command
+#     comm = args.pop(0)
+#     if comm not in ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow']
+#         message.reply_text(
+#             'Sorry, this command is NOT valid. Enter /help to see all valid commands'
+#         )
+
+# (?) Variant N2: ***Use "NOT" in "filters" somehow?!
+@user.on_message(filters.me & ~filters.edited & ~filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow'])) # Commands from all four chats must be listed here
+def not_command_handler(client, message):  # (?) Draft
+    # accept commands only for bot chat ids
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
+        return
+
+    if message.forward_from and str(message.chat.id) == following_chat_id:
+        if str(message.forward_from.id) in following_set:
+            message.reply('Following already works for id {}'.format(
+                message.forward_from.id))
+        else:
+            following_set.add(str(message.forward_from.id))
+            save_following(following_set)
+            message.reply('id {} is added to Following list'.format(
+                message.forward_from.id))
+        return
+
+    message.reply_text(
+        'Sorry, this command is NOT valid. Enter /help to see all valid commands'
+    )
+
+# (Variant 1) (How to follow a TG user) Follow via forwarding manually any message from this user to ‘Following’ chat
+# listen to user messages to catch forwards for following chat
+# @user.on_message(filters.me & ~filters.edited)
+# def myHandler(client, message):
+#     if str(message.chat.id) != following_chat_id:
+#         return
+#     if message.forward_from:
+#         if str(message.forward_from.id) in following_set:
+#             message.reply('Following already works for id {}'.format(
+#                 message.forward_from.id))
+#         else:
+#             following_set.add(str(message.forward_from.id))
+#             save_following(following_set)
+#             message.reply('id {} is added to Following list'.format(
+#                 message.forward_from.id))
+
+
+
+
 # "Mentions" chat handler
 def mentionsHandler(client, message):
     args = message.command
@@ -407,22 +458,6 @@ def notmyHandler(client, message):
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
-
-# (Variant 1) (How to follow a TG user) Follow via forwarding manually any message from this user to ‘Following’ chat
-# listen to user messages to catch forwards for following chat
-@user.on_message(filters.me & ~filters.edited)
-def myHandler(client, message):
-    if str(message.chat.id) != following_chat_id:
-        return
-    if message.forward_from:
-        if str(message.forward_from.id) in following_set:
-            message.reply('Following already works for id {}'.format(
-                message.forward_from.id))
-        else:
-            following_set.add(str(message.forward_from.id))
-            save_following(following_set)
-            message.reply('id {} is added to Following list'.format(
-                message.forward_from.id))
 
 
 def makeUserMention(user):
