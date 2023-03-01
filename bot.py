@@ -119,8 +119,11 @@ def forward_all_messages(client, from_chat_id):
 
 ############## bot commands handlers #################
 
+# Commands used in all bot chats (Keywords; Mentions; Following; forward_all_messages) must be listed here:
+filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow']
+
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow'])) # Commands from all four chats must be listed here
+@user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def commHandler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
@@ -149,12 +152,12 @@ def commHandler(client, message):
 #         )
 
 # (?) Variant N2: ***Use "NOT" in "filters" somehow?!
-@user.on_message(filters.me & ~filters.edited & ~filters.command(['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'forward_all_messages', 'include', 'follow', 'unfollow'])) # Commands from all four chats must be listed here
+@user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
         return
-
+    # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
         if str(message.forward_from.id) in following_set:
             message.reply('Following already works for id {}'.format(
@@ -269,7 +272,7 @@ def keywordsHandler(client, message):
             save_keywords(keywords)
         case 'findid':
             if(not args):
-                return
+                return message.reply_text("Smth must be entered manually after /findid command: chat_title | first_name last_name | id | @username"_
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | chat_id | @username')
@@ -305,7 +308,7 @@ def keywordsHandler(client, message):
                 message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
         case 'forward_all_messages':
             if not args:
-                message.reply_text('Please, use this format: /forward_all_messages from_chat_id  |  Use /findid command to get from_chat_id & paste it manually')
+                message.reply_text('Please, use this format: /forward_all_messages from_chat_id   ***Use /findid command to get from_chat_id & paste it manually')
             else:
                 forward_all_messages(user, args[0])
         case 'include':
@@ -343,7 +346,7 @@ def followingHandler(client, message):
             )
         case 'findid':
             if (not args):
-                return
+                return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | id | @username')
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Sorry, nothing is found. Paste manually after /findid - @username | first_name last_name | chat_title')
@@ -363,16 +366,21 @@ def followingHandler(client, message):
             # print(args[0], " - printed 'args[0]'")  # CDL
             # print(comm)  # CDL
             if len(args) == 0:
-                message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow')  # chat_title | chat_id | @username
+                message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow  ***Use /findid manually to get Telegram ID')  # chat_title | chat_id | @username
             if len(args) > 1:
                 message.reply_text('More than one ID entered:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid ID after /follow')
             if len(args) == 1:
-                if args[0] in following_set:  # ..??..  ***OR just "if" is necessary here?
-                    message.reply('Following already works for id {}'.format(args[0]))  # ..??..
+                user_id = args[0]
+                try:
+                    user_id = int(user_id)
+                except ValueError:
+                    message.reply("Sorry, ID is not valid. Enter manually valid Telegram ID of the target user after /follow ***Use /findid to get Telegram ID")
+                if user_id in following_set:
+                    message.reply('Following already works for id {}'.format(user_id))  # ..??..
                 else:
-                    following_set.add(args[0])
+                    following_set.add(user_id)
                     save_following(following_set)
-                    message.reply_text('This ID was added to "following" list:\n' + args[0])
+                    message.reply_text('This ID was added to "following" list:\n' + user_id)
         case _:
             message.reply('Sorry, this command is not valid')
 
