@@ -1,7 +1,7 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, keywords, save_keywords, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
     dummy_bot_name, config_set_and_save
 # from threading import Timer
@@ -14,7 +14,8 @@ chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
-    "forward_all_messages": "forward_all_messages_chat_id"
+    "Forward_all_messages": "forward_all_messages_chat_id",
+    "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id"
 }
 
 
@@ -126,7 +127,7 @@ filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_ch
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def commHandler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_messages_handler):
         return
 
     chat_id = str(message.chat.id)
@@ -139,6 +140,8 @@ def commHandler(client, message):
         mentionsHandler(client, message)
     elif chat_id == forward_all_messages_chat_id:
         forwardAllMessagesHandler(client, message)
+    elif chat_id == edited_and_deleted_chat_id:
+        edited_and_deleted_messages_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
 
 
 # (?)  Processing all random / wrong input from Telegram user BESIDES the allowed useful commands in all four chats (Keywords; Mentions; Following; Forwarding)
@@ -155,7 +158,7 @@ def commHandler(client, message):
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_messages_handler):
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -196,10 +199,8 @@ def not_command_handler(client, message):  # (?) Draft
 def mentionsHandler(client, message):
     args = message.command
     comm = args.pop(0)
-
     # print("priNt 'args':", args) # CDL (for testing purposes)
     # print("priNt 'comm':", comm) # CDL (for testing purposes)
-
     match comm:
         case 'help':
             message.reply_text(
@@ -212,8 +213,22 @@ def mentionsHandler(client, message):
         #     message.reply_text('bEcome an IMperfectionist') # CDL
         case _:
             message.reply_text('Sorry, this command is not valid')
-
     # return message.reply_text("args & comm aRe reTurned") # CDL (for testing purposes)
+
+
+# "Edited_and_Deleted_messages_monitoring" chat handler
+def edited_and_deleted_messages_handler(client, message): # (?) Or two SEPARATE handlers necessary for “Edited” & for “Deleted”?
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'help':
+            message.reply_text(
+                '"Edited_and_Deleted_messages_monitoring" chat works automatically\n'
+                'No need to enter any input in this chat\n\n'
+                '..??..  (?) ADD here the text description of this feature from the final version of ReadMe ..??..\n'
+            )
+        case _:
+            message.reply_text('Sorry, this command is not valid')
 
 
 # "forward_all_messages" chat handler
@@ -467,6 +482,8 @@ def notmyHandler(client, message):
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
 
+    # process Edited_and_Deleted_messages_monitoring
+    # ..??..
 
 def makeUserMention(user):
     name = str(user.first_name) + ' ' + str(user.last_name).strip()
@@ -519,6 +536,13 @@ def following_forward(client, message):
         following_chat_id, 'Action detected {}'.format(source))
     message.forward(following_chat_id)
     client.mark_chat_unread(following_chat_id)
+
+def edited_and_deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    source = makeMessageDescription(message)
+    client.send_message(
+        edited_and_deleted_chat_id, 'Edited or Deleted message {}'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    message.forward(edited_and_deleted_chat_id)
+    client.mark_chat_unread(edited_and_deleted_chat_id)
 
 
 def start_bot():

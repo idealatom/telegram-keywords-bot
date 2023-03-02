@@ -9,7 +9,7 @@
 - Run `docker build -t your_image_name .` - to build image from Dockerfile
 - Run `docker run -it --rm -v your_volume_name:/app your_image_name` - to login to your Telegram account 
 - Paste your Telegram App's `api_id` and `api_hash`. Get them from 'App configuration' at https://my.telegram.org/apps 
-- Pyrogram asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
+- [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
 - When you see `bot started` phrase in Terminal - four new chats (‘Keywords’, ‘Following’, ‘Mentions’, 'forward_all_messages') will appear in your Telegram account  
@@ -29,7 +29,7 @@ Forwards messages that contain specified keywords to 'Keywords' chat
 - `/delete_from_excluded_chats chat_id` - delete a chat from your excluded chats list
 - `/findid chat_title | first_name last_name | id | @username` - find IDs & names of chats or users or channels (may work slowly, wait for bot's response) 
 - `/removeall` - remove all keywords from global listener (turned off currently)
-- `/forward_all_messages from_chat_id` - forward all messages from some chat to 'forward_all_messages' chat. Use `/findid` command manually to get chat ID
+- `/forward_all_messages from_chat_id` - forward all messages from some chat to 'Forward_all_messages' chat. Use `/findid` command manually to get chat ID
 #### 2. Mentions bot
 Messages from all chats where your TG account was mentioned (tagged) will be forwarded to 'Mentions' chat
 Replies to your messages are also counted as mentions 
@@ -46,5 +46,5 @@ Forwards all messages from specified TG user(s) to 'Following' chat
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’, so do NOT create a new bot via BotFather 
-- [Pyrogram](https://docs.pyrogram.org/) is used in the bot. It is [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
+- [Pyrogram](https://docs.pyrogram.org/) (version 1.4, NOT version 2.0) is used - [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
 - Data about your keywords & Telegram users who you follow is saved to config.ini file 
