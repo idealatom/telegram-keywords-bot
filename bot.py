@@ -127,7 +127,7 @@ filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_ch
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def commHandler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_messages_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_chat_input_handler):
         return
 
     chat_id = str(message.chat.id)
@@ -141,7 +141,7 @@ def commHandler(client, message):
     elif chat_id == forward_all_messages_chat_id:
         forwardAllMessagesHandler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
-        edited_and_deleted_messages_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
+        edited_and_deleted_chat_input_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
 
 
 # (?)  Processing all random / wrong input from Telegram user BESIDES the allowed useful commands in all four chats (Keywords; Mentions; Following; Forwarding)
@@ -158,7 +158,7 @@ def commHandler(client, message):
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_messages_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, forward_all_messages_chat_id, edited_and_deleted_chat_input_handler):
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -217,7 +217,7 @@ def mentionsHandler(client, message):
 
 
 # "Edited_and_Deleted_messages_monitoring" chat handler
-def edited_and_deleted_messages_handler(client, message): # (?) Or two SEPARATE handlers necessary for “Edited” & for “Deleted”?
+def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARATE handlers necessary for “Edited” & for “Deleted”?
     args = message.command
     comm = args.pop(0)
     match comm:
@@ -287,7 +287,7 @@ def keywordsHandler(client, message):
             save_keywords(keywords)
         case 'findid':
             if(not args):
-                return message.reply_text("Smth must be entered manually after /findid command: chat_title | first_name last_name | id | @username"_
+                return message.reply_text("Smth must be entered manually after /findid command: chat_title | first_name last_name | id | @username")
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
                 dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | chat_id | @username')
@@ -464,7 +464,7 @@ def followingHandler(client, message):
 # skip message edits for now (TODO: handle edited messages)
 @user.on_message(~filters.me & ~filters.edited)
 def notmyHandler(client, message):
-    # print(message)
+    # print(message) # CDL
     # process keywords
     if message.text and not str(message.chat.id) in excluded_chats:
         # maybe search -> findall and mark all keywords?
@@ -482,8 +482,29 @@ def notmyHandler(client, message):
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
 
-    # process Edited_and_Deleted_messages_monitoring
-    # ..??..
+
+# process Deleted messages
+@user.on_deleted_messages(~filters.me)  # (?)
+def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
+    if message: # (?)
+        deleted_messages_forward(client, message)  # (?)
+
+
+
+# process Edited messages
+# Variant N2   *** https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_message
+@user.on_message(~filters.me & filters.edited) # (?)
+def edited_messages_handler(client, message):
+    if message: # (?)
+        edited_messages_forward(client, message)  # (?)
+# process Edited messages
+# Variant N1.  *** on_edited_message decorator did NOT work for Pyrogram 1.4  https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_edited_message
+# @user.on_edited_message(~filters.me)  # (?)
+# def edited_messages_handler(client, message):
+#     if message: # (?)
+#         edited_messages_forward(client, message)  # (?)
+
+
 
 def makeUserMention(user):
     name = str(user.first_name) + ' ' + str(user.last_name).strip()
@@ -537,10 +558,19 @@ def following_forward(client, message):
     message.forward(following_chat_id)
     client.mark_chat_unread(following_chat_id)
 
-def edited_and_deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+
+def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     source = makeMessageDescription(message)
     client.send_message(
-        edited_and_deleted_chat_id, 'Edited or Deleted message {}'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+        edited_and_deleted_chat_id, 'Deleted message {}'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    message.forward(edited_and_deleted_chat_id)
+    client.mark_chat_unread(edited_and_deleted_chat_id)
+
+
+def edited_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    source = makeMessageDescription(message)
+    client.send_message(
+        edited_and_deleted_chat_id, 'Edited message {}'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     message.forward(edited_and_deleted_chat_id)
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
