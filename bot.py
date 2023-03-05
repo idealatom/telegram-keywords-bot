@@ -1,7 +1,7 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, Backup_all_messages_chat_id, edited_and_deleted_chat_id, keywords, save_keywords, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
     dummy_bot_name, config_set_and_save
 # from threading import Timer
@@ -14,7 +14,7 @@ chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
-    "Backup_all_messages": "Backup_all_messages_chat_id",
+    "Backup_all_messages": "backup_all_messages_chat_id",
     "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id"
 }
 
@@ -62,8 +62,8 @@ def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
     pass
 
 
-def Backup_all_messages(client, from_chat_id):
-    Backup_all_messages_chat_size = client.get_history_count(Backup_all_messages_chat_id)
+def backup_all_messages(client, from_chat_id):
+    backup_all_messages_chat_size = client.get_history_count(backup_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
     # current_time = int(datetime.now().timestamp())
@@ -74,39 +74,39 @@ def Backup_all_messages(client, from_chat_id):
             skipped_service_messages += 1
             continue
         # message_datetime = datetime.fromtimestamp(message.date)
-        # client.send_message(chat_id=Backup_all_messages_chat_id,
+        # client.send_message(chat_id=backup_all_messages_chat_id,
         #                     text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-        # Timer(counter * 50, message.forward(Backup_all_messages_chat_id)).start()
-        message.forward(Backup_all_messages_chat_id)
-        #message.forward(Backup_all_messages_chat_id, schedule_date=current_time + counter);
-        #forwarded_message = message.forward(Backup_all_messages_chat_id)
+        # Timer(counter * 50, message.forward(backup_all_messages_chat_id)).start()
+        message.forward(backup_all_messages_chat_id)
+        #message.forward(backup_all_messages_chat_id, schedule_date=current_time + counter);
+        #forwarded_message = message.forward(backup_all_messages_chat_id)
         #print(forwarded_message.id, forwarded_message.text)
     from_chat_full_message_history = client.get_history_count(from_chat_id)
-    forward_chat_full_message_history = client.get_history_count(Backup_all_messages_chat_id)
-    client.send_message(keywords_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
-    client.send_message(keywords_chat_id, f"Number of messages forwarded by bot (to 'Backup_all_messages' chat in your TG account): {forward_chat_full_message_history - Backup_all_messages_chat_size}")
-    client.send_message(keywords_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
-    client.send_message(keywords_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {Backup_all_messages_chat_id} is finished")
+    forward_chat_full_message_history = client.get_history_count(backup_all_messages_chat_id)
+    client.send_message(backup_all_messages_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
+    client.send_message(backup_all_messages_chat_id, f"Number of messages forwarded by bot (to 'Backup_all_messages' chat in your TG account): {forward_chat_full_message_history - backup_all_messages_chat_size}")
+    client.send_message(backup_all_messages_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
+    client.send_message(backup_all_messages_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {backup_all_messages_chat_id} is finished")
 
     # from_chat = client.get_chat(from_chat_id)
-    # Backup_all_messages_chat = client.get_chat(Backup_all_messages_chat_id)
-    # client.send_message(keywords_chat_id, f"Forwarding from chat [{from_chat.first_name} {from_chat.last_name}](tg://resolve?domain={from_chat_id}) to chat {Backup_all_messages_chat.title} is finihsed", "markdown")
+    # backup_all_messages_chat = client.get_chat(backup_all_messages_chat_id)
+    # client.send_message(keywords_chat_id, f"Forwarding from chat [{from_chat.first_name} {from_chat.last_name}](tg://resolve?domain={from_chat_id}) to chat {backup_all_messages_chat.title} is finihsed", "markdown")
 
 
     # user.send_message(keywords_chat_id, 'Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(Backup_all_messages_chat_id) - Backup_all_messages_chat_size)
+    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(backup_all_messages_chat_id) - backup_all_messages_chat_size)
     # user.send_message(keywords_chat_id, "Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
     # client.send_message(keywords_chat_id, 'aCCept')
 
 
     # print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # print('Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(Backup_all_messages_chat_id) - Backup_all_messages_chat_size)
+    # print('Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(backup_all_messages_chat_id) - backup_all_messages_chat_size)
     # print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
 
     # print(type(client.iter_history(from_chat_id))) # <class 'pyrogram.types.list.List'>
-    # client.send_message(chat_id=Backup_all_messages_chat_id, text=..??..)
+    # client.send_message(chat_id=backup_all_messages_chat_id, text=..??..)
 
-    # async def Backup_all_messages(client, from_chat_id, to_chat_id):
+    # async def backup_all_messages(client, from_chat_id, to_chat_id):
         #     async with client:
         #         async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         #             if message.service:
@@ -115,19 +115,19 @@ def Backup_all_messages(client, from_chat_id):
         #             await client.send_message(chat_id=to_chat_id, text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
         #             await message.forward(to_chat_id)
         #
-        # user.run(Backup_all_messages(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
+        # user.run(backup_all_messages(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
 
 
 ############## bot commands handlers #################
 
 # Commands used in all bot chats (Keywords; Mentions; Following; Backup_all_messages) must be listed here:
-filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'Backup_all_messages', 'include', 'follow', 'unfollow']
+filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
 
 # command messages listener
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def commHandler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, Backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
         return
 
     chat_id = str(message.chat.id)
@@ -138,8 +138,8 @@ def commHandler(client, message):
         followingHandler(client, message)
     elif chat_id == mentions_chat_id:
         mentionsHandler(client, message)
-    elif chat_id == Backup_all_messages_chat_id:
-        forwardAllMessagesHandler(client, message)
+    elif chat_id == backup_all_messages_chat_id:
+        backup_all_messages_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
         edited_and_deleted_chat_input_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
 
@@ -149,7 +149,7 @@ def commHandler(client, message):
 # def notAllowedInputHandler(client, message):  # (?) Draft
 #     args = message.command
 #     comm = args.pop(0)
-#     if comm not in ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'Backup_all_messages', 'include', 'follow', 'unfollow']
+#     if comm not in ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
 #         message.reply_text(
 #             'Sorry, this command is NOT valid. Enter /help to see all valid commands'
 #         )
@@ -158,7 +158,7 @@ def commHandler(client, message):
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, Backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -232,17 +232,27 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
 
 
 # "Backup_all_messages" chat handler
-def forwardAllMessagesHandler(client, message):
+def backup_all_messages_handler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
         case 'help':
             message.reply_text(
-                'To forward all messages from some chat to "Backup_all_messages" chat:\n'
-                'Type in "Keywords" chat: /Backup_all_messages from_chat_id\n\n'
-                'To get chat ID:\n'
-                'Type in "Keywords" chat: /findid chat_title | first_name last_name | @username'
+                '/help - show Help options\n'
+                '/backup_all_messages from_chat_id - forward all messages from some chat to "Backup_all_messages" chat\n'
+                '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly, wait for bot\'s response)\n'
             )
+        case 'backup_all_messages': # (?)
+            if not args:
+                message.reply_text('Please, use this format: /backup_all_messages from_chat_id   ***Use /findid to get from_chat_id & paste it manually')
+            else:
+                backup_all_messages(user, args[0])
+        case 'findid': # (?)
+            if (not args):
+                return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
+            dialogs = find_chats(client, args)
+            message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
+                dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | first_name last_name | @username')
         case _:
             message.reply_text('Sorry, this command is not valid')
 
@@ -263,9 +273,8 @@ def keywordsHandler(client, message):
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
                 '/findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot\'s response)\n' 
                 '/removeall - remove all keywords (turned off currently)\n'
-                '/Backup_all_messages from_chat_id - forward all messages from specific chat to "Backup_all_messages" chat (was created automatically in your TG account). Use /findid command manually to get chat ID'
             )
-                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/Backup_all_messages from_chat_id\n/include name|id|@username keywords')
+                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/backup_all_messages from_chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -321,11 +330,6 @@ def keywordsHandler(client, message):
                 excluded_chats.discard(args[0])
                 save_excluded_chats(excluded_chats)
                 message.reply('{} - this chat was deleted from your list of excluded chats'.format(args[0]))
-        case 'Backup_all_messages':
-            if not args:
-                message.reply_text('Please, use this format: /Backup_all_messages from_chat_id   ***Use /findid command to get from_chat_id & paste it manually')
-            else:
-                Backup_all_messages(user, args[0])
         case 'include':
             if len(args) < 2:
                 return

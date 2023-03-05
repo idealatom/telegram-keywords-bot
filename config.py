@@ -39,7 +39,7 @@ dummy_bot_name = config.get('bot_params', 'dummy_bot_name', fallback='MyLittleDu
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
-Backup_all_messages_chat_id = config.get('bot_params', 'Backup_all_messages_chat_id', fallback='')
+backup_all_messages_chat_id = config.get('bot_params', 'backup_all_messages_chat_id', fallback='')
 edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_id', fallback='')
 
 

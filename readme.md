@@ -29,7 +29,7 @@ Forwards incoming messages that contain specified keywords to 'Keywords' chat
 - `/excluded_chats_list` - show IDs of all excluded chats 
 - `/delete_from_excluded_chats chat_id` - delete a chat from your excluded chats list
 - `/removeall` - remove all keywords from global listener (turned off currently)
-~~- `/Backup_all_messages from_chat_id` - forward all messages from some chat to 'Backup_all_messages' chat. Use `/findid` command manually to get chat ID~~
+~~- `/backup_all_messages from_chat_id` - forward all messages from some chat to 'Backup_all_messages' chat. Use `/findid` command manually to get chat ID~~
 #### 2. Mentions
 Automatically forwards all messages from chats where your TG account was mentioned (tagged) to 'Mentions' chat   
 Replies to your messages are also counted as mentions 
@@ -48,7 +48,7 @@ All messages from some selected chat are copied & forwarded to 'Backup_all_messa
 Single-time manual backup (NOT automatic, NOT in real time)
 ##### (?) In ‘Backup_all_messages’ chat:
 - (?) `/help` - show Help options
-- (?) `/Backup_all_messages from_chat_id` - forward all messages from some selected chat to 'Backup_all_messages' chat 
+- (?) `/backup_all_messages from_chat_id` - forward all messages from some selected chat to 'Backup_all_messages' chat 
 - (?) `/findid chat_title | first_name last_name | @username` - find `from_chat_id` (may work slowly)
 
 ### Pay attention:
