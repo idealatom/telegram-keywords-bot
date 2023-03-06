@@ -35,7 +35,6 @@ for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
 
 
-dummy_bot_name = config.get('bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')

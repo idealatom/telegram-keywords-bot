@@ -3,7 +3,7 @@ from pyrogram import Client, filters, idle
 # from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
-    dummy_bot_name, config_set_and_save
+    config_set_and_save
 # from threading import Timer
 
 # start app
@@ -127,7 +127,7 @@ filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_ch
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def commHandler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id):
         return
 
     chat_id = str(message.chat.id)
@@ -158,7 +158,7 @@ def commHandler(client, message):
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_input_handler):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id):
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -243,16 +243,29 @@ def backup_all_messages_handler(client, message):
                 '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly, wait for bot\'s response)\n'
             )
         case 'backup_all_messages': # (?)
-            if not args:
-                message.reply_text('Please, use this format: /backup_all_messages from_chat_id   ***Use /findid to get from_chat_id & paste it manually')
-            else:
+            if len(args) == 0:
+                message.reply_text('Sorry, from_chat_id is not found\n'
+                                   'from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /backup_all_messages\n\n'
+                                   'Please, use this format: /backup_all_messages from_chat_id\n'
+                                   'Use /findid to get from_chat_id')  # chat_title | chat_id | @username
+            if len(args) > 1:
+                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /backup_all_messages')
+            if len(args) == 1:
+                from_chat_id = args[0]
+                try:
+                    from_chat_id = int(from_chat_id)
+                except ValueError:
+                    message.reply("Sorry, from_chat_id is not valid\n "
+                                  "from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /backup_all_messages\n\n"
+                                  'Please, use this format: /backup_all_messages from_chat_id\n'
+                                  "Use /findid to get from_chat_id")
                 backup_all_messages(user, args[0])
         case 'findid': # (?)
             if (not args):
                 return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
-                dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | first_name last_name | @username')
+                dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | first_name last_name | @username')
         case _:
             message.reply_text('Sorry, this command is not valid')
 
@@ -299,7 +312,7 @@ def keywordsHandler(client, message):
                 return message.reply_text("Smth must be entered manually after /findid command: chat_title | first_name last_name | id | @username")
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
-                dialogs) else 'Sorry, nothing is found. Paste manually after /findid - chat_title | chat_id | @username')
+                dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | chat_id | @username')
         case 'exclude_chat':
             if not args:
                 return
@@ -385,7 +398,8 @@ def followingHandler(client, message):
             # print(args[0], " - printed 'args[0]'")  # CDL
             # print(comm)  # CDL
             if len(args) == 0:
-                message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow  ***Use /findid manually to get Telegram ID')  # chat_title | chat_id | @username
+                message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow\n'
+                                   'Use /findid to get Telegram ID')  # chat_title | chat_id | @username
             if len(args) > 1:
                 message.reply_text('More than one ID entered:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid ID after /follow')
             if len(args) == 1:
@@ -393,7 +407,8 @@ def followingHandler(client, message):
                 try:
                     user_id = int(user_id)
                 except ValueError:
-                    message.reply("Sorry, ID is not valid. Enter manually valid Telegram ID of the target user after /follow ***Use /findid to get Telegram ID")
+                    message.reply("Sorry, ID is not valid. Enter manually valid Telegram ID of the target user after /follow\n"
+                                  "Use /findid to get Telegram ID")
                 if user_id in following_set:
                     message.reply('Following already works for id {}'.format(user_id))  # ..??..
                 else:
@@ -465,9 +480,9 @@ def followingHandler(client, message):
 # b2: limit to mentions
 
 # listen to only other users' messages;
-# skip message edits for now (TODO: handle edited messages)
-@user.on_message(~filters.me & ~filters.edited)
-def notmyHandler(client, message):
+# skip message edits for now (TODO: handle edited messages) (?)
+@user.on_message(~filters.me & ~filters.edited)  # (?)
+def not_my_messages_handler(client, message):
     # print(message) # CDL
     # process keywords
     if message.text and not str(message.chat.id) in excluded_chats:
@@ -490,16 +505,14 @@ def notmyHandler(client, message):
 # process Deleted messages
 @user.on_deleted_messages(~filters.me)  # (?)
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
-    if message: # (?)
-        deleted_messages_forward(client, message)  # (?)
+    deleted_messages_forward(client, message)  # (?)
 
 
 # process Edited messages
 # Variant N2   *** https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_message
 @user.on_message(~filters.me & filters.edited) # (?)
 def edited_messages_handler(client, message):
-    if message: # (?)
-        edited_messages_forward(client, message)  # (?)
+    edited_messages_forward(client, message)  # (?)
 # process Edited messages
 # Variant N1.  *** on_edited_message decorator did NOT work for Pyrogram 1.4  https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_edited_message
 # @user.on_edited_message(~filters.me)  # (?)
@@ -573,7 +586,7 @@ def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions n
 def edited_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     source = makeMessageDescription(message)
     client.send_message(
-        edited_and_deleted_chat_id, 'Edited message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+        edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     message.forward(edited_and_deleted_chat_id)
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
@@ -585,7 +598,7 @@ def start_bot():
 
     for k in chat_dict:
         if not globals()[chat_dict[k]]:
-            new_chat = user.create_group(k, dummy_bot_name)
+            new_chat = user.create_group(k)
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
     # init message
