@@ -67,7 +67,6 @@ def backup_all_messages(client, from_chat_id):
     skipped_service_messages = 0
     counter = 0
     # current_time = int(datetime.now().timestamp())
-    # print(datetime.now(), current_time)
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         counter += 1
         if message.service:
@@ -87,35 +86,6 @@ def backup_all_messages(client, from_chat_id):
     client.send_message(backup_all_messages_chat_id, f"Number of messages forwarded by bot (to 'Backup_all_messages' chat in your TG account): {forward_chat_full_message_history - backup_all_messages_chat_size}")
     client.send_message(backup_all_messages_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
     client.send_message(backup_all_messages_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {backup_all_messages_chat_id} is finished")
-
-    # from_chat = client.get_chat(from_chat_id)
-    # backup_all_messages_chat = client.get_chat(backup_all_messages_chat_id)
-    # client.send_message(keywords_chat_id, f"Forwarding from chat [{from_chat.first_name} {from_chat.last_name}](tg://resolve?domain={from_chat_id}) to chat {backup_all_messages_chat.title} is finihsed", "markdown")
-
-
-    # user.send_message(keywords_chat_id, 'Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # user.send_message(keywords_chat_id, 'Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(backup_all_messages_chat_id) - backup_all_messages_chat_size)
-    # user.send_message(keywords_chat_id, "Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
-    # client.send_message(keywords_chat_id, 'aCCept')
-
-
-    # print('Size of your chat to forward from: ', client.get_history_count(from_chat_id), ' messages')
-    # print('Number of messages forwarded by bot (to "Backup_all_messages" chat in your TG account): ', client.get_history_count(backup_all_messages_chat_id) - backup_all_messages_chat_size)
-    # print("Number of service messages (Rx.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: ", skipped_service_messages)
-
-    # print(type(client.iter_history(from_chat_id))) # <class 'pyrogram.types.list.List'>
-    # client.send_message(chat_id=backup_all_messages_chat_id, text=..??..)
-
-    # async def backup_all_messages(client, from_chat_id, to_chat_id):
-        #     async with client:
-        #         async for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
-        #             if message.service:
-        #                 continue
-        #             message_datetime = datetime.fromtimestamp(message.date)
-        #             await client.send_message(chat_id=to_chat_id, text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-        #             await message.forward(to_chat_id)
-        #
-        # user.run(backup_all_messages(user, 5481261145, -1001706720944))  # Substitute from_chat_id & to_chat_id manually with chat IDs here (use bot's /findid command to get chat IDs)
 
 
 ############## bot commands handlers #################
@@ -144,16 +114,6 @@ def commHandler(client, message):
         edited_and_deleted_chat_input_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
 
 
-# (?)  Processing all random / wrong input from Telegram user BESIDES the allowed useful commands in all four chats (Keywords; Mentions; Following; Forwarding)
-# (?) Variant N1:
-# def notAllowedInputHandler(client, message):  # (?) Draft
-#     args = message.command
-#     comm = args.pop(0)
-#     if comm not in ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
-#         message.reply_text(
-#             'Sorry, this command is NOT valid. Enter /help to see all valid commands'
-#         )
-
 # (?) Variant N2: ***Use "NOT" in "filters" somehow?!
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
@@ -175,24 +135,6 @@ def not_command_handler(client, message):  # (?) Draft
     message.reply_text(
         'Sorry, this command is NOT valid. Enter /help to see all valid commands'
     )
-
-# (Variant 1) (How to follow a TG user) Follow via forwarding manually any message from this user to ‘Following’ chat
-# listen to user messages to catch forwards for following chat
-# @user.on_message(filters.me & ~filters.edited)
-# def myHandler(client, message):
-#     if str(message.chat.id) != following_chat_id:
-#         return
-#     if message.forward_from:
-#         if str(message.forward_from.id) in following_set:
-#             message.reply('Following already works for id {}'.format(
-#                 message.forward_from.id))
-#         else:
-#             following_set.add(str(message.forward_from.id))
-#             save_following(following_set)
-#             message.reply('id {} is added to Following list'.format(
-#                 message.forward_from.id))
-
-
 
 
 # "Mentions" chat handler
@@ -394,9 +336,6 @@ def followingHandler(client, message):
                 message.reply('{} Deleted from Following'.format(args[0]))
         # (Variant 2) (How to follow a TG user) Follow via inputing manually user's TG id
         case 'follow':
-            # print(args, " - printed 'args'")  # CDL
-            # print(args[0], " - printed 'args[0]'")  # CDL
-            # print(comm)  # CDL
             if len(args) == 0:
                 message.reply_text('Sorry, ID is not found. Enter manually Telegram ID of the target user after /follow\n'
                                    'Use /findid to get Telegram ID')  # chat_title | chat_id | @username
@@ -417,57 +356,6 @@ def followingHandler(client, message):
                     message.reply_text('This ID was added to "following" list:\n' + user_id)
         case _:
             message.reply('Sorry, this command is not valid')
-
-        # dialogs = find_chats(client, args) # Finds list of lists with ID & name of all contacts of this user
-            # print(dialogs, dialogs[0][0], " - priNted from bot.py foR tEsting purPoses, CDL!")   #  ?  (CDL this line!)
-
-            # if not args:
-            #     message.reply('Enter ID of TG user via "/follow user_ID" command')
-
-
-            # Example block of code: DELETE it later!
-            # if str(message.chat.id) in following_set:  # ..??..  (Substitute "message" )
-            #             message.reply('Following already works for id {}'.format(
-            #                 message.forward_from.id))  # ..??..  (Substitute forward_from !)
-                    # else:
-                    #     following_set.add(str(message.forward_from.id))  # ..??..  (Substitute forward_from !)
-                    #     save_following(following_set)
-                    #     message.reply('id {} is added to Following list'.format(
-                    #         message.forward_from.id))  # ..??..  (Substitute forward_from !)
-
-
-        # case 'exclude_chat':  # Example block of code: DELETE it later!
-        #     if not args:
-        #         return
-        #     dialogs = find_chats(client, args)
-        #     if(len(dialogs) != 1):
-        #         message.reply_text('More than one chat is found:\n' + '\n'.join([' - '.join(
-        #             dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found. Paste manually after /exclude_chat - chat_title | chat_id | @username')
-        #     else:
-        #         excluded_chats.add(dialogs[0][0])
-        #         save_excluded_chats(excluded_chats)
-        #         message.reply_text(
-        #             'This chat was added to excluded chats list:\n' + ' - '.join(dialogs[0]))
-
-    # listen to user messages to catch forwards for following chat
-    # @user.on_message(filters.me & ~filters.edited)
-    # def myHandler(client, message):
-    #     if str(message.chat.id) != following_chat_id:
-    #         return
-    #     if message.forward_from:
-    #         if str(message.forward_from.id) in following_set:
-    #             message.reply('Following already works for id {}'.format(
-    #                 message.forward_from.id))
-    #         else:
-    #             following_set.add(str(message.forward_from.id))
-    #             save_following(following_set)
-    #             message.reply('id {} is added to Following list'.format(
-    #                 message.forward_from.id))
-
-
-
-
-
 
 
 # process incoming messages
@@ -503,14 +391,15 @@ def not_my_messages_handler(client, message):
 
 
 # process Deleted messages
-@user.on_deleted_messages(~filters.me)  # (?)
+@user.on_deleted_messages(~filters.me & filters.private)  # (?)
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
+    # print("2. (Watts)  At EVERY moment of life: you are already “there” = liberated = enlightened = in the optimal place / state / moment = where you tried & dreamed to get."!
     deleted_messages_forward(client, message)  # (?)
 
 
 # process Edited messages
 # Variant N2   *** https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_message
-@user.on_message(~filters.me & filters.edited) # (?)
+@user.on_message(~filters.me & filters.edited & filters.private) # (?)
 def edited_messages_handler(client, message):
     edited_messages_forward(client, message)  # (?)
 # process Edited messages
@@ -576,6 +465,7 @@ def following_forward(client, message):
 
 
 def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    print("1. (Ray Dalio) Go to pain & discomfort rather than avoid them.") # (?) (CDL) For testing purposes only!
     source = makeMessageDescription(message)
     client.send_message(
         edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
