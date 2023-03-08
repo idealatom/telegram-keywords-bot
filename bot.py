@@ -91,7 +91,13 @@ def backup_all_messages(client, from_chat_id):
 ############## bot commands handlers #################
 
 # Commands used in all bot chats (Keywords; Mentions; Following; Backup_all_messages) must be listed here:
-filtered_commands_list = ['help', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
+filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
+
+help_general_text = """
+...
+(Beverly Sills) There are NO short cuts to any place worth going. 
+...
+""" # (?) Add text w/ all instructions from the final version of ReadMe AFTER main changes in code are finished
 
 # command messages listener
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
@@ -144,6 +150,8 @@ def mentionsHandler(client, message):
     # print("priNt 'args':", args) # CDL (for testing purposes)
     # print("priNt 'comm':", comm) # CDL (for testing purposes)
     match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
                 '"Mentions" chat works automatically\n'
@@ -163,11 +171,14 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
     args = message.command
     comm = args.pop(0)
     match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
                 '"Edited_and_Deleted_messages_monitoring" chat works automatically\n'
                 'No need to enter any input in this chat\n\n'
-                '..??..  (?) ADD here the text description of this feature from the final version of ReadMe ..??..\n'
+                '..??..  \n'
+                '(?) ADD here the text description of this feature from the final version of ReadMe ..??..\n'
             )
         case _:
             message.reply_text('Sorry, this command is not valid')
@@ -178,6 +189,8 @@ def backup_all_messages_handler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
                 '/help - show Help options\n'
@@ -217,6 +230,8 @@ def keywordsHandler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
                 '/help - show Help options\n'
@@ -308,6 +323,8 @@ def followingHandler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
                 '/help - show Help options\n\n'

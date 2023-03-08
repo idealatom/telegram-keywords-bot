@@ -50,6 +50,15 @@ Single-time manual backup (NOT automatic, NOT in real time)
 - (?) `/help` - show Help options
 - (?) `/backup_all_messages from_chat_id` - forward all messages from some selected chat to 'Backup_all_messages' chat 
 - (?) `/findid chat_title | first_name last_name | @username` - find `from_chat_id` (may work slowly)
+#### (?) 5. Edited_and_Deleted_messages_monitoring 
+Your DMs (direct messages) are monitored
+***(?) UPDATE these instructions AFTER fixing bugs w/ "Deleted" feature*** 
+If smb edited or deleted a message - a notification comes to your ‘Edited_and_Deleted_messages_monitoring’ chat
+Details: user / chat, date, time, message content AFTER being updated (if deleted - NO content)
+(next feature) Select manually specific user(s) / group(s) / channel(s) to monitor
+(next big feature) Get ORIGINAL version of message - BEFORE being edited / deleted by smb. # Adding a database is necessary to backup your correspondence in real time  
+##### (?) In ‘Edited_and_Deleted_messages_monitoring’ chat:
+..(?)..
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’, so NO need to create a new bot via BotFather 
