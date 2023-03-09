@@ -82,11 +82,22 @@ def backup_all_messages(client, from_chat_id):
         #print(forwarded_message.id, forwarded_message.text)
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     forward_chat_full_message_history = client.get_history_count(backup_all_messages_chat_id)
-    client.send_message(backup_all_messages_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
-    client.send_message(backup_all_messages_chat_id, f"Number of messages forwarded by bot (to 'Backup_all_messages' chat in your TG account): {forward_chat_full_message_history - backup_all_messages_chat_size}")
-    client.send_message(backup_all_messages_chat_id, f"Number of service messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc) skipped by bot: {skipped_service_messages}")
-    client.send_message(backup_all_messages_chat_id, f"Forwarding from chat with chat_ID {from_chat_id} to chat with chat_ID {backup_all_messages_chat_id} is finished")
+    client.send_message(backup_all_messages_chat_id,f"""
+                        RESULTS:
+                        Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED
+                        Size of your chat to forward from: {from_chat_full_message_history} messages
+                        Number of messages forwarded by bot: {forward_chat_full_message_history - backup_all_messages_chat_size}
+                        Number of service messages skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_service_messages}
+                        /help - show Help options"""
+                        )
 
+    # (?)  (DELETE if the solution above works well)
+    # client.send_message(backup_all_messages_chat_id, "RESULTS: ")
+    # client.send_message(backup_all_messages_chat_id, f"Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED")
+    # client.send_message(backup_all_messages_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
+    # client.send_message(backup_all_messages_chat_id, f"Number of messages forwarded by bot: {forward_chat_full_message_history - backup_all_messages_chat_size}")
+    # client.send_message(backup_all_messages_chat_id, f"Number of service messages skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_service_messages}")
+    # client.send_message(backup_all_messages_chat_id, "/help - show Help options")
 
 ############## bot commands handlers #################
 
@@ -154,6 +165,8 @@ def mentionsHandler(client, message):
             message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n\n'
                 '"Mentions" chat works automatically\n'
                 'No need to enter any input in "Mentions" chat\n\n'
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "Mentions" chat\n'
@@ -175,6 +188,8 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
             message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n\n'
                 '"Edited_and_Deleted_messages_monitoring" chat works automatically\n'
                 'No need to enter any input in this chat\n\n'
                 '..??..  \n'
@@ -193,9 +208,12 @@ def backup_all_messages_handler(client, message):
             message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
-                '/help - show Help options\n'
-                '/backup_all_messages from_chat_id - forward all messages from some chat to "Backup_all_messages" chat\n'
-                '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly, wait for bot\'s response)\n'
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n'
+                '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
+                '/backup_all_messages from_chat_id -\n'
+                'All messages from a single selected chat are copied & forwarded to "Backup_all_messages" chat\n' 
+                'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
             )
         case 'backup_all_messages': # (?)
             if len(args) == 0:
@@ -234,14 +252,15 @@ def keywordsHandler(client, message):
             message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
-                '/help - show Help options\n'
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n'
+                '/findid chat_title | first_name last_name | id | @username` - find Telegram ID of chat / user / channel (may work slowly)\n' 
+                '/show - show all keywords monitored by bot\n'
                 '/add keyword1 keyword2 ... - add new keyword(s)\n'
                 '/remove keyword1 keyword2 ... - remove keyword(s)\n'
-                '/show - show all keywords monitored by bot\n'
-                '/exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly, wait for bot\'s response)\n'
+                '/exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly)\n'
                 '/excluded_chats_list - show IDs of all excluded chats\n' 
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
-                '/findid chat_title | first_name last_name | id | @username - find IDs & names of chats or users or channels (may work slowly, wait for bot\'s response)\n' 
                 '/removeall - remove all keywords (turned off currently)\n'
             )
                 # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/backup_all_messages from_chat_id\n/include name|id|@username keywords')
@@ -327,13 +346,14 @@ def followingHandler(client, message):
             message.reply_text(help_general_text)
         case 'help':
             message.reply_text(
-                '/help - show Help options\n\n'
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n\n'
                 'To follow a Telegram user:\n'
                 '\tVariant 1: forward manually any message of this user to your "Following" chat\n'
                 '\tVariant 2: /follow user_ID   # Enter /findid manually to get user_ID\n\n'
                 '/show - check IDs of all Telegram users in your current "Following" list\n'
                 '/unfollow user_ID - remove a user from your "Following" list\n'
-                '/findid @username | first_name last_name | chat_title - find user_ID (may work slowly, wait for bot\'s response)'
+                '/findid @username | first_name last_name | chat_title - find user_ID (may work slowly)'
             )
         case 'findid':
             if (not args):
