@@ -1,7 +1,7 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, keywords, save_keywords, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id, keywords, save_keywords, \
     excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
     config_set_and_save
 # from threading import Timer
@@ -15,7 +15,8 @@ chat_dict = {
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
     "Backup_all_messages": "backup_all_messages_chat_id",
-    "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id"
+    "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
+    "Pinned_messages": "pinned_messages_chat_id"
 }
 
 
@@ -128,7 +129,10 @@ def commHandler(client, message):
     elif chat_id == backup_all_messages_chat_id:
         backup_all_messages_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
-        edited_and_deleted_chat_input_handler(client, message) # (?) Or two SEPARATE handlers are necessary?!
+        edited_and_deleted_chat_input_handler(client, message)
+    elif chat_id == pinned_messages_chat_id:
+        pinned_messages_chat_input_handler(client, message)
+
 
 
 # (?) Variant N2: ***Use "NOT" in "filters" somehow?!
@@ -198,6 +202,22 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
         case _:
             message.reply_text('Sorry, this command is not valid')
 
+
+# "Pinned_messages" chat handler
+def pinned_messages_chat_input_handler(client, message):
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
+        case 'help':
+            message.reply_text(
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n\n'
+                'Pinned messages from all chats are automatically forwarded to your "Pinned_messages" chat\n'   
+                'No need to enter any input in this chat'
+        case _:
+            message.reply_text('Sorry, this command is not valid')
 
 # "Backup_all_messages" chat handler
 def backup_all_messages_handler(client, message):
@@ -427,6 +447,12 @@ def not_my_messages_handler(client, message):
         following_forward(client, message)
 
 
+# process Pinned messages
+@user.on_message(filters.pinned_message)
+def pinned_messages_handler(client, message):
+    pinned_messages_forward(client, message)
+
+
 # process Deleted messages
 @user.on_deleted_messages(~filters.me & filters.private)  # (?)
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
@@ -516,6 +542,14 @@ def edited_messages_forward(client, message): # (?) Or two SEPARATE functions ne
         edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     message.forward(edited_and_deleted_chat_id)
     client.mark_chat_unread(edited_and_deleted_chat_id)
+
+
+def pinned_messages_forward(client, message):
+    source = makeMessageDescription(message)
+    client.send_message(
+        pinned_messages_chat_id, 'Pinned message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+    message.forward(pinned_messages_chat_id)
+    client.mark_chat_unread(pinned_messages_chat_id)
 
 
 def start_bot():

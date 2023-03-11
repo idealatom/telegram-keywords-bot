@@ -57,6 +57,8 @@ Single-time manual backup (NOT automatic, NOT real time monitoring)
 - Details: user / chat, date, time, message content AFTER being updated (for 'Deleted' - NO content)
 - (next feature) Select manually specific user(s) / group(s) / channel(s) to monitor
 - (next big feature) Get ORIGINAL version of message - BEFORE being edited / deleted by smb. # Adding a database is necessary to backup your correspondence in real time
+#### 6. Pinned_messages
+Pinned messages from all chats are automatically forwarded to your 'Pinned_messages' chat   
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather 
