@@ -1,9 +1,10 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id, keywords, save_keywords, \
-    excluded_chats, save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, \
-    config_set_and_save
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, \
+    edited_and_deleted_chat_id, pinned_messages_chat_id, keywords, save_keywords, excluded_chats, save_excluded_chats, \
+    add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
+from first_session import create_configini_file # (??)
 # from threading import Timer
 
 # start app
@@ -113,19 +114,19 @@ help_general_text = """
 
 # command messages listener
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
-def commHandler(client, message):
+def command_messages_handler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id):
         return
 
     chat_id = str(message.chat.id)
 
     if chat_id == keywords_chat_id:
-        keywordsHandler(client, message)
+        keywords_handler(client, message)
     elif chat_id == following_chat_id:
-        followingHandler(client, message)
+        following_handler(client, message)
     elif chat_id == mentions_chat_id:
-        mentionsHandler(client, message)
+        mentions_handler(client, message)
     elif chat_id == backup_all_messages_chat_id:
         backup_all_messages_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
@@ -139,7 +140,7 @@ def commHandler(client, message):
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id):
+    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id):
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -159,7 +160,7 @@ def not_command_handler(client, message):  # (?) Draft
 
 
 # "Mentions" chat handler
-def mentionsHandler(client, message):
+def mentions_handler(client, message):
     args = message.command
     comm = args.pop(0)
     # print("priNt 'args':", args) # CDL (for testing purposes)
@@ -216,6 +217,7 @@ def pinned_messages_chat_input_handler(client, message):
                 '/help_general - show Help options for all chats\n\n'
                 'Pinned messages from all chats are automatically forwarded to your "Pinned_messages" chat\n'   
                 'No need to enter any input in this chat'
+            )
         case _:
             message.reply_text('Sorry, this command is not valid')
 
@@ -264,7 +266,7 @@ def backup_all_messages_handler(client, message):
 
 
 # "Keywords" chat handler
-def keywordsHandler(client, message):
+def keywords_handler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
@@ -355,7 +357,7 @@ def keywordsHandler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 # "Following" chat handler
-def followingHandler(client, message):
+def following_handler(client, message):
     if str(message.chat.id) != following_chat_id:
         return
     # print(message)
@@ -474,15 +476,15 @@ def edited_messages_handler(client, message):
 
 
 
-def makeUserMention(user):
+def make_user_mention(user):
     name = str(user.first_name) + ' ' + str(user.last_name).strip()
     return '[{}](tg://user?id={})'.format(name, user.id)
 
 
-def makeMessageDescription(message):
+def make_message_description(message):
     # Direct Messages
     if message.chat.type == 'private':
-        source = 'in Direct Messages ({})'.format(makeUserMention(message.from_user))
+        source = 'in Direct Messages ({})'.format(make_user_mention(message.from_user))
     # Channels
     elif message.chat.type == 'channel':
         source = 'in channel {} @{}'.format(message.chat.title,
@@ -494,17 +496,17 @@ def makeMessageDescription(message):
         source_chat_link = ' @' + \
             str(message.chat.username) if message.chat.username else ''
         source = 'in chat "{}" {} by {}'.format(
-            source_chat_name, source_chat_link, makeUserMention(message.from_user))
+            source_chat_name, source_chat_link, make_user_mention(message.from_user))
 
     # forward of forward loses the first person
     if message.forward_from:
-        return '{}, forwarded from - {}'.format(source, makeUserMention(message.forward_from))
+        return '{}, forwarded from - {}'.format(source, make_user_mention(message.forward_from))
 
     return source
 
 
 def keywords_forward(client, message, keyword):
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
         keywords_chat_id, '#{} {}'.format(keyword, source))
     message.forward(keywords_chat_id)
@@ -512,7 +514,7 @@ def keywords_forward(client, message, keyword):
 
 
 def mentions_forward(client, message):
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
         mentions_chat_id, 'Mentioned {}'.format(source))
     message.forward(mentions_chat_id)
@@ -520,7 +522,7 @@ def mentions_forward(client, message):
 
 
 def following_forward(client, message):
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
         following_chat_id, 'Action detected {}'.format(source))
     message.forward(following_chat_id)
@@ -529,7 +531,7 @@ def following_forward(client, message):
 
 def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     print("1. (Ray Dalio) Go to pain & discomfort rather than avoid them.") # (?) (CDL) For testing purposes only!
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
         edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     message.forward(edited_and_deleted_chat_id)
@@ -537,7 +539,7 @@ def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions n
 
 
 def edited_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
         edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
     message.forward(edited_and_deleted_chat_id)
@@ -545,9 +547,9 @@ def edited_messages_forward(client, message): # (?) Or two SEPARATE functions ne
 
 
 def pinned_messages_forward(client, message):
-    source = makeMessageDescription(message)
+    source = make_message_description(message)
     client.send_message(
-        pinned_messages_chat_id, 'Pinned message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+        pinned_messages_chat_id, 'Pinned message {}:'.format(source))
     message.forward(pinned_messages_chat_id)
     client.mark_chat_unread(pinned_messages_chat_id)
 
@@ -559,7 +561,7 @@ def start_bot():
 
     for k in chat_dict:
         if not globals()[chat_dict[k]]:
-            new_chat = user.create_group(k)
+            new_chat = user.create_group(k) # (?) TypeError: CreateGroup.create_group() missing 1 required positional argument: 'users'
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
     # init message
