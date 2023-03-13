@@ -2,8 +2,8 @@ import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, \
-    edited_and_deleted_chat_id, pinned_messages_chat_id, keywords, save_keywords, excluded_chats, save_excluded_chats, \
-    add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
+    edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
+    save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
 from first_session import create_configini_file # (??)
 # from threading import Timer
 
@@ -17,7 +17,8 @@ chat_dict = {
     "Following": "following_chat_id",
     "Backup_all_messages": "backup_all_messages_chat_id",
     "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
-    "Pinned_messages": "pinned_messages_chat_id"
+    "Pinned_messages": "pinned_messages_chat_id",
+    "Find_Telegram_ID": "findid_chat_id"
 }
 
 
@@ -65,6 +66,12 @@ def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
 
 
 def backup_all_messages(client, from_chat_id):
+    from_chat_full_message_history = client.get_history_count(from_chat_id)
+    if from_chat_full_message_history == 0:
+        client.send_message(backup_all_messages_chat_id,
+                            f"Sorry, NO messages to backup: chat {from_chat_id} is empty.\n Try to use another from_chat_id"
+                            )
+        return # (?) Test in TG if this solution works fine
     backup_all_messages_chat_size = client.get_history_count(backup_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
@@ -82,7 +89,6 @@ def backup_all_messages(client, from_chat_id):
         #message.forward(backup_all_messages_chat_id, schedule_date=current_time + counter);
         #forwarded_message = message.forward(backup_all_messages_chat_id)
         #print(forwarded_message.id, forwarded_message.text)
-    from_chat_full_message_history = client.get_history_count(from_chat_id)
     forward_chat_full_message_history = client.get_history_count(backup_all_messages_chat_id)
     client.send_message(backup_all_messages_chat_id,f"""
                         RESULTS:
@@ -104,7 +110,11 @@ def backup_all_messages(client, from_chat_id):
 ############## bot commands handlers #################
 
 # Commands used in all bot chats (Keywords; Mentions; Following; Backup_all_messages) must be listed here:
-filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list', 'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
+filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
+                          'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
+
+list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,backup_all_messages_chat_id,
+                                    edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id]
 
 help_general_text = """
 ...
@@ -116,7 +126,7 @@ help_general_text = """
 @user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
 def command_messages_handler(client, message):
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id):
+    if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
         return
 
     chat_id = str(message.chat.id)
@@ -133,14 +143,15 @@ def command_messages_handler(client, message):
         edited_and_deleted_chat_input_handler(client, message)
     elif chat_id == pinned_messages_chat_id:
         pinned_messages_chat_input_handler(client, message)
-
+    elif chat_id == findid_chat_id:
+        findid_input_handler(client, message)
 
 
 # (?) Variant N2: ***Use "NOT" in "filters" somehow?!
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
-    if not message.chat or not str(message.chat.id) in (keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, edited_and_deleted_chat_id, pinned_messages_chat_id):
+    if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
         return
     # listen to user messages to catch forwards for following chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
@@ -220,6 +231,31 @@ def pinned_messages_chat_input_handler(client, message):
             )
         case _:
             message.reply_text('Sorry, this command is not valid')
+
+
+# "Find_Telegram_ID" chat handler
+def findid_input_handler(client, message):
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
+        case 'help':
+            message.reply_text(
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n\n'
+                '/findid @username | first_name last_name | chat_title - find Telegram ID of any chat (user / group / channel / bot / etc.)\n'
+                '(this command may work slowly)\n'
+            )
+        case 'findid':
+            if (not args):
+                return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
+            dialogs = find_chats(client, args)
+            message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
+                dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | first_name last_name | @username')
+        case _:
+            message.reply_text('Sorry, this command is not valid')
+
 
 # "Backup_all_messages" chat handler
 def backup_all_messages_handler(client, message):
