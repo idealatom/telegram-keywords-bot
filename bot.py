@@ -4,7 +4,7 @@ from pyrogram import Client, filters, idle
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
-from first_session import create_configini_file # (??)
+# from first_session import create_configini_file # (??)
 # from threading import Timer
 
 # start app
@@ -152,8 +152,9 @@ def command_messages_handler(client, message):
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
-        return
-    # listen to user messages to catch forwards for following chat
+        return # (?) Add some text reply outputed to user via TG? (Ex.: "NOT valid. Try again")
+    # (Variant 1) (How to follow a TG user) Forward manually any message of this user to your 'Following' chat
+    # listen to messages forwarded manually by me to catch them in "Following" chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
         if str(message.forward_from.id) in following_set:
             message.reply('Following already works for id {}'.format(
@@ -163,11 +164,20 @@ def not_command_handler(client, message):  # (?) Draft
             save_following(following_set)
             message.reply('id {} is added to Following list'.format(
                 message.forward_from.id))
-        return
+        return # (?) Add some text reply outputed to user via TG? (Ex.: "NOT valid. Try again")
 
-    message.reply_text(
+    message.reply_text( # (?) Is this line used in the correct place? As I've added code below
         'Sorry, this command is NOT valid. Enter /help to see all valid commands'
     )
+
+    # Variant N2 to find Telegram ID via forwarding a message from a target chat to “FindID” chat
+    # listen to messages forwarded manually by me to catch them in "Find_Telegram_ID" chat
+    if message.forward_from and str(message.chat.id) == findid_chat_id:
+        message.reply('The chat (user / group / channel / bot / etc.) you\'ve just forwarded a message from '
+                      'has Telegram ID: {} '.format(message.forward_from.id)
+                      )
+    else:
+        message.reply_text('Please, try another way to find Telegram ID. Enter /help')
 
 
 # "Mentions" chat handler
@@ -244,8 +254,10 @@ def findid_input_handler(client, message):
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
-                '/findid @username | first_name last_name | chat_title - find Telegram ID of any chat (user / group / channel / bot / etc.)\n'
-                '(this command may work slowly)\n'
+                'To find Telegram ID of any chat (user / group / channel / bot / etc.):\n'
+                '\tVariant 1: Enter manually in "Find_Telegram_ID" chat: /findid @username | first_name last_name | chat_title\n'
+                '\tVariant 2: Forward manually any message from target chat to "Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
+                '(Finding IDs may work slowly. Wait for Bot\'s reply)\n'
             )
         case 'findid':
             if (not args):
@@ -394,7 +406,7 @@ def keywords_handler(client, message):
 
 # "Following" chat handler
 def following_handler(client, message):
-    if str(message.chat.id) != following_chat_id:
+    if str(message.chat.id) != following_chat_id: # (?) Why using this line here?
         return
     # print(message)
     args = message.command
@@ -596,7 +608,7 @@ def start_bot():
     user_info = user.get_me()
 
     for k in chat_dict:
-        if not globals()[chat_dict[k]]:
+        if not globals()[chat_dict[k]]: # (?) How does this line work for the first session launch?
             new_chat = user.create_group(k) # (?) TypeError: CreateGroup.create_group() missing 1 required positional argument: 'users'
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
