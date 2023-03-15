@@ -13,10 +13,10 @@ Get them from 'App configuration' at https://my.telegram.org/apps
 - [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
-- When you see `bot started` phrase in Terminal - six new chats will appear in your Telegram account (‘Keywords’, ‘Following’, ‘Mentions’, 'Backup_all_messages', 'Edited_and_Deleted_messages_monitoring', 'Pinned_messages'')  
+- When you see `bot started` phrase in Terminal - seven new chats will appear in your Telegram account (‘Keywords’, ‘Following’, ‘Mentions’, 'Backup_all_messages', 'Edited_and_Deleted_messages_monitoring', 'Pinned_messages', 'Find_Telegram_ID'')  
 - Stop the running script: `Ctrl+C`
 - Run `docker run -d -v your_volume_name:/app --restart unless-stopped your_image_name` - launch bot in a container 
-- (optional) (in Telegram) Create a separate folder for these five new chats, then - archive them (put manually each chat to 'Archived Chats'). So these chats do NOT disturb you in 'All chats' section 
+- (optional) (in Telegram) Create a separate folder for these seven new chats, then - archive them (put manually each chat to 'Archived Chats'). So these chats do NOT disturb you in 'All chats' section 
 
 ### Features
 #### 1. Keywords
@@ -32,7 +32,7 @@ Forwards incoming messages containing specified keywords to 'Keywords' chat
 - `/delete_from_excluded_chats chat_id` - delete a chat from your excluded chats list
 - `/removeall` - remove all keywords from global listener (turned off currently)
 #### 2. Mentions
-Automatically forwards all messages from chats where your TG account was mentioned (tagged) to 'Mentions' chat   
+Automatically forwards all messages from chats where your TG account was mentioned (tagged) to 'Mentions' chat 
 Replies to your messages are also counted as mentions 
 #### 3. Following
 Forwards all messages of a specified TG user(s) from chats you participate together to 'Following' chat  
@@ -45,7 +45,7 @@ Forwards all messages of a specified TG user(s) from chats you participate toget
 - `/unfollow user_ID` - remove a user from your 'Following' list
 - `/findid @username | first_name last_name | chat_title` - find user_ID 
 #### 4. Backup_all_messages  
-All messages from a single selected chat are copied & forwarded to 'Backup_all_messages' chat 
+All messages from a single selected chat are copied & forwarded to 'Backup_all_messages' chat. 
 Single-time manual backup (NOT automatic, NOT real time monitoring)
 ##### In ‘Backup_all_messages’ chat:
 - `/help` - show Help options
@@ -57,19 +57,17 @@ Single-time manual backup (NOT automatic, NOT real time monitoring)
 - (?) Details about every edited & deleted message automatically come to your ‘Edited_and_Deleted_messages_monitoring’ chat
 - Details: user / chat, date, time, message content AFTER being updated (for 'Deleted' - NO content)
 - (next feature) Select manually specific user(s) / group(s) / channel(s) to monitor
-- (next big feature) Get ORIGINAL version of message - BEFORE being edited / deleted by smb 
-Adding a database is necessary to backup your correspondence in real time
+- (next big feature) Get ORIGINAL version of message - BEFORE being edited / deleted by smb. # Adding a database is necessary to backup your correspondence in real time
 #### 6. Pinned_messages
 Pinned messages from all chats are automatically forwarded to your 'Pinned_messages' chat   
 #### 7. Find_Telegram_ID
 To find Telegram ID of any chat (user / group / channel / bot / etc.):
 - Variant 1: Enter manually in 'Find_Telegram_ID' chat: `/findid @username | first_name last_name | chat_title`
-- Variant 2: Forward manually any message from target chat to 'Find_Telegram_ID' chat 
-Get automatic reply with target chat ID    
+- Variant 2: Forward manually any message from target chat to 'Find_Telegram_ID' chat. Get automatic reply with target chat ID    
 - (??) (NOT build yet!) 
 Variant 3: Enter `/findid` in target chat  
-Get automatic reply with target chat ID
-Reply message is deleted after (?)10 seconds
+Get automatic reply with target chat ID  
+Reply message is deleted after (?)10 seconds 
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather 

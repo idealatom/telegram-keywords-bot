@@ -15,7 +15,7 @@ chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
-    "Backup_all_messages": "backup_all_messages_chat_id",
+    "Backup_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_chat' OR 'Backup_from_chat'
     "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
     "Pinned_messages": "pinned_messages_chat_id",
     "Find_Telegram_ID": "findid_chat_id"
@@ -504,7 +504,7 @@ def pinned_messages_handler(client, message):
 
 
 # process Deleted messages
-@user.on_deleted_messages(~filters.me & filters.private)  # (?)
+@user.on_deleted_messages(~filters.me)  # (?)
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
     # print("2. (Watts)  At EVERY moment of life: you are already “there” = liberated = enlightened = in the optimal place / state / moment = where you tried & dreamed to get."!
     deleted_messages_forward(client, message)  # (?)
@@ -577,19 +577,23 @@ def following_forward(client, message):
     client.mark_chat_unread(following_chat_id)
 
 
-def deleted_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
-    print("1. (Ray Dalio) Go to pain & discomfort rather than avoid them.") # (?) (CDL) For testing purposes only!
-    source = make_message_description(message)
-    client.send_message(
-        edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
-    message.forward(edited_and_deleted_chat_id)
+def deleted_messages_forward(client, message):
+    # source = make_message_description(message)
+    # client.send_message(
+    #     edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))
+    # message.forward(edited_and_deleted_chat_id)
+    client.send_message(edited_and_deleted_chat_id, "Deleted message detected:\n"
+                                                    f"message_id: {message[0]['message_id']}\n"
+                                                    "(?) In chat ...\n"  # (?) Try to use message_id 
+                                                    "(?) Date & time of deletion: ... " # (?) Try tu use message_id OR just use the time of the notification
+                        )
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
 
-def edited_messages_forward(client, message): # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+def edited_messages_forward(client, message):
     source = make_message_description(message)
     client.send_message(
-        edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))  # (?) Or two SEPARATE functions necessary for “Edited” & for “Deleted”?
+        edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))
     message.forward(edited_and_deleted_chat_id)
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
@@ -609,7 +613,7 @@ def start_bot():
 
     for k in chat_dict:
         if not globals()[chat_dict[k]]: # (?) How does this line work for the first session launch?
-            new_chat = user.create_group(k) # (?) TypeError: CreateGroup.create_group() missing 1 required positional argument: 'users'
+            new_chat = user.create_group(k, user_info.id)
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
     # init message
