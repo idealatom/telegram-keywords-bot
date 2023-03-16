@@ -4,7 +4,6 @@ from pyrogram import Client, filters, idle
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
-# from first_session import create_configini_file # (??)
 # from threading import Timer
 
 # start app
@@ -90,26 +89,18 @@ def backup_all_messages(client, from_chat_id):
         #forwarded_message = message.forward(backup_all_messages_chat_id)
         #print(forwarded_message.id, forwarded_message.text)
     forward_chat_full_message_history = client.get_history_count(backup_all_messages_chat_id)
-    client.send_message(backup_all_messages_chat_id,f"""
-                        RESULTS:
-                        Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED
-                        Size of your chat to forward from: {from_chat_full_message_history} messages
-                        Number of messages forwarded by bot: {forward_chat_full_message_history - backup_all_messages_chat_size}
-                        Number of service messages skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_service_messages}
-                        /help - show Help options"""
+    client.send_message(backup_all_messages_chat_id,
+                        "RESULTS:\n"
+                        f"Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED\n"
+                        f"Size of your chat to forward from: {from_chat_full_message_history} messages\n"
+                        f"Number of messages forwarded by bot: {forward_chat_full_message_history - backup_all_messages_chat_size}\n"
+                        f"Number of service messages skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_service_messages}\n"
+                        "/help - show Help options"
                         )
-
-    # (?)  (DELETE if the solution above works well)
-    # client.send_message(backup_all_messages_chat_id, "RESULTS: ")
-    # client.send_message(backup_all_messages_chat_id, f"Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED")
-    # client.send_message(backup_all_messages_chat_id, f"Size of your chat to forward from: {from_chat_full_message_history} messages")
-    # client.send_message(backup_all_messages_chat_id, f"Number of messages forwarded by bot: {forward_chat_full_message_history - backup_all_messages_chat_size}")
-    # client.send_message(backup_all_messages_chat_id, f"Number of service messages skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_service_messages}")
-    # client.send_message(backup_all_messages_chat_id, "/help - show Help options")
 
 ############## bot commands handlers #################
 
-# Commands used in all bot chats (Keywords; Mentions; Following; Backup_all_messages) must be listed here:
+# Commands used in all bot chats in Telegram ("Keywords"; "Mentions"; "Following"; etc.) must be listed here:
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
                           'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
 
@@ -147,7 +138,7 @@ def command_messages_handler(client, message):
         findid_input_handler(client, message)
 
 
-# (?) Variant N2: ***Use "NOT" in "filters" somehow?!
+# (?) Variant N2:
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
@@ -198,11 +189,8 @@ def mentions_handler(client, message):
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
-        # case 's':  # CDL
-        #     message.reply_text('bEcome an IMperfectionist') # CDL
         case _:
             message.reply_text('Sorry, this command is not valid')
-    # return message.reply_text("args & comm aRe reTurned") # CDL (for testing purposes)
 
 
 # "Edited_and_Deleted_messages_monitoring" chat handler
@@ -333,7 +321,6 @@ def keywords_handler(client, message):
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
                 '/removeall - remove all keywords (turned off currently)\n'
             )
-                # '/add keyword1 keyword2\n/show\n/remove keyword1 keyword2\n/removeall\n/findid chat_title|name|id|@username\n/exclude_chat chat_title|id|@username\n/excluded_chats_list\n/delete_from_excluded_chats chat_id\n/backup_all_messages from_chat_id\n/include name|id|@username keywords')
         case 'add':
             for keyword in args:
                 keywords.add(keyword.strip().replace(',', ''))
@@ -408,7 +395,6 @@ def keywords_handler(client, message):
 def following_handler(client, message):
     if str(message.chat.id) != following_chat_id: # (?) Why using this line here?
         return
-    # print(message)
     args = message.command
     comm = args.pop(0)
     match comm:
@@ -478,7 +464,6 @@ def following_handler(client, message):
 # skip message edits for now (TODO: handle edited messages) (?)
 @user.on_message(~filters.me & ~filters.edited)  # (?)
 def not_my_messages_handler(client, message):
-    # print(message) # CDL
     # process keywords
     if message.text and not str(message.chat.id) in excluded_chats:
         # maybe search -> findall and mark all keywords?
@@ -486,12 +471,10 @@ def not_my_messages_handler(client, message):
                             message.text, re.IGNORECASE)
         if len(keywords) and keyword:
             keywords_forward(client, message, keyword.group())
-
     # process mentions
     # message can be a reply with attachment with no text
     if message.mentioned:
         mentions_forward(client, message)
-
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
@@ -507,14 +490,14 @@ def pinned_messages_handler(client, message):
 @user.on_deleted_messages(~filters.me)  # (?)
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
     # print("2. (Watts)  At EVERY moment of life: you are already “there” = liberated = enlightened = in the optimal place / state / moment = where you tried & dreamed to get."!
-    deleted_messages_forward(client, message)  # (?)
+    deleted_messages_forward(client, message)
 
 
 # process Edited messages
 # Variant N2   *** https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_message
 @user.on_message(~filters.me & filters.edited & filters.private) # (?)
 def edited_messages_handler(client, message):
-    edited_messages_forward(client, message)  # (?)
+    edited_messages_forward(client, message)
 # process Edited messages
 # Variant N1.  *** on_edited_message decorator did NOT work for Pyrogram 1.4  https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_edited_message
 # @user.on_edited_message(~filters.me)  # (?)
@@ -584,8 +567,9 @@ def deleted_messages_forward(client, message):
     # message.forward(edited_and_deleted_chat_id)
     client.send_message(edited_and_deleted_chat_id, "Deleted message detected:\n"
                                                     f"message_id: {message[0]['message_id']}\n"
-                                                    "(?) In chat ...\n"  # (?) Try to use message_id 
-                                                    "(?) Date & time of deletion: ... " # (?) Try tu use message_id OR just use the time of the notification
+                                                    "(?) Date & time of deletion: ... \n" # (?) Try tu use message_id OR just use the time of the notification
+                                                    "(later feature) Chat ID where deletion happened: ...\n"  # (?) Try to use message_id 
+                                                    "(later feature) Original message BEFORE being deleted: ..."
                         )
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
