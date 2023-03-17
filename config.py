@@ -35,12 +35,12 @@ for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
 
 
-dummy_bot_name = config.get(
-    'bot_params', 'dummy_bot_name', fallback='MyLittleDummyBot')
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
-forward_all_messages_chat_id = config.get('bot_params', 'forward_all_messages_chat_id', fallback='')
+backup_all_messages_chat_id = config.get('bot_params', 'backup_all_messages_chat_id', fallback='')
+edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_id', fallback='')
+
 
 def save_keywords(keywords):
     keywords = set(filter(None, keywords))
