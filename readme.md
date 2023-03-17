@@ -13,10 +13,19 @@ Get them from 'App configuration' at https://my.telegram.org/apps
 - [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
-- When you see `bot started` phrase in Terminal - seven new chats will appear in your Telegram account (‘Keywords’, ‘Following’, ‘Mentions’, 'Backup_all_messages', 'Edited_and_Deleted_messages_monitoring', 'Pinned_messages', 'Find_Telegram_ID'')  
+- When you see `bot started` phrase in Terminal - seven new chats appear in your Telegram account: 
+  - ‘Keywords’
+  - ‘Mentions’ 
+  - ‘Following’
+  - 'Backup_all_messages' 
+  - 'Edited_and_Deleted_messages_monitoring' 
+  - 'Pinned_messages' 
+  - 'Find_Telegram_ID'  
 - Stop the running script: `Ctrl+C`
 - Run `docker run -d -v your_volume_name:/app --restart unless-stopped your_image_name` - launch bot in a container 
-- (optional) (in Telegram) Create a separate folder for these seven new chats, then - archive them (put manually each chat to 'Archived Chats'). So these chats do NOT disturb you in 'All chats' section 
+- (optional) (in Telegram) Create a new Folder & add to it manually these seven new chats 
+Then - archive manually each of these seven chats from 'All chats' to 'Archived Chats' 
+So these seven chats are kept in a separate Folder & do NOT disturb you 
 
 ### Features
 #### 1. Keywords

@@ -487,7 +487,7 @@ def pinned_messages_handler(client, message):
 
 
 # process Deleted messages
-@user.on_deleted_messages(~filters.me)  # (?)
+@user.on_deleted_messages(~filters.me)  # (?) "NOT-me" filter does NOT work correctly now
 def deleted_messages_handler(client, message): # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
     # print("2. (Watts)  At EVERY moment of life: you are already “there” = liberated = enlightened = in the optimal place / state / moment = where you tried & dreamed to get."!
     deleted_messages_forward(client, message)
