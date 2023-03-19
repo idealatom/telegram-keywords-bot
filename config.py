@@ -42,6 +42,7 @@ backup_all_messages_chat_id = config.get('bot_params', 'backup_all_messages_chat
 edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_id', fallback='')
 pinned_messages_chat_id = config.get('bot_params', 'pinned_messages_chat_id', fallback='')
 findid_chat_id = config.get('bot_params', 'findid_chat_id', fallback='')
+dump_replies_chat_id = config.get('bot_params', 'dump_replies_chat_id', fallback='')
 
 
 def save_keywords(keywords):

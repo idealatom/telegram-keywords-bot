@@ -1,7 +1,7 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
 # from threading import Timer
@@ -14,10 +14,11 @@ chat_dict = {
     "Keywords": "keywords_chat_id",
     "Mentions": "mentions_chat_id",
     "Following": "following_chat_id",
-    "Backup_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_chat' OR 'Backup_from_chat'
+    "Backup_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
     "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
     "Pinned_messages": "pinned_messages_chat_id",
-    "Find_Telegram_ID": "findid_chat_id"
+    "Find_Telegram_ID": "findid_chat_id",
+    "Dump_replies": "dump_replies_chat_id"
 }
 
 
@@ -64,6 +65,12 @@ def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
     pass
 
 
+def dump_replies(client, from_chat_id):
+    pass
+    # (?) PROCEED here!
+
+
+
 def backup_all_messages(client, from_chat_id):
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     if from_chat_full_message_history == 0:
@@ -102,10 +109,10 @@ def backup_all_messages(client, from_chat_id):
 
 # Commands used in all bot chats in Telegram ("Keywords"; "Mentions"; "Following"; etc.) must be listed here:
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
-                          'delete_from_excluded_chats', 'backup_all_messages', 'include', 'follow', 'unfollow']
+                          'delete_from_excluded_chats', 'backup_all_messages', 'dump_replies', 'include', 'follow', 'unfollow']
 
 list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,backup_all_messages_chat_id,
-                                    edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id]
+                                    edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
 
 help_general_text = """
 ...
@@ -136,6 +143,8 @@ def command_messages_handler(client, message):
         pinned_messages_chat_input_handler(client, message)
     elif chat_id == findid_chat_id:
         findid_input_handler(client, message)
+    elif chat_id == dump_replies_chat_id:
+        dump_replies_chat_input_handler(client, message)
 
 
 # (?) Variant N2:
@@ -299,6 +308,52 @@ def backup_all_messages_handler(client, message):
                 dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | first_name last_name | @username')
         case _:
             message.reply_text('Sorry, this command is not valid')
+
+
+# "Dump_replies" chat handler
+def dump_replies_chat_input_handler(client, message):
+    args = message.command
+    comm = args.pop(0)
+    match comm:
+        case 'help_general':
+            message.reply_text(help_general_text)
+        case 'help':
+            message.reply_text(
+                '/help - show Help options for this chat\n'
+                '/help_general - show Help options for all chats\n'
+                '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
+                '/dump_replies from_chat_id -\n'
+                'Replies to your messages from a single selected chat are copied & forwarded to "Dump_replies" chat\n'
+                'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
+            )
+        case 'dump_replies': # (?)
+            if len(args) == 0:
+                message.reply_text('Sorry, from_chat_id is not found\n'
+                                   'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
+                                   'Please, use this format: /dump_replies from_chat_id\n'
+                                   'Use /findid to get from_chat_id')
+            if len(args) > 1:
+                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_replies')
+            if len(args) == 1:
+                from_chat_id = args[0]
+                try:
+                    from_chat_id = int(from_chat_id)
+                except ValueError:
+                    message.reply_text('Sorry, from_chat_id is not found\n'
+                                       'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
+                                       'Please, use this format: /dump_replies from_chat_id\n'
+                                       'Use /findid to get from_chat_id')
+                dump_replies(user, args[0])
+        case 'findid': # (?)
+            if (not args):
+                return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
+            dialogs = find_chats(client, args)
+            message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
+                dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | first_name last_name | @username')
+        case _:
+            message.reply_text('Sorry, this command is not valid')
+
+
 
 
 # "Keywords" chat handler
@@ -582,11 +637,13 @@ def edited_messages_forward(client, message):
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
 
-def pinned_messages_forward(client, message):
-    source = make_message_description(message)
-    client.send_message(
-        pinned_messages_chat_id, 'Pinned message {}:'.format(source))
-    message.forward(pinned_messages_chat_id)
+def pinned_messages_forward(client, message): # (?) “Pinned” forwarding is NOT working at ALL.  ***Other commands in “Pinned” chat work fine.  ***Function pinned_messages_forward is NOT called,
+    print("(Doris Lessing) Whatever you're meant to do, do it now. The conditions are always impossible.") # (?) (CDL) For testing only
+    client.send_message(pinned_messages_chat_id, f"PiNNed message detected:\n {message}")
+    # source = make_message_description(message)
+    # client.send_message(
+    #     pinned_messages_chat_id, 'Pinned message {}:'.format(source))
+    # message.forward(pinned_messages_chat_id)
     client.mark_chat_unread(pinned_messages_chat_id)
 
 

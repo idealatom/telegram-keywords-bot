@@ -54,7 +54,7 @@ Forwards all messages of a specified TG user(s) from chats you participate toget
 - `/unfollow user_ID` - remove a user from your 'Following' list
 - `/findid @username | first_name last_name | chat_title` - find user_ID 
 #### 4. Backup_all_messages  
-All messages from a single selected chat are copied & forwarded to 'Backup_all_messages' chat. 
+All messages from a single selected chat are copied & forwarded to 'Backup_all_messages' chat 
 Single-time manual backup (NOT automatic, NOT real time monitoring)
 ##### In ‘Backup_all_messages’ chat:
 - `/help` - show Help options
