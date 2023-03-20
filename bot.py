@@ -61,13 +61,38 @@ def find_users(client, args):
     return result
 
 
-def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
-    pass
+# def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
+#     pass
 
 
 def dump_replies(client, from_chat_id):
-    pass
-    # (?) PROCEED here!
+    # Add some verification that "from_chat_id" is a valid ID by using "find_chats" function?
+    # (?) Or better to move this verification block of code to Handler?!
+    if not find_chats(client, from_chat_id):
+        client.send_message(
+            dump_replies_chat_id,
+            'Sorry, from_chat_id is not found\n'
+            'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
+            'Please, use this format: /dump_replies from_chat_id\n'
+            'Use /findid to get from_chat_id')
+        return # (?) Did I use "return" in a correct way & place?
+    if client.get_history_count(from_chat_id) == 0:
+        client.send_message(backup_all_messages_chat_id,
+                            f"Sorry, chat {from_chat_id} is empty.\n Try to use another from_chat_id"
+        return # (?) Is this line necessary? ***Test in TG if this solution works fine
+
+    # (?) About the code block below: is it the optimal solution?!
+    for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        # 1. Get IDs of all messages of the target user via user ID
+        # if message.from_user(..??..) == (?)target_user_ID:
+        #     print(message.id)
+        # (?) ... PROCEED here!
+
+        # 2. Get IDs of all replies to these messages
+
+
+
+
 
 
 
@@ -77,7 +102,7 @@ def backup_all_messages(client, from_chat_id):
         client.send_message(backup_all_messages_chat_id,
                             f"Sorry, NO messages to backup: chat {from_chat_id} is empty.\n Try to use another from_chat_id"
                             )
-        return # (?) Test in TG if this solution works fine
+        return # (?) Is this line necessary? ***Test in TG if this solution works fine
     backup_all_messages_chat_size = client.get_history_count(backup_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
@@ -328,11 +353,13 @@ def dump_replies_chat_input_handler(client, message):
             )
         case 'dump_replies': # (?)
             if len(args) == 0:
+                # (?) Is "return" necessary to add here?
                 message.reply_text('Sorry, from_chat_id is not found\n'
                                    'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
                                    'Please, use this format: /dump_replies from_chat_id\n'
                                    'Use /findid to get from_chat_id')
             if len(args) > 1:
+                # (?) Is "return" necessary to add here?
                 message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_replies')
             if len(args) == 1:
                 from_chat_id = args[0]
@@ -344,6 +371,11 @@ def dump_replies_chat_input_handler(client, message):
                                        'Please, use this format: /dump_replies from_chat_id\n'
                                        'Use /findid to get from_chat_id')
                 dump_replies(user, args[0])
+
+        # (AFTER Korolev confirms this option)
+        # (?) Add “target user ID” input as a separate command?
+        # case 'target_user':
+
         case 'findid': # (?)
             if (not args):
                 return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
