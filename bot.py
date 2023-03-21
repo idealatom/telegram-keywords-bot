@@ -65,27 +65,31 @@ def find_users(client, args):
 #     pass
 
 
-def dump_replies(client, from_chat_id):
+def dump_replies(client, from_chat_id, target_user_id):
     # Add some verification that "from_chat_id" is a valid ID by using "find_chats" function?
     # (?) Or better to move this verification block of code to Handler?!
-    if not find_chats(client, from_chat_id):
-        client.send_message(
-            dump_replies_chat_id,
-            'Sorry, from_chat_id is not found\n'
-            'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
-            'Please, use this format: /dump_replies from_chat_id\n'
-            'Use /findid to get from_chat_id')
-        return # (?) Did I use "return" in a correct way & place?
+
+    # if not find_chats(client, from_chat_id):
+    #     client.send_message(dump_replies_chat_id,
+    #                         'Sorry, from_chat_id is not found\n'
+    #                         'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
+    #                         'Please, use this format: /dump_replies from_chat_id\n'
+    #                         'Use /findid to get from_chat_id'
+    #                         )
+    #     return # (?) Did I use "return" in a correct way & place?
+
     if client.get_history_count(from_chat_id) == 0:
-        client.send_message(backup_all_messages_chat_id,
-                            f"Sorry, chat {from_chat_id} is empty.\n Try to use another from_chat_id"
+        client.send_message(backup_all_messages_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
 
     # (?) About the code block below: is it the optimal solution?!
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        print(f"'message.from_user.id' param == {message.from_user.id}")
+        # print(f"'message_id' param == {message.id}\n 'message' content == {message}")
+
         # 1. Get IDs of all messages of the target user via user ID
-        # if message.from_user(..??..) == (?)target_user_ID:
-        #     print(message.id)
+        # if message.from_user == target_user_id: # (?) Verify if the message belongs to the target user
+        #     print(f"'message_id' param == {message.id}\n 'message' content == {message}")
         # (?) ... PROCEED here!
 
         # 2. Get IDs of all replies to these messages
@@ -352,28 +356,36 @@ def dump_replies_chat_input_handler(client, message):
                 'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
             )
         case 'dump_replies': # (?)
-            if len(args) == 0:
+            if len(args) != 2:
                 # (?) Is "return" necessary to add here?
-                message.reply_text('Sorry, from_chat_id is not found\n'
-                                   'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
-                                   'Please, use this format: /dump_replies from_chat_id\n'
-                                   'Use /findid to get from_chat_id')
-            if len(args) > 1:
-                # (?) Is "return" necessary to add here?
-                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_replies')
-            if len(args) == 1:
+                message.reply_text('Wrong input\n' 
+                                   'Please, enter valid data in this format:\n' 
+                                   '/dump_replies from_chat_id target_user_id\n\n'
+                                   'Use /findid command to find valid from_chat_id and target_user_id'
+                                   )
+            if len(args) == 2:
                 from_chat_id = args[0]
+                target_user_id = args[1]
                 try:
                     from_chat_id = int(from_chat_id)
                 except ValueError:
                     message.reply_text('Sorry, from_chat_id is not found\n'
-                                       'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
-                                       'Please, use this format: /dump_replies from_chat_id\n'
-                                       'Use /findid to get from_chat_id')
-                dump_replies(user, args[0])
+                                       'Please, enter valid data in this format:\n'
+                                       '/dump_replies from_chat_id target_user_id\n\n'
+                                       'Use /findid command to find valid from_chat_id and target_user_id'
+                                       )
+                try:
+                    target_user_id = int(target_user_id)
+                except ValueError:
+                    message.reply_text('Sorry, target_user_id is not found\n'
+                                       'Please, enter valid data in this format:\n'
+                                       '/dump_replies from_chat_id target_user_id\n\n'
+                                       'Use /findid command to find valid from_chat_id and target_user_id'
+                                       )
+                dump_replies(user, from_chat_id, target_user_id) # (?) Is it correct to use two args here?  (?)Try "client" instead of "user" ?
 
         # (AFTER Korolev confirms this option)
-        # (?) Add “target user ID” input as a separate command?
+        # (?) Add “target user ID” input as a separate / interactive command?
         # case 'target_user':
 
         case 'findid': # (?)
@@ -568,7 +580,7 @@ def not_my_messages_handler(client, message):
 
 
 # process Pinned messages
-@user.on_message(filters.pinned_message)
+@user.on_message(filters.pinned_message, 1)  # "1" - group identifier parameter for the decorator
 def pinned_messages_handler(client, message):
     pinned_messages_forward(client, message)
 
