@@ -84,15 +84,37 @@ def dump_replies(client, from_chat_id, target_user_id):
 
     # (?) About the code block below: is it the optimal solution?!
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
-        print(f"'message.from_user.id' param == {message.from_user.id}")
-        # print(f"'message_id' param == {message.id}\n 'message' content == {message}")
 
-        # 1. Get IDs of all messages of the target user via user ID
-        # if message.from_user == target_user_id: # (?) Verify if the message belongs to the target user
-        #     print(f"'message_id' param == {message.id}\n 'message' content == {message}")
+        # + Get ALL messages of the target user (via user ID) & forward them:
+        # if message.from_user.id == target_user_id:
+        #     message.forward(dump_replies_chat_id)
+            # (CDL)  print(message.from_user.username, message.from_user.id, message.text)  # (CDL) This line works fine
+
+        # + Get every original message (from all users in the chat) that HAS some replies:
+        # if message.reply_to_message:
+        #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
+
+        # + Get every original message of the TARGET user that HAS some replies:
+        # if message.from_user.id == target_user_id and message.reply_to_message:
+        #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
+
+        # ! Get all REPLIES to selected message(s) from a specific user in a selected chat:
+        if message.from_user.id == target_user_id and message.reply_to_message:
+            print("1.'message.reply' == ", message.reply)  # (?)
+            # print("2.'message.reply_to_message' == ", message.reply_to_message)
+            # print("3.'message.reply_text()' == ", message.reply_text("accEpt"))
+
+
+        # Get all replies to a (single) selected message from a specific user in a selected chat
         # (?) ... PROCEED here!
 
-        # 2. Get IDs of all replies to these messages
+
+        # print(f"'message.from_user.id' param == {message.from_user.id}")
+        # print(f"'message_id' param == {message.id}\n 'message' section == {message}")
+
+        # if message.from_user == target_user_id: # (?) Verify if the message belongs to the target user
+        #     print(f"'message_id' param == {message.id}\n 'message' content == {message}")
+
 
 
 
@@ -382,7 +404,8 @@ def dump_replies_chat_input_handler(client, message):
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
-                dump_replies(user, from_chat_id, target_user_id) # (?) Is it correct to use two args here?  (?)Try "client" instead of "user" ?
+                # (?) (CDL)  Is it correct to use two args in the line below?  (?)Try "client" instead of "user" ?
+                dump_replies(user, from_chat_id, target_user_id) # (CDL) This solution works fine now
 
         # (AFTER Korolev confirms this option)
         # (?) Add “target user ID” input as a separate / interactive command?
