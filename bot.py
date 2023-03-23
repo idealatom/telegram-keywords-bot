@@ -90,24 +90,35 @@ def dump_replies(client, from_chat_id, target_user_id):
         #     message.forward(dump_replies_chat_id)
             # (CDL)  print(message.from_user.username, message.from_user.id, message.text)  # (CDL) This line works fine
 
-        # + Get every original message (from all users in the chat) that HAS some replies:
+        # + Get the original message if the selected (specified, target) message is a reply:
         # if message.reply_to_message:
         #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
 
-        # + Get every original message of the TARGET user that HAS some replies:
+        # + Get every original message from smb that target user made a reply to:
         # if message.from_user.id == target_user_id and message.reply_to_message:
         #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
 
-        # ! Get all REPLIES to selected message(s) from a specific user in a selected chat:
-        if message.from_user.id == target_user_id and message.reply_to_message:
-            print("1.'message.reply' == ", message.reply)  # (?)
-            # print("2.'message.reply_to_message' == ", message.reply_to_message)
-            # print("3.'message.reply_text()' == ", message.reply_text("accEpt"))
 
+        # !! (to-do) PROCEED here!
+        # if message is a reply   &    message AUTHOR_ID of its' ORIGINAL message == target user ID
+        # Get every original message of the TARGET user that HAS some replies
+#
+        # if message.from_user.id == target_user_id:  #  ??
+        #     print("\n\n1.'message.text' == \n", message.text)
+        #     print("\n\n2.'message.reply_to_message' == \n", message.reply_to_message)
+        #     print("\n\n3.'message.reply_to_message.text' == \n", message.reply_to_message.text)
+        #
 
         # Get all replies to a (single) selected message from a specific user in a selected chat
         # (?) ... PROCEED here!
 
+        # + Parts of this code block are useful & can be used in my final solution:
+        # if message.from_user.id == target_user_id and message.reply_to_message:
+            # print("'message' parameter == \n", message)
+            # print("1.'message.text' == \n", message.text) # Text of replies made by target user to smb's messages
+            # print("\n\n2.'message.reply_to_message' == \n", message.reply_to_message) # All details about the original message(s) from other user(s) that had replies made by target user
+            # print("\n\n3.'message.reply_to_message.text' == \n", message.reply_to_message.text) # Text of original message(s) from other user(s) that had replies made by target user
+            # print("4.'message.reply_text()' == ", message.reply_text("accEpt"))
 
         # print(f"'message.from_user.id' param == {message.from_user.id}")
         # print(f"'message_id' param == {message.id}\n 'message' section == {message}")
@@ -374,8 +385,9 @@ def dump_replies_chat_input_handler(client, message):
                 '/help_general - show Help options for all chats\n'
                 '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
                 '/dump_replies from_chat_id -\n'
+                'Forward all messages (and replies to them) of a target user from a specific chat to "Dump_replies" chat'
                 'Replies to your messages from a single selected chat are copied & forwarded to "Dump_replies" chat\n'
-                'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
+                'Single-time backup launched manually (NOT real time monitoring)\n'
             )
         case 'dump_replies': # (?)
             if len(args) != 2:

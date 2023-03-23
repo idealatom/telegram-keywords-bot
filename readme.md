@@ -48,18 +48,18 @@ Forwards all messages of a specified TG user(s) from chats you participate toget
 ##### In ‘Following’ chat:
 - `/help` - show Help options
 - `/show` - check IDs of all Telegram users in your current 'Following' list
+- `/findid @username | first_name last_name | chat_title` - find user_ID
 - To start following a Telegram user:
   - Variant 1: forward manually any message of this user to your 'Following' chat
   - Variant 2: `/follow user_ID`   # Use `/findid` command manually to get user_ID
 - `/unfollow user_ID` - remove a user from your 'Following' list
-- `/findid @username | first_name last_name | chat_title` - find user_ID 
 #### 4. Backup_all_messages  
 All messages from a single selected chat are copied & forwarded to 'Backup_all_messages' chat 
-Single-time manual backup (NOT automatic, NOT real time monitoring)
+Single-time backup launched manually (NOT real time monitoring)
 ##### In ‘Backup_all_messages’ chat:
 - `/help` - show Help options
+- `/findid chat_title | first_name last_name | @username` - find `from_chat_id`
 - `/backup_all_messages from_chat_id` - forward all messages from a single selected chat to 'Backup_all_messages' chat 
-- `/findid chat_title | first_name last_name | @username` - find `from_chat_id` 
 #### (?) 5. Edited_and_Deleted_messages_monitoring
 - (?) (CDL) # UPDATE these instructions AFTER fixing bugs with 'Deleted' feature
 - Your DMs (direct messages) are monitored 
@@ -77,6 +77,13 @@ To find Telegram ID of any chat (user / group / channel / bot / etc.):
 Variant 3: Enter `/findid` in target chat  
 Get automatic reply with target chat ID  
 Reply message is deleted after (?)10 seconds 
+#### 8. Dump_replies
+All messages of a target user & all replies to these messages are selected from a specific chat & forwarded to 'Dump_replies' chat
+Single-time backup launched manually (NOT real time monitoring)
+##### In ‘Dump_replies’ chat:
+- `/help` - show Help options
+- `/findid chat_title | first_name last_name | @username` - find `from_chat_id` and `target_user_id`
+- `/dump_replies from_chat_id target_user_id` - forward all messages (and replies to them) of a target user from a specific chat to 'Dump_replies' chat  
 
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather 
