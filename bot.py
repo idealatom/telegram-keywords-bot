@@ -11,14 +11,14 @@ user = Client('user')
 
 # init chats
 chat_dict = {
-    "Keywords": "keywords_chat_id",
-    "Mentions": "mentions_chat_id",
-    "Following": "following_chat_id",
-    "Backup_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
-    "Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
-    "Pinned_messages": "pinned_messages_chat_id",
-    "Find_Telegram_ID": "findid_chat_id",
-    "Dump_replies": "dump_replies_chat_id"
+    "1.Mentions": "mentions_chat_id",
+    "2.Pinned_messages": "pinned_messages_chat_id",
+    "3.Find_Telegram_ID": "findid_chat_id",
+    "4.Keywords": "keywords_chat_id",
+    "5.Following": "following_chat_id",
+    "6.Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
+    "7.Dump_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
+    "8.Dump_replies": "dump_replies_chat_id"
 }
 
 
@@ -133,7 +133,7 @@ def dump_replies(client, from_chat_id, target_user_id):
 
 
 
-def backup_all_messages(client, from_chat_id):
+def dump_all_messages(client, from_chat_id):
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     if from_chat_full_message_history == 0:
         client.send_message(backup_all_messages_chat_id,
@@ -169,9 +169,9 @@ def backup_all_messages(client, from_chat_id):
 
 ############## bot commands handlers #################
 
-# Commands used in all bot chats in Telegram ("Keywords"; "Mentions"; "Following"; etc.) must be listed here:
+# Commands used in all bot chats in Telegram ("4.Keywords"; "1.Mentions"; "5.Following"; etc.) must be listed here:
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
-                          'delete_from_excluded_chats', 'backup_all_messages', 'dump_replies', 'include', 'follow', 'unfollow']
+                          'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow']
 
 list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,backup_all_messages_chat_id,
                                     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
@@ -215,8 +215,8 @@ def not_command_handler(client, message):  # (?) Draft
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
         return # (?) Add some text reply outputed to user via TG? (Ex.: "NOT valid. Try again")
-    # (Variant 1) (How to follow a TG user) Forward manually any message of this user to your 'Following' chat
-    # listen to messages forwarded manually by me to catch them in "Following" chat
+    # (Variant 1) (How to follow a TG user) Forward manually any message of this user to your '5.Following' chat
+    # listen to messages forwarded manually by me to catch them in "5.Following" chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
         if str(message.forward_from.id) in following_set:
             message.reply('Following already works for id {}'.format(
@@ -233,7 +233,7 @@ def not_command_handler(client, message):  # (?) Draft
     )
 
     # Variant N2 to find Telegram ID via forwarding a message from a target chat to “FindID” chat
-    # listen to messages forwarded manually by me to catch them in "Find_Telegram_ID" chat
+    # listen to messages forwarded manually by me to catch them in "3.Find_Telegram_ID" chat
     if message.forward_from and str(message.chat.id) == findid_chat_id:
         message.reply('The chat (user / group / channel / bot / etc.) you\'ve just forwarded a message from '
                       'has Telegram ID: {} '.format(message.forward_from.id)
@@ -242,7 +242,7 @@ def not_command_handler(client, message):  # (?) Draft
         message.reply_text('Please, try another way to find Telegram ID. Enter /help')
 
 
-# "Mentions" chat handler
+# "1.Mentions" chat handler
 def mentions_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -255,16 +255,16 @@ def mentions_handler(client, message):
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
-                '"Mentions" chat works automatically\n'
-                'No need to enter any input in "Mentions" chat\n\n'
-                'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "Mentions" chat\n'
+                '"1.Mentions" chat works automatically\n'
+                'No need to enter any input in "1.Mentions" chat\n\n'
+                'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
         case _:
             message.reply_text('Sorry, this command is not valid')
 
 
-# "Edited_and_Deleted_messages_monitoring" chat handler
+# "6.Edited_and_Deleted_messages_monitoring" chat handler
 def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARATE handlers necessary for “Edited” & for “Deleted”?
     args = message.command
     comm = args.pop(0)
@@ -275,7 +275,7 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
-                '"Edited_and_Deleted_messages_monitoring" chat works automatically\n'
+                '"6.Edited_and_Deleted_messages_monitoring" chat works automatically\n'
                 'No need to enter any input in this chat\n\n'
                 '..??..  \n'
                 '(?) ADD here the text description of this feature from the final version of ReadMe ..??..\n'
@@ -284,7 +284,7 @@ def edited_and_deleted_chat_input_handler(client, message): # (?) Or two SEPARAT
             message.reply_text('Sorry, this command is not valid')
 
 
-# "Pinned_messages" chat handler
+# "2.Pinned_messages" chat handler
 def pinned_messages_chat_input_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -295,14 +295,14 @@ def pinned_messages_chat_input_handler(client, message):
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
-                'Pinned messages from all chats are automatically forwarded to your "Pinned_messages" chat\n'   
+                'Pinned messages from all chats are automatically forwarded to your "2.Pinned_messages" chat\n'   
                 'No need to enter any input in this chat'
             )
         case _:
             message.reply_text('Sorry, this command is not valid')
 
 
-# "Find_Telegram_ID" chat handler
+# "3.Find_Telegram_ID" chat handler
 def findid_input_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -314,8 +314,8 @@ def findid_input_handler(client, message):
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
                 'To find Telegram ID of any chat (user / group / channel / bot / etc.):\n'
-                '\tVariant 1: Enter manually in "Find_Telegram_ID" chat: /findid @username | first_name last_name | chat_title\n'
-                '\tVariant 2: Forward manually any message from target chat to "Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
+                '\tVariant 1: Enter manually in "3.Find_Telegram_ID" chat: /findid @username | first_name last_name | chat_title\n'
+                '\tVariant 2: Forward manually any message from target chat to "3.Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
                 '(Finding IDs may work slowly. Wait for Bot\'s reply)\n'
             )
         case 'findid':
@@ -328,7 +328,7 @@ def findid_input_handler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 
-# "Backup_all_messages" chat handler
+# "7.Dump_all_messages" chat handler
 def backup_all_messages_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -340,28 +340,28 @@ def backup_all_messages_handler(client, message):
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n'
                 '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
-                '/backup_all_messages from_chat_id -\n'
-                'All messages from a single selected chat are copied & forwarded to "Backup_all_messages" chat\n' 
+                '/dump_all_messages from_chat_id -\n'
+                'All messages from a single selected chat are copied & forwarded to "7.Dump_all_messages" chat\n' 
                 'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
             )
-        case 'backup_all_messages': # (?)
+        case 'dump_all_messages': # (?)
             if len(args) == 0:
                 message.reply_text('Sorry, from_chat_id is not found\n'
-                                   'from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /backup_all_messages\n\n'
-                                   'Please, use this format: /backup_all_messages from_chat_id\n'
+                                   'from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_messages\n\n'
+                                   'Please, use this format: /dump_all_messages from_chat_id\n'
                                    'Use /findid to get from_chat_id')  # chat_title | chat_id | @username
             if len(args) > 1:
-                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /backup_all_messages')
+                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_all_messages')
             if len(args) == 1:
                 from_chat_id = args[0]
                 try:
                     from_chat_id = int(from_chat_id)
                 except ValueError:
                     message.reply("Sorry, from_chat_id is not valid\n "
-                                  "from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /backup_all_messages\n\n"
-                                  'Please, use this format: /backup_all_messages from_chat_id\n'
+                                  "from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_messages\n\n"
+                                  'Please, use this format: /dump_all_messages from_chat_id\n'
                                   "Use /findid to get from_chat_id")
-                backup_all_messages(user, args[0])
+                dump_all_messages(user, args[0])
         case 'findid': # (?)
             if (not args):
                 return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
@@ -372,7 +372,7 @@ def backup_all_messages_handler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 
-# "Dump_replies" chat handler
+# "8.Dump_replies" chat handler
 def dump_replies_chat_input_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -385,8 +385,8 @@ def dump_replies_chat_input_handler(client, message):
                 '/help_general - show Help options for all chats\n'
                 '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
                 '/dump_replies from_chat_id -\n'
-                'Forward all messages (and replies to them) of a target user from a specific chat to "Dump_replies" chat'
-                'Replies to your messages from a single selected chat are copied & forwarded to "Dump_replies" chat\n'
+                'Forward all messages (and replies to them) of a target user from a specific chat to "8.Dump_replies" chat'
+                'Replies to your messages from a single selected chat are copied & forwarded to "8.Dump_replies" chat\n'
                 'Single-time backup launched manually (NOT real time monitoring)\n'
             )
         case 'dump_replies': # (?)
@@ -435,7 +435,7 @@ def dump_replies_chat_input_handler(client, message):
 
 
 
-# "Keywords" chat handler
+# "4.Keywords" chat handler
 def keywords_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -450,7 +450,7 @@ def keywords_handler(client, message):
                 '/show - show all keywords monitored by bot\n'
                 '/add keyword1 keyword2 ... - add new keyword(s)\n'
                 '/remove keyword1 keyword2 ... - remove keyword(s)\n'
-                '/exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by Keywords bot (may work slowly)\n'
+                '/exclude_chat chat_title | chat_id | @username - exclude chat or user or channel from being monitored by 4.Keywords bot (may work slowly)\n'
                 '/excluded_chats_list - show IDs of all excluded chats\n' 
                 '/delete_from_excluded_chats chat_id - delete a chat from your excluded chats list\n'
                 '/removeall - remove all keywords (turned off currently)\n'
@@ -520,12 +520,12 @@ def keywords_handler(client, message):
                     dialog) for dialog in dialogs]) if len(dialogs) else 'Sorry, nothing is found')
             else:
                 add_keywords_to_includes(dialogs[0][0], args)
-                message.reply_text('Keywords #{} for the chat:\n'.format(', #'.join(
+                message.reply_text('4.Keywords #{} for the chat:\n'.format(', #'.join(
                     includes_dict[dialogs[0][0]])) + ' - '.join(dialogs[0]))
         case _:
             message.reply_text('Sorry, this command is not valid')
 
-# "Following" chat handler
+# "5.Following" chat handler
 def following_handler(client, message):
     if str(message.chat.id) != following_chat_id: # (?) Why using this line here?
         return
@@ -539,7 +539,7 @@ def following_handler(client, message):
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
                 'To follow a Telegram user:\n'
-                '\tVariant 1: forward manually any message of this user to your "Following" chat\n'
+                '\tVariant 1: forward manually any message of this user to your "5.Following" chat\n'
                 '\tVariant 2: /follow user_ID   # Enter /findid manually to get user_ID\n\n'
                 '/show - check IDs of all Telegram users in your current "Following" list\n'
                 '/unfollow user_ID - remove a user from your "Following" list\n'
