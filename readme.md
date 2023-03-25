@@ -36,9 +36,8 @@ Replies to your messages are also counted as mentions
 Pinned messages from all chats are automatically forwarded to your '2.Pinned_messages' chat   
 #### 3.Find_Telegram_ID
 To find Telegram ID of any chat (user / group / channel / bot / etc.):
-- Variant 1: Enter manually in '3.Find_Telegram_ID' chat: `/findid @username | first_name last_name | chat_title`
-- Variant 2: Forward manually any message from target chat to '3.Find_Telegram_ID' chat. Get automatic reply with target chat ID    
-- (??) (NOT build yet!) Variant 3: Enter `/findid` in target chat. Get automatic reply with target chat ID. Reply message is deleted after (?)10 seconds 
+- Enter manually in '3.Find_Telegram_ID' chat: `/findid @username | first_name last_name | chat_title`
+_- (??) (NOT build yet!) Variant 3: Enter `/findid` in target chat. Get automatic reply with target chat ID. Reply message is deleted after (?)10 seconds_ 
 #### 4.Keywords
 Your chats (all or selected) are monitored in real time. Messages containing specific keywords are forwarded to '4.Keywords' chat    
 ##### In ‘4.Keywords’ chat:

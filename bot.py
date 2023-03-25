@@ -83,7 +83,7 @@ def dump_replies(client, from_chat_id, target_user_id):
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
 
     # (?) About the code block below: is it the optimal solution?!
-    for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+    # for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
 
         # + Get ALL messages of the target user (via user ID) & forward them:
         # if message.from_user.id == target_user_id:
@@ -212,11 +212,28 @@ def command_messages_handler(client, message):
 # (?) Variant N2:
 @user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
+
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
         return # (?) Add some text reply outputed to user via TG? (Ex.: "NOT valid. Try again")
+
+    # Variant N2 to find Telegram ID via forwarding a message from a target chat to “FindID” chat
+    # (current status)  Turned OFF now because:
+    # 1. Works only for user chats (NOT for: group chats, channels)
+    # 2. 'forward_from.id' output is NOT clear & it confuses the customer
+    # Listen to messages forwarded manually by me to catch them in "3.Find_Telegram_ID" chat
+    # if message.forward_from and str(message.chat.id) == findid_chat_id:
+    #     return message.reply('The chat (user / group / channel / bot / etc.) you\'ve just forwarded a message from '
+    #                   'has Telegram ID: \n{} '.format(message.forward_from.id)
+    #                   )
+    # else:
+    #     return message.reply_text(
+    #         'NOT found\n'
+    #         'Please, try another way to find Telegram ID\n'
+    #         'Enter /help')
+
     # (Variant 1) (How to follow a TG user) Forward manually any message of this user to your '5.Following' chat
-    # listen to messages forwarded manually by me to catch them in "5.Following" chat
+    # Listen to messages forwarded manually by me to catch them in "5.Following" chat
     if message.forward_from and str(message.chat.id) == following_chat_id:
         if str(message.forward_from.id) in following_set:
             message.reply('Following already works for id {}'.format(
@@ -226,20 +243,11 @@ def not_command_handler(client, message):  # (?) Draft
             save_following(following_set)
             message.reply('id {} is added to Following list'.format(
                 message.forward_from.id))
-        return # (?) Add some text reply outputed to user via TG? (Ex.: "NOT valid. Try again")
+        return
 
     message.reply_text( # (?) Is this line used in the correct place? As I've added code below
-        'Sorry, this command is NOT valid. Enter /help to see all valid commands'
+        'Sorry, this command is NOT valid. \nEnter /help to see all valid commands'
     )
-
-    # Variant N2 to find Telegram ID via forwarding a message from a target chat to “FindID” chat
-    # listen to messages forwarded manually by me to catch them in "3.Find_Telegram_ID" chat
-    if message.forward_from and str(message.chat.id) == findid_chat_id:
-        message.reply('The chat (user / group / channel / bot / etc.) you\'ve just forwarded a message from '
-                      'has Telegram ID: {} '.format(message.forward_from.id)
-                      )
-    else:
-        message.reply_text('Please, try another way to find Telegram ID. Enter /help')
 
 
 # "1.Mentions" chat handler
@@ -313,9 +321,10 @@ def findid_input_handler(client, message):
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n\n'
-                'To find Telegram ID of any chat (user / group / channel / bot / etc.):\n'
-                '\tVariant 1: Enter manually in "3.Find_Telegram_ID" chat: /findid @username | first_name last_name | chat_title\n'
-                '\tVariant 2: Forward manually any message from target chat to "3.Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
+                'To find Telegram ID of any chat (user / group / channel / bot / etc.)\n'
+                'Enter manually in "3.Find_Telegram_ID" chat:\n'
+                '/findid @username | first_name last_name | chat_title\n\n'
+               # '\tVariant 2: Forward manually any message from target chat to "3.Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
                 '(Finding IDs may work slowly. Wait for Bot\'s reply)\n'
             )
         case 'findid':
