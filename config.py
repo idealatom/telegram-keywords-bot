@@ -20,6 +20,9 @@ def read_config():
     if not config.has_section('includes_dict'):
         config.add_section('includes_dict')
 
+    if not config.has_section('chats_monitoring_switcher_section'): # (?)
+        config.add_section('chats_monitoring_switcher_section')
+
     return config
 
 config = read_config()
@@ -33,6 +36,10 @@ following_set = set(filter(None, config.get(
 includes_dict = dict(config.items('includes_dict'))
 for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
+
+# (??) NOT finished here! Test what solution is better here. Ex.: boolean? if/else? ...
+mentions_monitoring_switcher = config.get(
+    'chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='')
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')

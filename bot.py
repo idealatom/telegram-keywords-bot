@@ -3,7 +3,7 @@ from pyrogram import Client, filters, idle
 # from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
-    save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save
+    save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, mentions_monitoring_switcher
 # from threading import Timer
 
 # start app
@@ -171,7 +171,7 @@ def dump_all_messages(client, from_chat_id):
 
 # Commands used in all bot chats in Telegram ("4.Keywords"; "1.Mentions"; "5.Following"; etc.) must be listed here:
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
-                          'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow']
+                          'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow', 'on', 'off']
 
 list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,backup_all_messages_chat_id,
                                     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
@@ -250,7 +250,7 @@ def not_command_handler(client, message):  # (?) Draft
     )
 
 
-# "1.Mentions" chat handler
+# "1.Mentions" chat input handler
 def mentions_handler(client, message):
     args = message.command
     comm = args.pop(0)
@@ -267,6 +267,16 @@ def mentions_handler(client, message):
                 'No need to enter any input in "1.Mentions" chat\n\n'
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
+            )
+        case '/on':
+            message.reply_text(
+                'Automatic monitoring is turned ON\n'
+                '"Mentions" feature is working now'
+            )
+        case '/off':
+            message.reply_text(
+                'Automatic monitoring is turned OFF\n'
+                '"Mentions" feature is NOT working now'
             )
         case _:
             message.reply_text('Sorry, this command is not valid')
@@ -616,7 +626,7 @@ def not_my_messages_handler(client, message):
             keywords_forward(client, message, keyword.group())
     # process mentions
     # message can be a reply with attachment with no text
-    if message.mentioned:
+    if message.mentioned and "Turned ON" in mentions_monitoring_switcher:
         mentions_forward(client, message)
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
