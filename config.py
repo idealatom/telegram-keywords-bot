@@ -33,13 +33,17 @@ excluded_chats = set(filter(None, config.get(
     'bot_params', 'excluded_chats', fallback='').split(',')))
 following_set = set(filter(None, config.get(
     'bot_params', 'following', fallback='').split(',')))
+
+# mentions_monitoring_switcher_set = config.get('bot_params', 'mentions_monitoring_switcher_set', fallback='')
+
 includes_dict = dict(config.items('includes_dict'))
 for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
 
-# (??) NOT finished here! Test what solution is better here. Ex.: boolean? if/else? ...
-mentions_monitoring_switcher = config.get(
-    'chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='')
+
+# (??) NOT finished here! Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
+# (??)  Fix bug: chats_monitoring_switcher_section  is NOT created as a new section in config.ini
+mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
@@ -50,6 +54,11 @@ edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_i
 pinned_messages_chat_id = config.get('bot_params', 'pinned_messages_chat_id', fallback='')
 findid_chat_id = config.get('bot_params', 'findid_chat_id', fallback='')
 dump_replies_chat_id = config.get('bot_params', 'dump_replies_chat_id', fallback='')
+
+
+def save_mentions_switcher(mentions_switcher):
+    mentions_switcher = set(mentions_switcher)
+    config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', mentions_switcher) # (?)
 
 
 def save_keywords(keywords):

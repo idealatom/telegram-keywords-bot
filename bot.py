@@ -3,7 +3,8 @@ from pyrogram import Client, filters, idle
 # from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
-    save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, mentions_monitoring_switcher
+    save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, \
+    mentions_monitoring_switcher_set, save_mentions_switcher
 # from threading import Timer
 
 # start app
@@ -268,12 +269,18 @@ def mentions_handler(client, message):
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
-        case '/on':
+        case 'on':
+            mentions_monitoring_switcher_set.clear()
+            mentions_monitoring_switcher_set.add('Turned_ON')
+            save_mentions_switcher(mentions_monitoring_switcher_set)
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
                 '"Mentions" feature is working now'
             )
-        case '/off':
+        case 'off':
+            mentions_monitoring_switcher_set.clear()
+            mentions_monitoring_switcher_set.add('Turned_OFF')
+            save_mentions_switcher(mentions_monitoring_switcher_set)
             message.reply_text(
                 'Automatic monitoring is turned OFF\n'
                 '"Mentions" feature is NOT working now'
@@ -453,7 +460,6 @@ def dump_replies_chat_input_handler(client, message):
 
 
 
-
 # "4.Keywords" chat handler
 def keywords_handler(client, message):
     args = message.command
@@ -626,8 +632,9 @@ def not_my_messages_handler(client, message):
             keywords_forward(client, message, keyword.group())
     # process mentions
     # message can be a reply with attachment with no text
-    if message.mentioned and "Turned ON" in mentions_monitoring_switcher:
-        mentions_forward(client, message)
+    if "Turned_ON" in mentions_monitoring_switcher_set:
+        if message.mentioned:
+            mentions_forward(client, message)
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
@@ -755,6 +762,12 @@ def start_bot():
             new_chat = user.create_group(k, user_info.id)
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
+
+    # (CDL) (?) Is this code block  necessary?
+    if not globals()['mentions_monitoring_switcher_set']: # (?) How does this line work for the first session launch?
+        # config_set_and_save('bot_params', 'mentions_monitoring_switcher_set', 'Turned_ON')
+        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', 'Turned_ON')
+
     # init message
     # user.send_message(keywords_chat_id, 'bot started')
     # user.send_message(mentions_chat_id, 'bot started')
