@@ -633,7 +633,9 @@ def not_my_messages_handler(client, message):
     # process mentions
     # message can be a reply with attachment with no text
     if "Turned_ON" in mentions_monitoring_switcher_set:
+        print("aCCept reAliTy") # (CDL) For testing only
         if message.mentioned:
+            print("acTioN crEaTs mooD")  # (CDL) For testing only
             mentions_forward(client, message)
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
@@ -765,7 +767,6 @@ def start_bot():
 
     # (CDL) (?) Is this code block  necessary?
     if not globals()['mentions_monitoring_switcher_set']: # (?) How does this line work for the first session launch?
-        # config_set_and_save('bot_params', 'mentions_monitoring_switcher_set', 'Turned_ON')
         config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', 'Turned_ON')
 
     # init message

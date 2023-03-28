@@ -33,17 +33,12 @@ excluded_chats = set(filter(None, config.get(
     'bot_params', 'excluded_chats', fallback='').split(',')))
 following_set = set(filter(None, config.get(
     'bot_params', 'following', fallback='').split(',')))
-
-# mentions_monitoring_switcher_set = config.get('bot_params', 'mentions_monitoring_switcher_set', fallback='')
-
 includes_dict = dict(config.items('includes_dict'))
 for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
-
-
-# (??) NOT finished here! Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
-# (??)  Fix bug: chats_monitoring_switcher_section  is NOT created as a new section in config.ini
-mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')
+# (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
+# Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
+mentions_monitoring_switcher_set = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback=''))
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
@@ -57,8 +52,9 @@ dump_replies_chat_id = config.get('bot_params', 'dump_replies_chat_id', fallback
 
 
 def save_mentions_switcher(mentions_switcher):
-    mentions_switcher = set(mentions_switcher)
-    config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', mentions_switcher) # (?)
+    config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', str(mentions_switcher)) # (?)
+    # print("'config_set_and_save' param type == ", type(config_set_and_save)) # (CDL) For testing only
+    # print("'mentions_switcher' param type == ", type(mentions_switcher)) # (CDL) For testing only
 
 
 def save_keywords(keywords):
