@@ -36,9 +36,11 @@ following_set = set(filter(None, config.get(
 includes_dict = dict(config.items('includes_dict'))
 for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
+
 # (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
 # Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
-mentions_monitoring_switcher_set = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback=''))
+# mentions_monitoring_switcher_set = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback=''))
+mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')  # (?) (CDL) Try to use STRING here instead of SET
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')

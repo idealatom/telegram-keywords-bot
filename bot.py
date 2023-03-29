@@ -270,8 +270,11 @@ def mentions_handler(client, message):
                 'Replies to your messages are also counted as mentions'
             )
         case 'on':
-            mentions_monitoring_switcher_set.clear()
-            mentions_monitoring_switcher_set.add('Turned_ON')
+            # mentions_monitoring_switcher_set.clear()
+            mentions_monitoring_switcher_set.format() # Var1 (??) How to do the same, but for a STRING instead of SET ?
+            mentions_monitoring_switcher_set.replace() # Var1 (??) How to do the same, but for a STRING instead of SET ?
+
+            mentions_monitoring_switcher_set.add('Turned_ON')  # (CDL) For "set"
             save_mentions_switcher(mentions_monitoring_switcher_set)
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
@@ -630,13 +633,35 @@ def not_my_messages_handler(client, message):
                             message.text, re.IGNORECASE)
         if len(keywords) and keyword:
             keywords_forward(client, message, keyword.group())
+
+
     # process mentions
     # message can be a reply with attachment with no text
-    if "Turned_ON" in mentions_monitoring_switcher_set:
-        print("aCCept reAliTy") # (CDL) For testing only
-        if message.mentioned:
-            print("acTioN crEaTs mooD")  # (CDL) For testing only
+
+    # if "Turned_ON" in mentions_monitoring_switcher_set:
+    #     print("aCCept reAliTy")  # (CDL) For testing only
+    #     if message.mentioned:
+    #         print("acTioN crEaTs mooD")  # (CDL) For testing only
+    #         mentions_forward(client, message)
+
+    # if message.mentioned and "Turned_ON" in mentions_monitoring_switcher_set:
+    #     print(" (Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
+    #     mentions_forward(client, message)
+
+    if message.mentioned:
+        print(mentions_monitoring_switcher_set)
+        print(type(mentions_monitoring_switcher_set))
+        print("aCCept reAliTy")  # (CDL) For testing only
+        print(set(mentions_monitoring_switcher_set))
+        print(type(set(mentions_monitoring_switcher_set)))
+
+        # print(mentions_monitoring_switcher_set[0])
+
+        if mentions_monitoring_switcher_set == "Turned_ON":
+            print("(Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
             mentions_forward(client, message)
+
+
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
         following_forward(client, message)
@@ -646,6 +671,7 @@ def not_my_messages_handler(client, message):
 @user.on_message(filters.pinned_message, 1)  # "1" - group identifier parameter for the decorator
 def pinned_messages_handler(client, message):
     pinned_messages_forward(client, message)
+    # (?) (CDL) Also if necessary, use "message.pinned_message" method from https://docs.pyrogram.org/api/types/Message#pyrogram.types.Message
 
 
 # process Deleted messages
@@ -709,7 +735,7 @@ def keywords_forward(client, message, keyword):
 def mentions_forward(client, message):
     source = make_message_description(message)
     client.send_message(
-        mentions_chat_id, 'Mentioned {}'.format(source))
+        mentions_chat_id, 'Your Telegram account was mentioned {}'.format(source))
     message.forward(mentions_chat_id)
     client.mark_chat_unread(mentions_chat_id)
 
