@@ -1,14 +1,15 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, backup_all_messages_chat_id, dump_replies_chat_id, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_messages_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, \
     mentions_monitoring_switcher_set, save_mentions_switcher
 # from threading import Timer
 
 # start app
-user = Client('user')
+# (?) (CDL) Test these updates w/ a new login session from scratch:
+user = Client(workdir="./config_resources", session_name="user_1", config_file="my_config.ini")
 
 # init chats
 chat_dict = {
@@ -18,7 +19,7 @@ chat_dict = {
     "4.Keywords": "keywords_chat_id",
     "5.Following": "following_chat_id",
     "6.Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
-    "7.Dump_all_messages": "backup_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
+    "7.Dump_all_messages": "dump_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
     "8.Dump_replies": "dump_replies_chat_id"
 }
 
@@ -80,7 +81,7 @@ def dump_replies(client, from_chat_id, target_user_id):
     #     return # (?) Did I use "return" in a correct way & place?
 
     if client.get_history_count(from_chat_id) == 0:
-        client.send_message(backup_all_messages_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
+        client.send_message(dump_all_messages_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
 
     # (?) About the code block below: is it the optimal solution?!
@@ -137,11 +138,11 @@ def dump_replies(client, from_chat_id, target_user_id):
 def dump_all_messages(client, from_chat_id):
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     if from_chat_full_message_history == 0:
-        client.send_message(backup_all_messages_chat_id,
+        client.send_message(dump_all_messages_chat_id,
                             f"Sorry, NO messages to backup: chat {from_chat_id} is empty.\n Try to use another from_chat_id"
                             )
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
-    backup_all_messages_chat_size = client.get_history_count(backup_all_messages_chat_id)
+    backup_all_messages_chat_size = client.get_history_count(dump_all_messages_chat_id)
     skipped_service_messages = 0
     counter = 0
     # current_time = int(datetime.now().timestamp())
@@ -151,15 +152,15 @@ def dump_all_messages(client, from_chat_id):
             skipped_service_messages += 1
             continue
         # message_datetime = datetime.fromtimestamp(message.date)
-        # client.send_message(chat_id=backup_all_messages_chat_id,
+        # client.send_message(chat_id=dump_all_messages_chat_id,
         #                     text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-        # Timer(counter * 50, message.forward(backup_all_messages_chat_id)).start()
-        message.forward(backup_all_messages_chat_id)
-        #message.forward(backup_all_messages_chat_id, schedule_date=current_time + counter);
-        #forwarded_message = message.forward(backup_all_messages_chat_id)
+        # Timer(counter * 50, message.forward(dump_all_messages_chat_id)).start()
+        message.forward(dump_all_messages_chat_id)
+        #message.forward(dump_all_messages_chat_id, schedule_date=current_time + counter);
+        #forwarded_message = message.forward(dump_all_messages_chat_id)
         #print(forwarded_message.id, forwarded_message.text)
-    forward_chat_full_message_history = client.get_history_count(backup_all_messages_chat_id)
-    client.send_message(backup_all_messages_chat_id,
+    forward_chat_full_message_history = client.get_history_count(dump_all_messages_chat_id)
+    client.send_message(dump_all_messages_chat_id,
                         "RESULTS:\n"
                         f"Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED\n"
                         f"Size of your chat to forward from: {from_chat_full_message_history} messages\n"
@@ -174,7 +175,7 @@ def dump_all_messages(client, from_chat_id):
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
                           'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow', 'on', 'off']
 
-list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,backup_all_messages_chat_id,
+list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,dump_all_messages_chat_id,
                                     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
 
 help_general_text = """
@@ -198,7 +199,7 @@ def command_messages_handler(client, message):
         following_handler(client, message)
     elif chat_id == mentions_chat_id:
         mentions_handler(client, message)
-    elif chat_id == backup_all_messages_chat_id:
+    elif chat_id == dump_all_messages_chat_id:
         backup_all_messages_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
         edited_and_deleted_chat_input_handler(client, message)

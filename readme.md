@@ -7,7 +7,7 @@
 - create a new App attached to your Telegram account [here](https://my.telegram.org/auth?to=apps) ('URL' & 'Description' fields may be kept empty, 'Platform' - select 'Web') 
 - Run `docker volume create your_volume_name` - to create Docker volume on your host
 - Run `docker build -t your_image_name .` - to build image from `Dockerfile`
-- Run `docker run -it --rm -v your_volume_name:/app your_image_name` - to login to your Telegram account 
+- Run `docker run -it --rm -v your_volume_name:/app/config_resources your_image_name` - to login to your Telegram account 
 - Paste your Telegram App's `api_id` and `api_hash` 
 Get them from 'App configuration' at https://my.telegram.org/apps 
 - [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
@@ -23,7 +23,13 @@ Get them from 'App configuration' at https://my.telegram.org/apps
   - '7.Dump_all_messages' 
   - '8.Dump_replies'
 - Stop the running script: `Ctrl+C`
-- Run `docker run -d -v your_volume_name:/app --restart unless-stopped your_image_name` - launch bot in a container 
+- Run `docker run -d -v your_volume_name:/app/config_resources --name your_container_name --restart unless-stopped your_image_name` - launch bot in a container 
+
+- (optional) To launch Bot with the same Telegram account & data on another machine (aka backup, restore & migrate Docker volume): 
+  - (?) (to back up volume) Run `docker run --rm --volumes-from your_container_name -v $(pwd):/backup ubuntu tar cvf /backup/archive.tar /your_volume_name` - 
+  launch new container, mount volume from previous container, mount local host directory, tar contents of volume to archive.tar
+  - ..??..
+
 - (optional) (in Telegram) Create a new Folder & add to it manually these seven new chats 
 Then - archive manually each of these seven chats from 'All chats' to 'Archived Chats' 
 So these seven chats are kept in a separate Folder & do NOT disturb you 

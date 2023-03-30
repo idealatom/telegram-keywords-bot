@@ -40,13 +40,13 @@ for chat in includes_dict:
 # (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
 # Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
 # mentions_monitoring_switcher_set = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback=''))
-mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')  # (?) (CDL) Try to use STRING here instead of SET
+mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')  # (??) (CDL) Try to use STRING here instead of SET
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
-backup_all_messages_chat_id = config.get('bot_params', 'backup_all_messages_chat_id', fallback='')
+dump_all_messages_chat_id = config.get('bot_params', 'dump_all_messages_chat_id', fallback='')
 edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_id', fallback='')
 pinned_messages_chat_id = config.get('bot_params', 'pinned_messages_chat_id', fallback='')
 findid_chat_id = config.get('bot_params', 'findid_chat_id', fallback='')
@@ -66,14 +66,12 @@ def save_keywords(keywords):
 
 def save_excluded_chats(excluded_chats):
     excluded_chats = set(filter(None, excluded_chats))
-    config_set_and_save('bot_params', 'excluded_chats',
-                        str(','.join(excluded_chats)))
+    config_set_and_save('bot_params', 'excluded_chats', str(','.join(excluded_chats)))
 
 
 def save_following(following):
     following = set(filter(None, following))
-    config_set_and_save('bot_params', 'following',
-                        str(','.join(following)))
+    config_set_and_save('bot_params', 'following', str(','.join(following)))
 
 
 def add_keywords_to_includes(chat, keywords):
