@@ -26,9 +26,12 @@ Get them from 'App configuration' at https://my.telegram.org/apps
 - Run `docker run -d -v your_volume_name:/app/config_resources --name your_container_name --restart unless-stopped your_image_name` - launch bot in a container 
 
 - (optional) To launch Bot with the same Telegram account & data on another machine (aka backup, restore & migrate Docker volume): 
-  - (?) (to back up volume) Run `docker run --rm --volumes-from your_container_name -v $(pwd):/backup ubuntu tar cvf /backup/archive.tar /your_volume_name` - 
-  launch new container, mount volume from previous container, mount local host directory, tar contents of volume to archive.tar
-  - ..??..
+  - (?!) (to back up volume) Run `docker run --rm --volumes-from your_container_name -v $(pwd):/backup_dir ubuntu tar cvf /backup_dir/archive.tar /your_volume_name` - 
+  launch new container, mount volume from previous container, mount local host directory, tar contents of volume to 'archive.tar' file
+  - (?!) Transfer “archive.tar” file to another machine via SSH with `scp` (or `rsync`):  
+  - `scp your_source_user@backup_dir/archive.tar your_destination_user@your_destination_host_ip_address:/your_destination_path` 
+  - (?!) (to restore volume from backup) Run `docker run --rm --volumes-from your_new_container -v $(pwd):/backup_dir ubuntu bash -c "cd /your_new_volume && tar xvf /backup_dir/archive.tar --strip 1"` - 
+  un-tar 'archive.tar' file in the new container’s data volume 
 
 - (optional) (in Telegram) Create a new Folder & add to it manually these seven new chats 
 Then - archive manually each of these seven chats from 'All chats' to 'Archived Chats' 

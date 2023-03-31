@@ -19,7 +19,7 @@ chat_dict = {
     "4.Keywords": "keywords_chat_id",
     "5.Following": "following_chat_id",
     "6.Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
-    "7.Dump_all_messages": "dump_all_messages_chat_id", # (?) Rename the chat to 'Dump_from_a_chat' OR 'Backup_from_chat'
+    "7.Dump_all_messages": "dump_all_messages_chat_id", # (?) Rename the chat to 'Dump_all_from_selected_chat' OR 'Dump_from_a_chat' OR 'Backup_from_chat'
     "8.Dump_replies": "dump_replies_chat_id"
 }
 
