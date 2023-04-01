@@ -8,8 +8,10 @@ from config import config, keywords_chat_id, following_chat_id, mentions_chat_id
 # from threading import Timer
 
 # start app
-# (?) (CDL) Test these updates w/ a new login session from scratch:
-user = Client(workdir="./config_resources", session_name="user_1", config_file="my_config.ini")
+# (CDL) (OLD version that was working well)
+user = Client("user")  # (CDL) Temporarily rolled back to the OLD solution. Delete it after I test the new solution below
+# (?) (CDL) (NEW version, NOT tested yet)
+# user = Client(workdir="./config_resources", session_name="user_1", config_file="my_config.ini")  # (?) Test these updates w/ a new login session from scratch
 
 # init chats
 chat_dict = {
@@ -68,29 +70,23 @@ def find_users(client, args):
 
 
 def dump_replies(client, from_chat_id, target_user_id):
-    # Add some verification that "from_chat_id" is a valid ID by using "find_chats" function?
-    # (?) Or better to move this verification block of code to Handler?!
-
-    # if not find_chats(client, from_chat_id):
-    #     client.send_message(dump_replies_chat_id,
-    #                         'Sorry, from_chat_id is not found\n'
-    #                         'from_chat_id (Telegram ID of the chat to dump your replies from) must be entered manually after /dump_replies\n\n'
-    #                         'Please, use this format: /dump_replies from_chat_id\n'
-    #                         'Use /findid to get from_chat_id'
-    #                         )
-    #     return # (?) Did I use "return" in a correct way & place?
 
     if client.get_history_count(from_chat_id) == 0:
         client.send_message(dump_all_messages_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
 
     # (?) About the code block below: is it the optimal solution?!
-    # for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+    for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
 
-        # + Get ALL messages of the target user (via user ID) & forward them:
-        # if message.from_user.id == target_user_id:
-        #     message.forward(dump_replies_chat_id)
-            # (CDL)  print(message.from_user.username, message.from_user.id, message.text)  # (CDL) This line works fine
+        # ++ Get ALL messages of the target user (via user ID) & forward them:
+        if message.from_user.id == target_user_id:
+            print("message.from_user.username == ", message.from_user.username) # (CDL) For testing only. Test if this lines below work fine
+            print("message.from_user.id == ", message.from_user.id) # (CDL) For testing only. Test if this lines below work fine
+            print("type(message.from_user.id) == ", type(message.from_user.id)) # (CDL) For testing only. Test if this lines below work fine
+            print("message.text == ", message.text)  # (CDL) For testing only. Test if this lines below work fine
+            print("target_user_id == ", target_user_id) # (CDL) For testing only. Test if this lines below work fine
+            print("type(target_user_id) == ", type(target_user_id)) # (CDL) For testing only. Test if this lines below work fine
+            message.forward(dump_replies_chat_id)
 
         # + Get the original message if the selected (specified, target) message is a reply:
         # if message.reply_to_message:
@@ -102,17 +98,19 @@ def dump_replies(client, from_chat_id, target_user_id):
 
 
         # !! (to-do) PROCEED here!
-        # if message is a reply   &    message AUTHOR_ID of its' ORIGINAL message == target user ID
+        # if message is a reply   &    if message AUTHOR_ID of its' ORIGINAL message == target user ID
         # Get every original message of the TARGET user that HAS some replies
-#
+
         # if message.from_user.id == target_user_id:  #  ??
         #     print("\n\n1.'message.text' == \n", message.text)
         #     print("\n\n2.'message.reply_to_message' == \n", message.reply_to_message)
         #     print("\n\n3.'message.reply_to_message.text' == \n", message.reply_to_message.text)
-        #
+
 
         # Get all replies to a (single) selected message from a specific user in a selected chat
         # (?) ... PROCEED here!
+
+
 
         # + Parts of this code block are useful & can be used in my final solution:
         # if message.from_user.id == target_user_id and message.reply_to_message:
@@ -413,10 +411,9 @@ def dump_replies_chat_input_handler(client, message):
             message.reply_text(
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n'
-                '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
-                '/dump_replies from_chat_id -\n'
-                'Forward all messages (and replies to them) of a target user from a specific chat to "8.Dump_replies" chat'
-                'Replies to your messages from a single selected chat are copied & forwarded to "8.Dump_replies" chat\n'
+                '/findid chat_title | first_name last_name | @username - find "from_chat_id" and "target_user_id"\n\n'
+                '/dump_replies from_chat_id target_user_id - \n'
+                'forward all messages (and replies to them) of a target user from a specific chat to "8.Dump_replies" chat. \n'
                 'Single-time backup launched manually (NOT real time monitoring)\n'
             )
         case 'dump_replies': # (?)
@@ -431,7 +428,9 @@ def dump_replies_chat_input_handler(client, message):
                 from_chat_id = args[0]
                 target_user_id = args[1]
                 try:
-                    from_chat_id = int(from_chat_id)
+                    check_from_chat_id = int(from_chat_id) # (?)
+                    print(check_from_chat_id) # (CDL) For testing only
+                    print(type(check_from_chat_id)) # (CDL) For testing only
                 except ValueError:
                     message.reply_text('Sorry, from_chat_id is not found\n'
                                        'Please, enter valid data in this format:\n'
@@ -439,18 +438,40 @@ def dump_replies_chat_input_handler(client, message):
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
                 try:
-                    target_user_id = int(target_user_id)
+                    check_target_user_id = int(target_user_id) # (?)
+                    print(check_target_user_id) # (CDL) For testing only
+                    print(type(check_target_user_id)) # (CDL) For testing only
+
                 except ValueError:
                     message.reply_text('Sorry, target_user_id is not found\n'
                                        'Please, enter valid data in this format:\n'
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
+                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
+                # if not find_chats(client, from_chat_id):
+                #     client.send_message(dump_replies_chat_id,
+                #                         'Sorry, from_chat_id is not found\n'
+                #                         'Please, enter valid data in this format:\n'
+                #                         '/dump_replies from_chat_id target_user_id\n\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         )
+                #     return # (?) Did I use "return" in a correct way & place?
+                # if not find_chats(client, target_user_id):
+                #     client.send_message(dump_replies_chat_id,
+                #                         'Sorry, target_user_id is not found\n'
+                #                         'Please, enter valid data in this format:\n'
+                #                         '/dump_replies from_chat_id target_user_id\n\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         )
+                #     return # (?) Did I use "return" in a correct way & place?
+
                 # (?) (CDL)  Is it correct to use two args in the line below?  (?)Try "client" instead of "user" ?
                 dump_replies(user, from_chat_id, target_user_id) # (CDL) This solution works fine now
+                print("Printed at the END of 'dump_replies_chat_input_handler' ") # (CDL) For testing only
 
         # (AFTER Korolev confirms this option)
-        # (?) Add “target user ID” input as a separate / interactive command?
+        # (?!) Add “target user ID” input as a separate / interactive command?
         # case 'target_user':
 
         case 'findid': # (?)
