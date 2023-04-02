@@ -4,7 +4,7 @@ from pyrogram import Client, filters, idle
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_messages_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, \
-    mentions_monitoring_switcher_set, save_mentions_switcher
+    mentions_monitoring_switcher, save_mentions_switcher
 # from threading import Timer
 
 # start app
@@ -269,20 +269,25 @@ def mentions_handler(client, message):
                 'Replies to your messages are also counted as mentions'
             )
         case 'on':
-            # mentions_monitoring_switcher_set.clear()
-            mentions_monitoring_switcher_set.format() # Var1 (??) How to do the same, but for a STRING instead of SET ?
-            mentions_monitoring_switcher_set.replace() # Var1 (??) How to do the same, but for a STRING instead of SET ?
+            # mentions_monitoring_switcher.clear()
+            mentions_monitoring_switcher.format('on') # Var1 (??)  TEST this line!
+            # mentions_monitoring_switcher.replace() # Var2 (??) NOT tried yet
+            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
 
-            mentions_monitoring_switcher_set.add('Turned_ON')  # (CDL) For "set"
-            save_mentions_switcher(mentions_monitoring_switcher_set)
+            # mentions_monitoring_switcher.add('on')  # (CDL) For "set"
+            save_mentions_switcher(mentions_monitoring_switcher)
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
                 '"Mentions" feature is working now'
             )
         case 'off':
-            mentions_monitoring_switcher_set.clear()
-            mentions_monitoring_switcher_set.add('Turned_OFF')
-            save_mentions_switcher(mentions_monitoring_switcher_set)
+            # mentions_monitoring_switcher.clear()
+            mentions_monitoring_switcher.format('off') # Var1 (??)  TEST this line!
+            # mentions_monitoring_switcher.replace() # Var2 (??) NOT tried yet
+            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+
+            # mentions_monitoring_switcher.add('off')
+            save_mentions_switcher(mentions_monitoring_switcher)
             message.reply_text(
                 'Automatic monitoring is turned OFF\n'
                 '"Mentions" feature is NOT working now'
@@ -660,26 +665,26 @@ def not_my_messages_handler(client, message):
     # process mentions
     # message can be a reply with attachment with no text
 
-    # if "Turned_ON" in mentions_monitoring_switcher_set:
+    # if "Turned_ON" in mentions_monitoring_switcher:
     #     print("aCCept reAliTy")  # (CDL) For testing only
     #     if message.mentioned:
     #         print("acTioN crEaTs mooD")  # (CDL) For testing only
     #         mentions_forward(client, message)
 
-    # if message.mentioned and "Turned_ON" in mentions_monitoring_switcher_set:
+    # if message.mentioned and "Turned_ON" in mentions_monitoring_switcher:
     #     print(" (Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
     #     mentions_forward(client, message)
 
     if message.mentioned:
-        print(mentions_monitoring_switcher_set)
-        print(type(mentions_monitoring_switcher_set))
+        print(mentions_monitoring_switcher)
+        print(type(mentions_monitoring_switcher))
         print("aCCept reAliTy")  # (CDL) For testing only
-        print(set(mentions_monitoring_switcher_set))
-        print(type(set(mentions_monitoring_switcher_set)))
+        print(set(mentions_monitoring_switcher))
+        print(type(set(mentions_monitoring_switcher)))
 
-        # print(mentions_monitoring_switcher_set[0])
+        # print(mentions_monitoring_switcher[0])
 
-        if mentions_monitoring_switcher_set == "Turned_ON":
+        if mentions_monitoring_switcher == "Turned_ON":
             print("(Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
             mentions_forward(client, message)
 
@@ -814,8 +819,8 @@ def start_bot():
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
     # (CDL) (?) Is this code block  necessary?
-    if not globals()['mentions_monitoring_switcher_set']: # (?) How does this line work for the first session launch?
-        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', 'Turned_ON')
+    if not globals()['mentions_monitoring_switcher']: # (?) How does this line work for the first session launch?
+        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'Turned_ON')
 
     # init message
     # user.send_message(keywords_chat_id, 'bot started')

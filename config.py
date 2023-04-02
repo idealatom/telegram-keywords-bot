@@ -39,8 +39,8 @@ for chat in includes_dict:
 
 # (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
 # Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
-# mentions_monitoring_switcher_set = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback=''))
-mentions_monitoring_switcher_set = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', fallback='')  # (??) (CDL) Try to use STRING here instead of SET
+# mentions_monitoring_switcher = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback=''))
+mentions_monitoring_switcher = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='')  # (??) (CDL) Try to use STRING here instead of SET
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
@@ -54,7 +54,7 @@ dump_replies_chat_id = config.get('bot_params', 'dump_replies_chat_id', fallback
 
 
 def save_mentions_switcher(mentions_switcher):
-    config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher_set', str(mentions_switcher)) # (?)
+    config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', str(mentions_switcher)) # (?)
     # print("'config_set_and_save' param type == ", type(config_set_and_save)) # (CDL) For testing only
     # print("'mentions_switcher' param type == ", type(mentions_switcher)) # (CDL) For testing only
 
