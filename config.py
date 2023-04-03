@@ -40,7 +40,7 @@ for chat in includes_dict:
 # (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
 # Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
 # mentions_monitoring_switcher = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback=''))
-mentions_monitoring_switcher = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='')  # (??) (CDL) Try to use STRING here instead of SET
+mentions_monitoring_switcher = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRRor in config.py with mentions_monitoring_switcher')  # (??) (CDL) Try to use STRING here instead of SET
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
