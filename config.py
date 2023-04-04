@@ -37,10 +37,15 @@ includes_dict = dict(config.items('includes_dict'))
 for chat in includes_dict:
     includes_dict[chat] = set(filter(None, includes_dict[chat].split(',')))
 
-# (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ? Is 'filter' necessary?  ...
-# Fix handler error when entering  /on  &  /off  commands: AttributeError: 'str' object has no attribute 'clear’
+# (??) Test what solution is better here. Ex.:  boolean?  if/else?  string / list / set ?  Is 'filter' necessary?  ...
 # mentions_monitoring_switcher = set(config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback=''))
-mentions_monitoring_switcher = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRRor in config.py with mentions_monitoring_switcher')  # (??) (CDL) Try to use STRING here instead of SET
+# (??) (CDL) Is the variable "mentions_monitoring_switcher" below always getting the value from confit.ini in "real time mode" OR only once at the beginning?
+# mentions_monitoring_switcher = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='on')  # (??)  Test this "fallback"
+mentions_monitoring_switcher = config.get(  # (??) (CDL) Now this varable is NOT created, as nothing to get from the section in config.ini, which is NOT created automatically now
+    'chats_monitoring_switcher_section',
+    'mentions_monitoring_switcher',
+    fallback='eRRor in config.py with mentions_monitoring_switcher'  # (?) Use "on" here?!
+)
 
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')

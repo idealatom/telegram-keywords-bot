@@ -173,7 +173,7 @@ def dump_all_messages(client, from_chat_id):
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
                           'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow', 'on', 'off']
 
-list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id,dump_all_messages_chat_id,
+list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_messages_chat_id,
                                     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
 
 help_general_text = """
@@ -271,13 +271,15 @@ def mentions_handler(client, message):
         case 'on':
             # mentions_monitoring_switcher.clear()
             # mentions_monitoring_switcher.format('mentions_monitoring_switcher'='on') # Var1 (??)  TEST this line!
-            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
             # mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (?) TEST this line!
-            mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (?) TEST this line!
+            # mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (??) Is using "mentions_monitoring_switcher_on"_== an optimal solution? ***TEST this line!
+            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only  ***Use global var for testin?!
+            mentions_monitoring_switcher = mentions_monitoring_switcher.replace("off", "on") # Var3 (??) Test it!
             print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
-            print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
+            # print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
             # mentions_monitoring_switcher.add('on')  # (CDL) For "set"
-            save_mentions_switcher(mentions_monitoring_switcher_on)
+            # save_mentions_switcher(mentions_monitoring_switcher_on) # Var2. (??) Test it!
+            save_mentions_switcher(mentions_monitoring_switcher) # Var3. (??) Test it!
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
                 '"Mentions" feature is working now'
@@ -288,7 +290,7 @@ def mentions_handler(client, message):
             # mentions_monitoring_switcher.replace() # Var2 (??) NOT tried yet
             print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
             # mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (?) TEST this line!
-            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (?) TEST this line!
+            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (??) Is using "mentions_monitoring_switcher_off"_== an optimal solution? ***TEST this line!
             print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
             print("mentions_monitoring_switcher_off == ", mentions_monitoring_switcher_off, "// tYpe == ", type(mentions_monitoring_switcher_off)) # (CDL) For testing only
             # mentions_monitoring_switcher.add('off')
@@ -827,9 +829,9 @@ def start_bot():
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
-    # (CDL) (?) Is this code block  necessary?
-    if not globals()['mentions_monitoring_switcher']: # (??) How does this line work for the first session launch?
-        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'on')
+    # (CDL) (??) Is this code block correct & necessary?
+    if not globals()['mentions_monitoring_switcher']: # (??) How to modify this line so it works correctly for the first session launch? (a new section in config.ini must be created automatically)
+        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'on') # (??) Bug: why is this line NOT working if launching the bot from scratch?
 
     # init message
     # user.send_message(keywords_chat_id, 'bot started')
