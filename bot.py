@@ -75,31 +75,43 @@ def dump_replies(client, from_chat_id, target_user_id):
         client.send_message(dump_all_messages_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
 
+    # print(f"'from_chat_id' == {from_chat_id}, tYpE == {type(from_chat_id)}")  # (CDL) For testing only
+    # print(f"'target_user_id' == {target_user_id}, tYpE == {type(target_user_id)}")  # (CDL) For testing only
+
     # (?) About the code block below: is it the optimal solution?!
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+        # print(message.from_user.id)  # (CDL) For testing only
+        # print(type(message.from_user.id))  # (CDL) For testing only
+        # return  # (CDL) For testing only
 
-        # ++ Get ALL messages of the target user (via user ID) & forward them:
-        if message.from_user.id == target_user_id:
-            print("message.from_user.username == ", message.from_user.username) # (CDL) For testing only. Test if this lines below work fine
-            print("message.from_user.id == ", message.from_user.id) # (CDL) For testing only. Test if this lines below work fine
-            print("type(message.from_user.id) == ", type(message.from_user.id)) # (CDL) For testing only. Test if this lines below work fine
-            print("message.text == ", message.text)  # (CDL) For testing only. Test if this lines below work fine
-            print("target_user_id == ", target_user_id) # (CDL) For testing only. Test if this lines below work fine
-            print("type(target_user_id) == ", type(target_user_id)) # (CDL) For testing only. Test if this lines below work fine
-            message.forward(dump_replies_chat_id)
+        # +++ Get ALL messages of the target user (via user ID) & forward them:  # Already tested
+        # if str(message.from_user.id) == target_user_id:
+        #     message.forward(dump_replies_chat_id)
 
-        # + Get the original message if the selected (specified, target) message is a reply:
+        # +++ If message IS a reply  =>  Get details about it & about its' original message
+        # if message.reply_to_message:
+        #     print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
+        #     print(f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}\n")  # (CDL) For testing only
+
+        # +++ If target user's message has replies - print this reply.
+        # If message IS a reply    &    if message AUTHOR_ID of its' ORIGINAL message == target user ID
+        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
+            print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
+            # print(message.reply_to_message.from_user.id, type(message.reply_to_message.from_user.id))
+            # print("target_user_id == ", target_user_id, type(target_user_id)) # (CDL) For testing only
+
+        # (!!) (NEXT) (Proceed from HERE)
+        # Get every original message of the TARGET user that HAS some replies
+        #  ...
+        # Combine all the solutions above:
+        #  ...
+
+
+        # ++ Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
+        # (?) (CDL) BUT: I can NOT get ANY details about this "reply" message itself with "reply_to_message" param
         # if message.reply_to_message:
         #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
 
-        # + Get every original message from smb that target user made a reply to:
-        # if message.from_user.id == target_user_id and message.reply_to_message:
-        #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
-
-
-        # !! (to-do) PROCEED here!
-        # if message is a reply   &    if message AUTHOR_ID of its' ORIGINAL message == target user ID
-        # Get every original message of the TARGET user that HAS some replies
 
         # if message.from_user.id == target_user_id:  #  ??
         #     print("\n\n1.'message.text' == \n", message.text)
@@ -109,7 +121,6 @@ def dump_replies(client, from_chat_id, target_user_id):
 
         # Get all replies to a (single) selected message from a specific user in a selected chat
         # (?) ... PROCEED here!
-
 
 
         # + Parts of this code block are useful & can be used in my final solution:
@@ -126,9 +137,12 @@ def dump_replies(client, from_chat_id, target_user_id):
         # if message.from_user == target_user_id: # (?) Verify if the message belongs to the target user
         #     print(f"'message_id' param == {message.id}\n 'message' content == {message}")
 
+        # + (NOT relevant for my task?!) Get every original message from smb that target user made a reply to:
+        # if message.from_user.id == target_user_id and message.reply_to_message:
+        #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
 
-
-
+        # if message.reply_to_message:
+        #     print(message.reply_to_message.reply_to_message) # (CDL) Wrong
 
 
 
@@ -441,8 +455,6 @@ def dump_replies_chat_input_handler(client, message):
                 target_user_id = args[1]
                 try:
                     check_from_chat_id = int(from_chat_id) # (?)
-                    print(check_from_chat_id) # (CDL) For testing only
-                    print(type(check_from_chat_id)) # (CDL) For testing only
                 except ValueError:
                     message.reply_text('Sorry, from_chat_id is not found\n'
                                        'Please, enter valid data in this format:\n'
@@ -451,9 +463,6 @@ def dump_replies_chat_input_handler(client, message):
                                        )
                 try:
                     check_target_user_id = int(target_user_id) # (?)
-                    print(check_target_user_id) # (CDL) For testing only
-                    print(type(check_target_user_id)) # (CDL) For testing only
-
                 except ValueError:
                     message.reply_text('Sorry, target_user_id is not found\n'
                                        'Please, enter valid data in this format:\n'
