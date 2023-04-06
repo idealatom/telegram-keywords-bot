@@ -94,17 +94,31 @@ def dump_replies(client, from_chat_id, target_user_id):
         #     print(f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}\n")  # (CDL) For testing only
 
         # +++ If target user's message has replies - print this reply.
-        # If message IS a reply    &    if message AUTHOR_ID of its' ORIGINAL message == target user ID
-        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
-            print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
+        # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # If message IS a reply  &  if message AUTHOR_ID of its' ORIGINAL message == target user ID
+            # print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
             # print(message.reply_to_message.from_user.id, type(message.reply_to_message.from_user.id))
             # print("target_user_id == ", target_user_id, type(target_user_id)) # (CDL) For testing only
 
-        # (!!) (NEXT) (Proceed from HERE)
-        # Get every original message of the TARGET user that HAS some replies
-        #  ...
-        # Combine all the solutions above:
-        #  ...
+        # +++ Get every ORIGINAL message of the TARGET user that HAS some replies:  # Already tested
+        # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
+        #     client.send_message(dump_replies_chat_id,
+        #                         f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}"
+        #                         )
+
+        # (NEXT) (Proceed from HERE)
+        # (!) TEST the solution below
+        # Get & forward both:  1.Every ORIGINAL message of the TARGET user that HAS some replies;   2.All REPLIES to these original messages
+        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
+            client.send_message(dump_replies_chat_id,
+                                f"1. Original message of target user with user_ID {message.reply_to_message.from_user.id}: \n{message.reply_to_message.text}\n"
+                                f"2. Reply of user '{message.reply_to_message.from_user.username}' with user_ID {message.reply_to_message.from_user.id} to this original message: \n{message.text}"
+                                )
+            # print(f"Original message of target user: \n{message.reply_to_message.text}")  # (CDL) For testing only
+            # print(f"Reply by user {message.reply_to_message.from_user.username} with ID {message.reply_to_message.from_user.id} to the original message: \n{message.text}")  # (CDL) For testing only
+
+
+
+
 
 
         # ++ Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
@@ -212,7 +226,7 @@ def command_messages_handler(client, message):
     elif chat_id == mentions_chat_id:
         mentions_handler(client, message)
     elif chat_id == dump_all_messages_chat_id:
-        backup_all_messages_handler(client, message)
+        dump_all_messages_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
         edited_and_deleted_chat_input_handler(client, message)
     elif chat_id == pinned_messages_chat_id:
@@ -383,7 +397,7 @@ def findid_input_handler(client, message):
 
 
 # "7.Dump_all_messages" chat handler
-def backup_all_messages_handler(client, message):
+def dump_all_messages_handler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
