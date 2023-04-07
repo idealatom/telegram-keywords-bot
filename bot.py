@@ -84,44 +84,48 @@ def dump_replies(client, from_chat_id, target_user_id):
         # print(type(message.from_user.id))  # (CDL) For testing only
         # return  # (CDL) For testing only
 
-        # +++ Get ALL messages of the target user (via user ID) & forward them:  # Already tested
+        # ++ Get ALL messages of the target user (via user ID) & forward them:  # Already tested
         # if str(message.from_user.id) == target_user_id:
         #     message.forward(dump_replies_chat_id)
 
-        # +++ If message IS a reply  =>  Get details about it & about its' original message
+        # ++ If message IS a reply  =>  Get details about it & about its' original message
         # if message.reply_to_message:
         #     print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
         #     print(f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}\n")  # (CDL) For testing only
 
-        # +++ If target user's message has replies - print this reply.
+        # ++ If target user's message has replies - print this reply.
         # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # If message IS a reply  &  if message AUTHOR_ID of its' ORIGINAL message == target user ID
             # print(f"{message.from_user.username} // {message.from_user.id} // {message.text}")  # (CDL) For testing only
             # print(message.reply_to_message.from_user.id, type(message.reply_to_message.from_user.id))
             # print("target_user_id == ", target_user_id, type(target_user_id)) # (CDL) For testing only
 
-        # +++ Get every ORIGINAL message of the TARGET user that HAS some replies:  # Already tested
+        # ++ Get every ORIGINAL message of the TARGET user that HAS some replies:  # Already tested
         # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
         #     client.send_message(dump_replies_chat_id,
         #                         f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}"
         #                         )
 
-        # (NEXT) (Proceed from HERE)
-        # (!) TEST the solution below
-        # Get & forward both:  1.Every ORIGINAL message of the TARGET user that HAS some replies;   2.All REPLIES to these original messages
-        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:
-            client.send_message(dump_replies_chat_id,
-                                f"1. Original message of target user with user_ID {message.reply_to_message.from_user.id}: \n{message.reply_to_message.text}\n"
-                                f"2. Reply of user '{message.reply_to_message.from_user.username}' with user_ID {message.reply_to_message.from_user.id} to this original message: \n{message.text}"
-                                )
-            # print(f"Original message of target user: \n{message.reply_to_message.text}")  # (CDL) For testing only
-            # print(f"Reply by user {message.reply_to_message.from_user.username} with ID {message.reply_to_message.from_user.id} to the original message: \n{message.text}")  # (CDL) For testing only
+
+        # +++ VARIANT N1: put TEXTS of original message & reply into a new single message:
+        # Get & forward both:
+        # 1.Every ORIGINAL message of the TARGET user that HAS some replies
+        # 2.All REPLIES to these original messages
+        # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
+        #     client.send_message(dump_replies_chat_id,
+        #                         f"1. Original message of target user with user_ID {message.reply_to_message.from_user.id}: \n{message.reply_to_message.text}\n"
+        #                         f"2. Reply of user '{message.reply_to_message.from_user.username}' with user_ID {message.reply_to_message.from_user.id} to this original message: \n{message.text}"
+        #                         )
+
+        # +++ VARIANT N2. FORWARD every original message & reply as SEPARATE messages.
+        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
+            # dump_replies_forward(client, message)  # (CDL)
+            message.reply_to_message.forward(dump_replies_chat_id)  # Forward the original message
+            message.forward(dump_replies_chat_id)  # Forward the reply to this original message
 
 
 
 
-
-
-        # ++ Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
+        # + Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
         # (?) (CDL) BUT: I can NOT get ANY details about this "reply" message itself with "reply_to_message" param
         # if message.reply_to_message:
         #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
@@ -767,16 +771,12 @@ def make_message_description(message):
         source = 'in Direct Messages ({})'.format(make_user_mention(message.from_user))
     # Channels
     elif message.chat.type == 'channel':
-        source = 'in channel {} @{}'.format(message.chat.title,
-                                          message.chat.username)
+        source = 'in channel {} @{}'.format(message.chat.title, message.chat.username)
     # Groups and Supergroups
     else:
-        source_chat_name = str(
-            message.chat.title) if message.chat.title else '<unnamed chat>'
-        source_chat_link = ' @' + \
-            str(message.chat.username) if message.chat.username else ''
-        source = 'in chat "{}" {} by {}'.format(
-            source_chat_name, source_chat_link, make_user_mention(message.from_user))
+        source_chat_name = str(message.chat.title) if message.chat.title else '<unnamed chat>'
+        source_chat_link = ' @' + str(message.chat.username) if message.chat.username else ''
+        source = 'in chat "{}" {} by {}'.format(source_chat_name, source_chat_link, make_user_mention(message.from_user))
 
     # forward of forward loses the first person
     if message.forward_from:
@@ -785,34 +785,37 @@ def make_message_description(message):
     return source
 
 
+# def dump_replies_forward(client, message):  # (CDL) This function is NOT used now
+#     source = make_message_description(message)
+#     # client.send_message(dump_replies_chat_id, '"Reply" to target user\'s message {}'.format(source))
+#     message.forward(dump_replies_chat_id)
+#     client.mark_chat_unread(dump_replies_chat_id)
+
+
 def keywords_forward(client, message, keyword):
     source = make_message_description(message)
-    client.send_message(
-        keywords_chat_id, '#{} {}'.format(keyword, source))
+    client.send_message(keywords_chat_id, '#{} {}'.format(keyword, source))
     message.forward(keywords_chat_id)
     client.mark_chat_unread(keywords_chat_id)
 
 
 def mentions_forward(client, message):
     source = make_message_description(message)
-    client.send_message(
-        mentions_chat_id, 'Your Telegram account was mentioned {}'.format(source))
+    client.send_message(mentions_chat_id, 'Your Telegram account was mentioned {}'.format(source))
     message.forward(mentions_chat_id)
     client.mark_chat_unread(mentions_chat_id)
 
 
 def following_forward(client, message):
     source = make_message_description(message)
-    client.send_message(
-        following_chat_id, 'Action detected {}'.format(source))
+    client.send_message(following_chat_id, 'Action detected {}'.format(source))
     message.forward(following_chat_id)
     client.mark_chat_unread(following_chat_id)
 
 
 def deleted_messages_forward(client, message):
     # source = make_message_description(message)
-    # client.send_message(
-    #     edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))
+    # client.send_message(edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))
     # message.forward(edited_and_deleted_chat_id)
     client.send_message(edited_and_deleted_chat_id, "Deleted message detected:\n"
                                                     f"message_id: {message[0]['message_id']}\n"
@@ -825,18 +828,16 @@ def deleted_messages_forward(client, message):
 
 def edited_messages_forward(client, message):
     source = make_message_description(message)
-    client.send_message(
-        edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))
+    client.send_message(edited_and_deleted_chat_id, 'Message AFTER being edited {}:'.format(source))
     message.forward(edited_and_deleted_chat_id)
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
 
 def pinned_messages_forward(client, message): # (?) “Pinned” forwarding is NOT working at ALL.  ***Other commands in “Pinned” chat work fine.  ***Function pinned_messages_forward is NOT called,
     print("(Doris Lessing) Whatever you're meant to do, do it now. The conditions are always impossible.") # (?) (CDL) For testing only
-    client.send_message(pinned_messages_chat_id, f"PiNNed message detected:\n {message}")
+    client.send_message(pinned_messages_chat_id, f"PiNNed message detected:\n {message}")  # (?) TEST it & the lines below
     # source = make_message_description(message)
-    # client.send_message(
-    #     pinned_messages_chat_id, 'Pinned message {}:'.format(source))
+    # client.send_message(pinned_messages_chat_id, 'Pinned message {}:'.format(source))
     # message.forward(pinned_messages_chat_id)
     client.mark_chat_unread(pinned_messages_chat_id)
 
