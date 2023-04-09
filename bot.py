@@ -502,7 +502,8 @@ def dump_replies_chat_input_handler(client, message):
                 'forward all messages of target user from a selected chat to "8.Dump_replies" chat. \n'
                 'Single-time backup launched manually (NOT real time monitoring)\n\n'                
                 '/dump_replies from_chat_id target_user_id - \n'
-                'forward all messages of target user and REPLIES to them from a selected chat to "8.Dump_replies" chat. \n'
+                'forward from a selected chat to "8.Dump_replies" chat:\n'
+                'messages of target user that had replies & all these replies.\n' 
                 'Single-time backup launched manually (NOT real time monitoring)\n'
             )
         case 'dump_replies': # (?)
@@ -580,29 +581,24 @@ def dump_replies_chat_input_handler(client, message):
                                        '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
-                # # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:  # (??) Is it a good idea to use "find_chats" function here for verification?
-                # if not find_chats(client, from_chat_id):
-                #     client.send_message(dump_replies_chat_id,
-                #                         'Sorry, from_chat_id is not found\n'
-                #                         'Please, enter valid data in this format:\n'
-                #                         '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
-                #                         'Use /findid command to find valid from_chat_id and target_user_id'
-                #                         )
-                #     return # (?) Did I use "return" in a correct way & place?
-                # if not find_chats(client, target_user_id):
-                #     client.send_message(dump_replies_chat_id,
-                #                         'Sorry, target_user_id is not found\n'
-                #                         'Please, enter valid data in this format:\n'
-                #                         '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
-                #                         'Use /findid command to find valid from_chat_id and target_user_id'
-                #                         )
-                #     return # (?) Did I use "return" in a correct way & place?
+                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:  # (??) NOT tested yet.
+                if not find_chats(client, from_chat_id):  # (??) Is it a good idea to use "find_chats" function here for verification?
+                    client.send_message(dump_replies_chat_id,
+                                        'Sorry, from_chat_id is not found\n'
+                                        'Please, enter valid data in this format:\n'
+                                        '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
+                                        'Use /findid command to find valid from_chat_id and target_user_id'
+                                        )
+                    return # (?) Did I use "return" in a correct way & place?
+                if not find_chats(client, target_user_id):
+                    client.send_message(dump_replies_chat_id,
+                                        'Sorry, target_user_id is not found\n'
+                                        'Please, enter valid data in this format:\n'
+                                        '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
+                                        'Use /findid command to find valid from_chat_id and target_user_id'
+                                        )
+                    return # (?) Did I use "return" in a correct way & place?
                 dump_messages_of_target_user_from_chat(user, from_chat_id, target_user_id)
-
-        # (AFTER Korolev confirms this option)
-        # (?!) Add “target user ID” input as a separate / interactive command?
-        # case 'target_user':
-
         case 'findid': # (?)
             if (not args):
                 return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')

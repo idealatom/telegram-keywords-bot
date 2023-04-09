@@ -84,14 +84,14 @@ Single-time backup launched manually (NOT real time monitoring)
 - `/findid chat_title | first_name last_name | @username` - find `from_chat_id`
 - `/dump_all_messages from_chat_id` - forward all messages from a single selected chat to '7.Dump_all_messages' chat
 #### 8.Dump_replies
-All messages of a target user & all replies to these messages are selected from a specific chat & forwarded to '8.Dump_replies' chat
+Messages of target user and / or replies to them are forwarded to '8.Dump_replies' chat from a selected chat
 Single-time backup launched manually (NOT real time monitoring)
 ##### In ‘8.Dump_replies’ chat:
 - `/help` - show Help options
 - `/findid chat_title | first_name last_name | @username` - find `from_chat_id` and `target_user_id`
-- `/dump_replies from_chat_id target_user_id` - forward all messages (and replies to them) of a target user from a specific chat to '8.Dump_replies' chat
-
-
+- `/dump_replies from_chat_id target_user_id` - forward from a selected chat to "8.Dump_replies" chat:
+messages of target user that had replies & all these replies 
+- `/dump_messages_of_target_user_from_chat from_chat_id target_user_id` - forward all messages of target user from a selected chat to "8.Dump_replies" chat
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather 
 - [Pyrogram](https://docs.pyrogram.org/) (version 1.4, NOT version 2.0) is used - [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 
