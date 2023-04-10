@@ -10,7 +10,7 @@
 - Run `docker run -it --rm -v your_volume_name:/app/config_resources your_image_name` - to login to your Telegram account 
 - Paste your Telegram App's `api_id` and `api_hash` 
 Get them from 'App configuration' at https://my.telegram.org/apps 
-- [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including your Country Code digit(s), other symbols can be omitted)
+- [Pyrogram](https://docs.pyrogram.org/) asks to enter the phone number attached to your Telegram account (just digits including Country Code, other symbols can be omitted)
 - Paste confirmation code sent by Telegram to your account 
 - If your Telegram account has two-step verification enabled - your password will be required 
 - When you see `bot started` phrase in Terminal - eight new chats appear in your Telegram account:
@@ -23,7 +23,11 @@ Get them from 'App configuration' at https://my.telegram.org/apps
   - '7.Dump_all_messages' 
   - '8.Dump_replies'
 - Stop the running script: `Ctrl+C`
-- Run `docker run -d -v your_volume_name:/app/config_resources --name your_container_name --restart unless-stopped your_image_name` - launch bot in a container 
+- Run `docker run -d -v your_volume_name:/app/config_resources --name your_container_name --restart unless-stopped your_image_name` - launch bot 24/7 in a container 
+
+- (optional) (in Telegram) Create a new Folder & add to it manually these eight new chats 
+Then - archive manually each of these eight chats from 'All chats' to 'Archived Chats' 
+So these eight chats are kept in a separate Folder & do NOT disturb you 
 
 - (optional) To launch Bot with the same Telegram account & data on another machine (aka backup, restore & migrate Docker volume): 
   - (?!) (to back up volume) Run `docker run --rm --volumes-from your_container_name -v $(pwd):/backup_dir ubuntu tar cvf /backup_dir/archive.tar /your_volume_name` - 
@@ -32,10 +36,6 @@ Get them from 'App configuration' at https://my.telegram.org/apps
   - `scp your_source_user@backup_dir/archive.tar your_destination_user@your_destination_host_ip_address:/your_destination_path` 
   - (?!) (to restore volume from backup) Run `docker run --rm --volumes-from your_new_container -v $(pwd):/backup_dir ubuntu bash -c "cd /your_new_volume && tar xvf /backup_dir/archive.tar --strip 1"` - 
   un-tar 'archive.tar' file in the new container’s data volume 
-
-- (optional) (in Telegram) Create a new Folder & add to it manually these seven new chats 
-Then - archive manually each of these seven chats from 'All chats' to 'Archived Chats' 
-So these seven chats are kept in a separate Folder & do NOT disturb you 
 
 ### Features
 #### 1.Mentions

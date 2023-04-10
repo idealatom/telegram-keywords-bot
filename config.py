@@ -18,10 +18,12 @@ def read_config():
         config.add_section('bot_params')
 
     if not config.has_section('includes_dict'):
-        config.add_section('includes_dict')
+        # print("pRintEd fRom config.py fiLe aFteR 'if not config.has_section('includes_dict'):' ")  # (CDL) For testing only
+        config.add_section('includes_dict')  # (?) Why is this line NOT working if deleting [includes_dict] section manually in config.ini file?
 
-    if not config.has_section('chats_monitoring_switcher_section'): # (?)
-        config.add_section('chats_monitoring_switcher_section')
+    if not config.has_section('chats_monitoring_switcher_section'):
+        # print("pRintEd fRom config.py fiLe aFteR 'if not config.has_section('chats_monitoring_switcher_section'):' ")  # (CDL) For testing only
+        config.add_section('chats_monitoring_switcher_section')  # Fixed!
 
     return config
 
@@ -44,7 +46,8 @@ for chat in includes_dict:
 mentions_monitoring_switcher = config.get(  # (??) (CDL) Now this varable is NOT created, as nothing to get from the section in config.ini, which is NOT created automatically now
     'chats_monitoring_switcher_section',
     'mentions_monitoring_switcher',
-    fallback='eRRor in config.py with mentions_monitoring_switcher'  # (?) Use "on" here?!
+    fallback=''
+    # fallback='eRRor in config.py with mentions_monitoring_switcher'  # (?) Use "on" here?
 )
 
 

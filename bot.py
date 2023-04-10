@@ -934,14 +934,17 @@ def start_bot():
     user_info = user.get_me()
 
     for k in chat_dict:
-        if not globals()[chat_dict[k]]: # (?) How does this line work for the first session launch?
+        # print("(priNting fRom bot.py) 'globals()[chat_dict[k]]' == ", globals()[chat_dict[k]], " // 'k' == ", k)  # (CDL) For testing only
+        if not globals()[chat_dict[k]]: # (??) How does this line work for the first session launch?
             new_chat = user.create_group(k, user_info.id)
             globals()[chat_dict[k]] = new_chat.id
             config_set_and_save('bot_params', chat_dict[k], str(new_chat.id))
 
-    # (CDL) (??) Is this code block correct & necessary?
-    if not globals()['mentions_monitoring_switcher']: # (??) How to modify this line so it works correctly for the first session launch? (a new section in config.ini must be created automatically)
-        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'on') # (??) Bug: why is this line NOT working if launching the bot from scratch?
+    # print("(V1. priNting fRom bot.py) 'globals()['mentions_monitoring_switcher']' == ", globals()['mentions_monitoring_switcher'])  # (CDL) For testing only
+    if not globals()['mentions_monitoring_switcher']:
+        # print("(V2. priNting fRom bot.py) 'globals()['mentions_monitoring_switcher']' == ", globals()['mentions_monitoring_switcher'])  # (CDL) For testing only
+        config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'on')
+
 
     # init message
     # user.send_message(keywords_chat_id, 'bot started')
