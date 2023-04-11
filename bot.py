@@ -345,34 +345,44 @@ def mentions_handler(client, message):
         case 'on':
             # mentions_monitoring_switcher.clear()
             # mentions_monitoring_switcher.format('mentions_monitoring_switcher'='on') # Var1 (??)  TEST this line!
-            # mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (?) TEST this line!
-            # mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (??) Is using "mentions_monitoring_switcher_on"_== an optimal solution? ***TEST this line!
-            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only  ***Use global var for testin?!
-            mentions_monitoring_switcher = mentions_monitoring_switcher.replace("off", "on") # Var3 (??) Test it!
-            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
-            # print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
-            # mentions_monitoring_switcher.add('on')  # (CDL) For "set"
+
+            print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only  ***Use global var for testin?!
+            # mentions_monitoring_switcher = mentions_monitoring_switcher.replace("off", "on") # Var3 (??) Test it!
+            # mentions_monitoring_switcher.replace("off", "on")  # Var3 (??) Test it!
+
+            mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (?) TEST this line!
+            print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
+            print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+
             # save_mentions_switcher(mentions_monitoring_switcher_on) # Var2. (??) Test it!
-            save_mentions_switcher(mentions_monitoring_switcher) # Var3. (??) Test it!
+            save_mentions_switcher(mentions_monitoring_switcher_on) # Var3. (??) Test it!
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
                 '"Mentions" feature is working now'
             )
+            print("mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+
         case 'off':
             # mentions_monitoring_switcher.clear()
             # mentions_monitoring_switcher.format('off') # Var1 (??)  TEST this line!
-            # mentions_monitoring_switcher.replace() # Var2 (??) NOT tried yet
-            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
-            # mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (?) TEST this line!
-            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (??) Is using "mentions_monitoring_switcher_off"_== an optimal solution? ***TEST this line!
-            print("mentions_monitoring_switcher == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+
+            print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (??) TEST this line!
             print("mentions_monitoring_switcher_off == ", mentions_monitoring_switcher_off, "// tYpe == ", type(mentions_monitoring_switcher_off)) # (CDL) For testing only
-            # mentions_monitoring_switcher.add('off')
-            save_mentions_switcher(mentions_monitoring_switcher_off)
+
+            # var3 = mentions_monitoring_switcher.replace("on", "off")  # (CDL) Var4. For testing only
+            # save_mentions_switcher(mentions_monitoring_switcher) # Var3. (??) Test it!
+            # print("var3 == ", var3, "// tYpe == ", type(var3)) # (CDL) For testing only
+
+            print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            save_mentions_switcher(mentions_monitoring_switcher_off)  # Var2 (??) TEST this line!
+
             message.reply_text(
                 'Automatic monitoring is turned OFF\n'
                 '"Mentions" feature is NOT working now'
             )
+            print("mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+
         case _:
             message.reply_text('Sorry, this command is not valid')
 
@@ -796,15 +806,13 @@ def not_my_messages_handler(client, message):
     #     mentions_forward(client, message)
 
     if message.mentioned:
-        print(mentions_monitoring_switcher)
-        print(type(mentions_monitoring_switcher))
+        print(" // 'mentions_monitoring_switcher' == ", mentions_monitoring_switcher, type(mentions_monitoring_switcher))  # (CDL) For testing only
         print("aCCept reAliTy")  # (CDL) For testing only
         # print(set(mentions_monitoring_switcher))
         # print(type(set(mentions_monitoring_switcher)))
         # print(mentions_monitoring_switcher[0])
-        c1 = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRroR with get()')
-        print(c1)
-        print(type(c1))
+        c1 = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRroR with config.get()')  # (CDL) For testing only
+        print("c1 == ", c1, type(c1))  # (CDL) For testing only
 
         # if mentions_monitoring_switcher == "on": # (??) This line does NOT work. Why?
         # if c1 == "on":  # (??) This line does NOT work. Why?

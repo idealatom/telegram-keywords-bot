@@ -50,6 +50,7 @@ mentions_monitoring_switcher = config.get(  # (??) (CDL) Now this varable is NOT
     # fallback='eRRor in config.py with mentions_monitoring_switcher'  # (?) Use "on" here?
 )
 
+print(" priNtinG 'mentions_monitoring_switcher' vaRiaBle fRoM config.py' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher))  # (CDL) For testing only
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
