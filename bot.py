@@ -1,7 +1,7 @@
 import re
 from pyrogram import Client, filters, idle
 # from datetime import datetime
-from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_messages_chat_id, dump_replies_chat_id, \
+from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_from_selected_chat_chat_id, dump_replies_chat_id, \
     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, keywords, save_keywords, excluded_chats, \
     save_excluded_chats, add_keywords_to_includes, includes_dict, following_set, save_following, config_set_and_save, \
     mentions_monitoring_switcher, save_mentions_switcher
@@ -21,7 +21,7 @@ chat_dict = {
     "4.Keywords": "keywords_chat_id",
     "5.Following": "following_chat_id",
     "6.Edited_and_Deleted_messages_monitoring": "edited_and_deleted_chat_id",
-    "7.Dump_all_messages": "dump_all_messages_chat_id", # (?) Rename the chat to 'Dump_all_from_selected_chat' OR 'Dump_from_a_chat' OR 'Backup_from_chat'
+    "7.Dump_all_from_selected_chat": "dump_all_from_selected_chat_chat_id",
     "8.Dump_replies": "dump_replies_chat_id"
 }
 
@@ -69,7 +69,7 @@ def find_users(client, args):
 #     pass
 
 
-def dump_messages_of_target_user_from_chat(client, from_chat_id, target_user_id):
+def dump_all_messages_of_target_user_from_selected_chat(client, from_chat_id, target_user_id):
 
     if client.get_history_count(from_chat_id) == 0:
         client.send_message(dump_replies_chat_id, f"Sorry, chat {from_chat_id} is empty.\n Try to enter another from_chat_id")
@@ -112,6 +112,7 @@ def dump_messages_of_target_user_from_chat(client, from_chat_id, target_user_id)
                         f"Number of messages from target user skipped by bot (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_messages}\n"
                         "/help - show Help options"
                         )
+    client.mark_chat_unread(dump_replies_chat_id)
 
 
 
@@ -165,6 +166,7 @@ def dump_replies(client, from_chat_id, target_user_id):
             # dump_replies_forward(client, message)  # (CDL)
             message.reply_to_message.forward(dump_replies_chat_id)  # Forward the original message
             message.forward(dump_replies_chat_id)  # Forward the reply to this original message
+            client.mark_chat_unread(dump_replies_chat_id)
 
         # + Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
         # (?) (CDL) BUT: I can NOT get ANY details about this "reply" message itself with "reply_to_message" param
@@ -206,14 +208,14 @@ def dump_replies(client, from_chat_id, target_user_id):
 
 
 
-def dump_all_messages(client, from_chat_id):
+def dump_all_from_selected_chat(client, from_chat_id):
     from_chat_full_message_history = client.get_history_count(from_chat_id)
     if from_chat_full_message_history == 0:
-        client.send_message(dump_all_messages_chat_id,
+        client.send_message(dump_all_from_selected_chat_chat_id,
                             f"Sorry, NO messages to backup: chat {from_chat_id} is empty.\n Try to use another from_chat_id"
                             )
         return # (?) Is this line necessary? ***Test in TG if this solution works fine
-    backup_all_messages_chat_size = client.get_history_count(dump_all_messages_chat_id)
+    backup_all_messages_chat_size = client.get_history_count(dump_all_from_selected_chat_chat_id)
     skipped_service_messages = 0
     counter = 0
     # current_time = int(datetime.now().timestamp())
@@ -223,15 +225,15 @@ def dump_all_messages(client, from_chat_id):
             skipped_service_messages += 1
             continue
         # message_datetime = datetime.fromtimestamp(message.date)
-        # client.send_message(chat_id=dump_all_messages_chat_id,
+        # client.send_message(chat_id=dump_all_from_selected_chat_chat_id,
         #                     text=message_datetime.strftime("%A, %d. %B %Y %I:%M%p")) # To show the exact time
-        # Timer(counter * 50, message.forward(dump_all_messages_chat_id)).start()
-        message.forward(dump_all_messages_chat_id)
-        #message.forward(dump_all_messages_chat_id, schedule_date=current_time + counter);
-        #forwarded_message = message.forward(dump_all_messages_chat_id)
+        # Timer(counter * 50, message.forward(dump_all_from_selected_chat_chat_id)).start()
+        message.forward(dump_all_from_selected_chat_chat_id)
+        #message.forward(dump_all_from_selected_chat_chat_id, schedule_date=current_time + counter);
+        #forwarded_message = message.forward(dump_all_from_selected_chat_chat_id)
         #print(forwarded_message.id, forwarded_message.text)
-    forward_chat_full_message_history = client.get_history_count(dump_all_messages_chat_id)
-    client.send_message(dump_all_messages_chat_id,
+    forward_chat_full_message_history = client.get_history_count(dump_all_from_selected_chat_chat_id)
+    client.send_message(dump_all_from_selected_chat_chat_id,
                         "RESULTS:\n"
                         f"Forwarding of all messages from chat with chat_ID {from_chat_id} is FINISHED\n"
                         f"Size of your chat to forward from: {from_chat_full_message_history} messages\n"
@@ -244,10 +246,10 @@ def dump_all_messages(client, from_chat_id):
 
 # Commands used in all bot chats in Telegram ("4.Keywords"; "1.Mentions"; "5.Following"; etc.) must be listed here:
 filtered_commands_list = ['help', 'help_general', 'add', 'show', 'remove', 'findid', 'exclude_chat', 'excluded_chats_list',
-                          'delete_from_excluded_chats', 'dump_all_messages', 'dump_replies', 'include', 'follow', 'unfollow',
-                          'on', 'off', 'dump_messages_of_target_user_from_chat']
+                          'delete_from_excluded_chats', 'dump_all_from_selected_chat', 'dump_replies', 'include', 'follow', 'unfollow',
+                          'on', 'off', 'dump_all_messages_of_target_user_from_selected_chat']
 
-list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_messages_chat_id,
+list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_from_selected_chat_chat_id,
                                     edited_and_deleted_chat_id, pinned_messages_chat_id, findid_chat_id, dump_replies_chat_id]
 
 help_general_text = """
@@ -271,8 +273,8 @@ def command_messages_handler(client, message):
         following_handler(client, message)
     elif chat_id == mentions_chat_id:
         mentions_handler(client, message)
-    elif chat_id == dump_all_messages_chat_id:
-        dump_all_messages_handler(client, message)
+    elif chat_id == dump_all_from_selected_chat_chat_id:
+        dump_all_from_selected_chat_handler(client, message)
     elif chat_id == edited_and_deleted_chat_id:
         edited_and_deleted_chat_input_handler(client, message)
     elif chat_id == pinned_messages_chat_id:
@@ -452,8 +454,8 @@ def findid_input_handler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 
-# "7.Dump_all_messages" chat handler
-def dump_all_messages_handler(client, message):
+# "7.Dump_all_from_selected_chat" chat handler
+def dump_all_from_selected_chat_handler(client, message):
     args = message.command
     comm = args.pop(0)
     match comm:
@@ -464,34 +466,34 @@ def dump_all_messages_handler(client, message):
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n'
                 '/findid @username | first_name last_name | chat_title - find from_chat_id (may work slowly)\n\n'
-                '/dump_all_messages from_chat_id -\n'
-                'All messages from a single selected chat are copied & forwarded to "7.Dump_all_messages" chat\n' 
+                '/dump_all_from_selected_chat from_chat_id -\n'
+                'All messages from a single selected chat are copied & forwarded to "7.Dump_all_from_selected_chat" chat\n' 
                 'Single-time manual backup (NOT automatic, NOT real time monitoring)\n'
             )
-        case 'dump_all_messages': # (?)
+        case 'dump_all_from_selected_chat': # (?)
             if len(args) == 0:
-                message.reply_text('Sorry, from_chat_id is not found\n'
-                                   'from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_messages\n\n'
-                                   'Please, use this format: /dump_all_messages from_chat_id\n'
+                message.reply_text('Sorry, from_chat_id is not found\n\n'
+                                   'from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_from_selected_chat\n\n'
+                                   'Please, use this format: /dump_all_from_selected_chat from_chat_id\n'
                                    'Use /findid to get from_chat_id')  # chat_title | chat_id | @username
             if len(args) > 1:
-                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_all_messages')
+                message.reply_text('Wrong input:\n' + '\n'.join([arg for arg in args]) + '\n\nPlease enter a single valid from_chat_id after /dump_all_from_selected_chat')
             if len(args) == 1:
                 from_chat_id = args[0]
                 try:
                     from_chat_id = int(from_chat_id)
                 except ValueError:
-                    message.reply("Sorry, from_chat_id is not valid\n "
-                                  "from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_messages\n\n"
-                                  'Please, use this format: /dump_all_messages from_chat_id\n'
+                    message.reply("Sorry, from_chat_id is not valid\n\n"
+                                  "from_chat_id (Telegram ID of the chat to backup messages from) must be entered manually after /dump_all_from_selected_chat\n\n"
+                                  'Please, use this format: /dump_all_from_selected_chat from_chat_id\n'
                                   "Use /findid to get from_chat_id")
-                dump_all_messages(user, args[0])
+                dump_all_from_selected_chat(user, args[0])
         case 'findid': # (?)
             if (not args):
-                return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')
+                return message.reply_text('Smth must be entered manually after /findid command: \nchat_title | first_name last_name | @username')
             dialogs = find_chats(client, args)
             message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
-                dialogs) else 'Sorry, nothing is found. Enter manually after /findid - chat_title | first_name last_name | @username')
+                dialogs) else 'Sorry, nothing is found. \nEnter manually after /findid - chat_title | first_name last_name | @username')
         case _:
             message.reply_text('Sorry, this command is not valid')
 
@@ -508,7 +510,7 @@ def dump_replies_chat_input_handler(client, message):
                 '/help - show Help options for this chat\n'
                 '/help_general - show Help options for all chats\n'
                 '/findid chat_title | first_name last_name | @username - find "from_chat_id" and "target_user_id"\n\n'
-                '/dump_messages_of_target_user_from_chat from_chat_id target_user_id - \n'
+                '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id - \n'
                 'forward all messages of target user from a selected chat to "8.Dump_replies" chat. \n'
                 'Single-time backup launched manually (NOT real time monitoring)\n\n'                
                 '/dump_replies from_chat_id target_user_id - \n'
@@ -561,15 +563,14 @@ def dump_replies_chat_input_handler(client, message):
                 #                         )
                 #     return # (?) Did I use "return" in a correct way & place?
 
-                # (?) (CDL)  Is it correct to use two args in the line below?  (?)Try "client" instead of "user" ?
                 dump_replies(user, from_chat_id, target_user_id) # (CDL) This solution works fine now
 
-        case 'dump_messages_of_target_user_from_chat':
+        case 'dump_all_messages_of_target_user_from_selected_chat':
             if len(args) != 2:
                 # (?) Is "return" necessary to add here?
                 message.reply_text('Wrong input\n' 
                                    'Please, enter valid data in this format:\n' 
-                                   '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
+                                   '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id\n\n'
                                    'Use /findid command to find valid from_chat_id and target_user_id'
                                    )
             if len(args) == 2:
@@ -580,7 +581,7 @@ def dump_replies_chat_input_handler(client, message):
                 except ValueError:
                     message.reply_text('Sorry, from_chat_id is not found\n'
                                        'Please, enter valid data in this format:\n'
-                                       '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
+                                       '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
                 try:
@@ -588,27 +589,27 @@ def dump_replies_chat_input_handler(client, message):
                 except ValueError:
                     message.reply_text('Sorry, target_user_id is not found\n'
                                        'Please, enter valid data in this format:\n'
-                                       '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
+                                       '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
-                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:  # (??) NOT tested yet.
-                if not find_chats(client, from_chat_id):  # (??) Is it a good idea to use "find_chats" function here for verification?
-                    client.send_message(dump_replies_chat_id,
-                                        'Sorry, from_chat_id is not found\n'
-                                        'Please, enter valid data in this format:\n'
-                                        '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
-                                        'Use /findid command to find valid from_chat_id and target_user_id'
-                                        )
-                    return # (?) Did I use "return" in a correct way & place?
-                if not find_chats(client, target_user_id):
-                    client.send_message(dump_replies_chat_id,
-                                        'Sorry, target_user_id is not found\n'
-                                        'Please, enter valid data in this format:\n'
-                                        '/dump_messages_of_target_user_from_chat from_chat_id target_user_id\n\n'
-                                        'Use /findid command to find valid from_chat_id and target_user_id'
-                                        )
-                    return # (?) Did I use "return" in a correct way & place?
-                dump_messages_of_target_user_from_chat(user, from_chat_id, target_user_id)
+                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:  # (??) Fix as works wrong now  => Test AGAIN
+                # if not find_chats(client, from_chat_id):  # (??) Is it a good idea to use "find_chats" function here for verification?
+                #     client.send_message(dump_replies_chat_id,
+                #                         'Sorry, from_chat_id is not found\n'
+                #                         'Please, enter valid data in this format:\n'
+                #                         '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id\n\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         )
+                #     return # (?) Did I use "return" in a correct way & place?
+                # if not find_chats(client, target_user_id):
+                #     client.send_message(dump_replies_chat_id,
+                #                         'Sorry, target_user_id is not found\n'
+                #                         'Please, enter valid data in this format:\n'
+                #                         '/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id\n\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         )
+                #     return # (?) Did I use "return" in a correct way & place?
+                dump_all_messages_of_target_user_from_selected_chat(user, from_chat_id, target_user_id)
         case 'findid': # (?)
             if (not args):
                 return message.reply_text('Smth must be entered manually after /findid command: chat_title | first_name last_name | @username')

@@ -20,7 +20,7 @@ Get them from 'App configuration' at https://my.telegram.org/apps
   - ‘4.Keywords’
   - ‘5.Following’
   - '6.Edited_and_Deleted_messages_monitoring'
-  - '7.Dump_all_messages' 
+  - '7.Dump_all_from_selected_chat' 
   - '8.Dump_replies'
 - Stop the running script: `Ctrl+C`
 - Run `docker run -d -v your_volume_name:/app/config_resources --name your_container_name --restart unless-stopped your_image_name` - launch bot 24/7 in a container 
@@ -76,13 +76,13 @@ _(?) (CDL) # UPDATE these instructions AFTER fixing bugs with 'Deleted' feature_
 - Details: user / chat, date, time, message content AFTER being updated (for 'Deleted' - NO content)
 - (next feature) Select manually specific user(s) / group(s) / channel(s) to monitor
 - (next big feature) Get ORIGINAL version of message - BEFORE being edited / deleted by smb. # Adding a database is necessary to backup your correspondence in real time
-#### 7.Dump_all_messages  
-All messages from a single selected chat are copied & forwarded to '7.Dump_all_messages' chat 
+#### 7.Dump_all_from_selected_chat  
+All messages from a single selected chat are copied & forwarded to '7.Dump_all_from_selected_chat' chat 
 Single-time backup launched manually (NOT real time monitoring)
-##### In ‘7.Dump_all_messages’ chat:
+##### In ‘7.Dump_all_from_selected_chat’ chat:
 - `/help` - show Help options
 - `/findid chat_title | first_name last_name | @username` - find `from_chat_id`
-- `/dump_all_messages from_chat_id` - forward all messages from a single selected chat to '7.Dump_all_messages' chat
+- `/dump_all_from_selected_chat from_chat_id` - forward all messages from a single selected chat to '7.Dump_all_from_selected_chat' chat
 #### 8.Dump_replies
 Messages of target user and / or replies to them are forwarded to '8.Dump_replies' chat from a selected chat
 Single-time backup launched manually (NOT real time monitoring)
@@ -91,7 +91,7 @@ Single-time backup launched manually (NOT real time monitoring)
 - `/findid chat_title | first_name last_name | @username` - find `from_chat_id` and `target_user_id`
 - `/dump_replies from_chat_id target_user_id` - forward from a selected chat to "8.Dump_replies" chat:
 messages of target user that had replies & all these replies 
-- `/dump_messages_of_target_user_from_chat from_chat_id target_user_id` - forward all messages of target user from a selected chat to "8.Dump_replies" chat
+- `/dump_all_messages_of_target_user_from_selected_chat from_chat_id target_user_id` - forward all messages of target user from a selected chat to "8.Dump_replies" chat
 ### Pay attention:
 - This bot is a Telegram client & an app. It is NOT a ‘usual TG bot via BotFather’. NO need to create a new bot via BotFather 
 - [Pyrogram](https://docs.pyrogram.org/) (version 1.4, NOT version 2.0) is used - [MTProto API](https://docs.pyrogram.org/topics/mtproto-vs-botapi) framework to interact with the main Telegram API 

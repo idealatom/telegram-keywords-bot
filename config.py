@@ -49,13 +49,12 @@ mentions_monitoring_switcher = config.get(  # (??) (CDL) Now this varable is NOT
     fallback=''
     # fallback='eRRor in config.py with mentions_monitoring_switcher'  # (?) Use "on" here?
 )
-
-print(" priNtinG 'mentions_monitoring_switcher' vaRiaBle fRoM config.py' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher))  # (CDL) For testing only
+# print(" priNtinG 'mentions_monitoring_switcher' vaRiaBle fRoM config.py' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher))  # (CDL) For testing only
 
 keywords_chat_id = config.get('bot_params', 'keywords_chat_id', fallback='')
 mentions_chat_id = config.get('bot_params', 'mentions_chat_id', fallback='')
 following_chat_id = config.get('bot_params', 'following_chat_id', fallback='')
-dump_all_messages_chat_id = config.get('bot_params', 'dump_all_messages_chat_id', fallback='')
+dump_all_from_selected_chat_chat_id = config.get('bot_params', 'dump_all_from_selected_chat_chat_id', fallback='')
 edited_and_deleted_chat_id = config.get('bot_params', 'edited_and_deleted_chat_id', fallback='')
 pinned_messages_chat_id = config.get('bot_params', 'pinned_messages_chat_id', fallback='')
 findid_chat_id = config.get('bot_params', 'findid_chat_id', fallback='')
