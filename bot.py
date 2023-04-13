@@ -40,16 +40,16 @@ def find_chats(client, args):
         try:
             chat = client.get_chat(args[0])
             dialogs.append([str(chat.id), str(chat.title) if chat.title else str(
-                chat.first_name) + ' ' + str(chat.last_name)])
+                chat.first_name) + ' ' + str(chat.last_name)])  # (CDL) (?) Is the code in this line after "else" correct & adding value?
         except:
             return dialogs
     else:
         for dialog in client.iter_dialogs():
-            searchStr = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
+            search_str = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
                                   str(dialog.chat.last_name), '@' + str(dialog.chat.username)))
-            if re.search(' '.join(args), searchStr, re.IGNORECASE):
+            if re.search(' '.join(args), search_str, re.IGNORECASE):
                 dialogs.append([str(dialog.chat.id), str(dialog.chat.title) if dialog.chat.title else str(
-                    dialog.chat.first_name) + ' ' + str(dialog.chat.last_name)])
+                    dialog.chat.first_name) + ' ' + str(dialog.chat.last_name)])  # (CDL) (?) Is the code in this line after "else" correct & adding value? 
     return dialogs
 
 
@@ -520,19 +520,19 @@ def dump_replies_chat_input_handler(client, message):
             )
         case 'dump_replies': # (?)
             if len(args) != 2:
-                # (?) Is "return" necessary to add here?
-                message.reply_text('Wrong input\n' 
+                message.reply_text('Wrong input\n\n' 
                                    'Please, enter valid data in this format:\n' 
                                    '/dump_replies from_chat_id target_user_id\n\n'
                                    'Use /findid command to find valid from_chat_id and target_user_id'
                                    )
+                return  # (?) Is "return" necessary here?
             if len(args) == 2:
                 from_chat_id = args[0]
                 target_user_id = args[1]
                 try:
                     check_from_chat_id = int(from_chat_id) # (?)
                 except ValueError:
-                    message.reply_text('Sorry, from_chat_id is not found\n'
+                    message.reply_text('Sorry, from_chat_id is NOT valid\n\n'
                                        'Please, enter valid data in this format:\n'
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
@@ -540,30 +540,73 @@ def dump_replies_chat_input_handler(client, message):
                 try:
                     check_target_user_id = int(target_user_id) # (?)
                 except ValueError:
-                    message.reply_text('Sorry, target_user_id is not found\n'
+                    message.reply_text('Sorry, target_user_id is NOT valid\n\n'
                                        'Please, enter valid data in this format:\n'
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
+
+
+                # (??) Is this "hasty" solution below acceptable for my case?
+                # print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
+
+                if dump_replies(user, from_chat_id, target_user_id):  # (?) "is None"
+                    # print(dump_replies(user, from_chat_id, target_user_id))  # (CDL) For testing only
+                    return
+                else:
+                    # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
+                    message.reply_text('Sorry, from_chat_id or target_user_id is NOT valid\n\n'
+                                       'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                                       'Then enter valid data in this format:\n'
+                                       '/dump_replies from_chat_id target_user_id'
+                                       )
+
+                # try:
+                #     dump_replies(user, from_chat_id, target_user_id) # (CDL)
+                # except:  # (??) This "except" block is NOT working
+                # except None:  # (??) Did NOT work also
+                #     print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
+                #     message.reply_text('Sorry, from_chat_id or target_user_id are NOT valid\n\n'
+                #                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                #                        'Then enter valid data in this format:\n'
+                #                        '/dump_replies from_chat_id target_user_id'
+                #                        )
+
+                # print("foLLoW my iNsTinct bY all mEans")  # (CDL) For testing only
+
+                # print(find_chats(client, from_chat_id))  # (CDL) For testing only
+                # print(type(find_chats(client, from_chat_id)))  # (CDL) For testing only
+                # print(find_chats(client, target_user_id))  # (CDL) For testing only
+                # print(type(find_chats(client, target_user_id)))  # (CDL) For testing only
+
+
                 # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
-                # if not find_chats(client, from_chat_id):
+
+                # dialogs = find_chats(client, args)
+                # message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
+                #     dialogs) else 'Sorry, nothing is found. \nEnter manually after /findid - chat_title | first_name last_name | @username')
+                # print(" 'dialogs' == ", dialogs)
+                # print(type(dialogs))
+
+                # if find_chats(client, from_chat_id) == []:  # (??) Does this line fit the goal of the task?
+                #     print("*****\n", find_chats(client, from_chat_id))  # (CDL) For testing only
+                #     print(type(find_chats(client, from_chat_id)))  # (CDL) For testing only
                 #     client.send_message(dump_replies_chat_id,
-                #                         'Sorry, from_chat_id is not found\n'
-                #                         'Please, enter valid data in this format:\n'
-                #                         '/dump_replies from_chat_id target_user_id\n\n'
-                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         'Sorry, from_chat_id is NOT found\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                #                         'Then enter valid data in this format:\n'
+                #                         '/dump_replies from_chat_id target_user_id'
                 #                         )
                 #     return # (?) Did I use "return" in a correct way & place?
-                # if not find_chats(client, target_user_id):
+                # if not find_chats(client, target_user_id):  # (??) Does this line fit the goal of the task?
                 #     client.send_message(dump_replies_chat_id,
-                #                         'Sorry, target_user_id is not found\n'
-                #                         'Please, enter valid data in this format:\n'
-                #                         '/dump_replies from_chat_id target_user_id\n\n'
-                #                         'Use /findid command to find valid from_chat_id and target_user_id'
+                #                         'Sorry, target_user_id is NOT found\n'
+                #                         'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                #                         'Then enter valid data in this format:\n'
+                #                         '/dump_replies from_chat_id target_user_id'
                 #                         )
                 #     return # (?) Did I use "return" in a correct way & place?
 
-                dump_replies(user, from_chat_id, target_user_id) # (CDL) This solution works fine now
 
         case 'dump_all_messages_of_target_user_from_selected_chat':
             if len(args) != 2:
