@@ -128,11 +128,61 @@ def dump_replies(client, from_chat_id, target_user_id):
     # print(f"'from_chat_id' == {from_chat_id}, tYpE == {type(from_chat_id)}")  # (CDL) For testing only
     # print(f"'target_user_id' == {target_user_id}, tYpE == {type(target_user_id)}")  # (CDL) For testing only
 
+    from_chat_size = client.get_history_count(from_chat_id)
+    chat_initial_size = client.get_history_count(dump_replies_chat_id)
+    skipped_messages = 0
+    original_messages_of_target_user_that_had_replies_counter = 0
+    replies_to_original_messages_of_target_user_counter = 0
+
+
     # (?) About the code block below: is it the optimal solution?!
     for message in client.iter_history(from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         # print(message.from_user.id)  # (CDL) For testing only
         # print(type(message.from_user.id))  # (CDL) For testing only
         # return  # (CDL) For testing only
+
+        # +++ VARIANT N2. FORWARD every original message & reply (as SEPARATE messages).
+        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
+            try:  # (??) TEST this "try - except" block & confirm that counting is done correctly
+                if message.service:
+                    skipped_messages += 1
+                    continue
+                # if type(message) is None: # (??) (CDL) Is this verification correct?
+                #     continue
+
+                message.reply_to_message.forward(dump_replies_chat_id)  # Forward the original message of target user
+                original_messages_of_target_user_that_had_replies_counter += 1  # (??) Confirm during testing: an original message can be DUPLICATED in my current solution, if it has several replies
+
+                message.forward(dump_replies_chat_id)  # Forward the reply to this original message
+                replies_to_original_messages_of_target_user_counter += 1
+
+            except AttributeError:
+                skipped_messages += 1
+                continue  # (?) Is smth necessary to use here? "Continue" / "pass" / nothing ?
+
+    chat_final_size = client.get_history_count(dump_replies_chat_id)
+    client.send_message(dump_replies_chat_id,
+                        "RESULTS:\n\n"
+                        f"Messages of target user (user_id {target_user_id} ) that had replies & all these replies were forwarded from chat with chat_ID {from_chat_id}\n\n"
+                        f"Number of target user's messages that had replies: {original_messages_of_target_user_that_had_replies_counter}\n"
+                        "(the same message was counted & forwarded several times, if it had several replies)\n\n"
+                        f"Number of replies to messages of target user: {replies_to_original_messages_of_target_user_counter}\n\n"
+                        f"Total number of messages forwarded: {chat_final_size - chat_initial_size}\n" 
+                        f"Number of skipped messages (Ex.: 'joined chat', 'removed from chat', 'pinned message', etc): {skipped_messages}\n"
+                        f"Size of selected chat (chat_id {from_chat_id}): {from_chat_size} messages\n\n"
+                        "/help - show Help options"
+                        )
+    client.mark_chat_unread(dump_replies_chat_id)
+
+        # +++ VARIANT N1: put TEXTS of original message & reply into a new single message:
+        # Get & forward both:
+        # 1.Every ORIGINAL message of the TARGET user that HAS some replies
+        # 2.All REPLIES to these original messages
+        # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
+        #     client.send_message(dump_replies_chat_id,
+        #                         f"1. Original message of target user with user_ID {message.reply_to_message.from_user.id}: \n{message.reply_to_message.text}\n"
+        #                         f"2. Reply of user '{message.reply_to_message.from_user.username}' with user_ID {message.reply_to_message.from_user.id} to this original message: \n{message.text}"
+        #                         )
 
         # ++ If message IS a reply  =>  Get details about it & about its' original message
         # if message.reply_to_message:
@@ -150,23 +200,6 @@ def dump_replies(client, from_chat_id, target_user_id):
         #     client.send_message(dump_replies_chat_id,
         #                         f"{message.reply_to_message.from_user.username} // {message.reply_to_message.from_user.id} // {message.reply_to_message.text}"
         #                         )
-
-        # +++ VARIANT N1: put TEXTS of original message & reply into a new single message:
-        # Get & forward both:
-        # 1.Every ORIGINAL message of the TARGET user that HAS some replies
-        # 2.All REPLIES to these original messages
-        # if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
-        #     client.send_message(dump_replies_chat_id,
-        #                         f"1. Original message of target user with user_ID {message.reply_to_message.from_user.id}: \n{message.reply_to_message.text}\n"
-        #                         f"2. Reply of user '{message.reply_to_message.from_user.username}' with user_ID {message.reply_to_message.from_user.id} to this original message: \n{message.text}"
-        #                         )
-
-        # +++ VARIANT N2. FORWARD every original message & reply as SEPARATE messages.
-        if message.reply_to_message and str(message.reply_to_message.from_user.id) == target_user_id:  # Works correctly. # Already tested.
-            # dump_replies_forward(client, message)  # (CDL)
-            message.reply_to_message.forward(dump_replies_chat_id)  # Forward the original message
-            message.forward(dump_replies_chat_id)  # Forward the reply to this original message
-            client.mark_chat_unread(dump_replies_chat_id)
 
         # + Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
         # (?) (CDL) BUT: I can NOT get ANY details about this "reply" message itself with "reply_to_message" param
@@ -504,7 +537,8 @@ def dump_replies_chat_input_handler(client, message):
     comm = args.pop(0)
     match comm:
         case 'help_general':
-            message.reply_text(help_general_text)
+            # message.reply_text(help_general_text)
+            client.send_message(dump_replies_chat_id, help_general_text)
         case 'help':
             message.reply_text(
                 '/help - show Help options for this chat\n'
@@ -545,21 +579,21 @@ def dump_replies_chat_input_handler(client, message):
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
-
+                dump_replies(user, from_chat_id, target_user_id)  # (CDL) Temporary solutions w/o verification below
 
                 # (??) Is this "hasty" solution below acceptable for my case?
                 # print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
 
-                if dump_replies(user, from_chat_id, target_user_id):  # (?) "is None"
-                    # print(dump_replies(user, from_chat_id, target_user_id))  # (CDL) For testing only
-                    return
-                else:
-                    # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
-                    message.reply_text('Sorry, from_chat_id or target_user_id is NOT valid\n\n'
-                                       'Use /findid command to find valid from_chat_id and target_user_id\n\n'
-                                       'Then enter valid data in this format:\n'
-                                       '/dump_replies from_chat_id target_user_id'
-                                       )
+                # if dump_replies(user, from_chat_id, target_user_id):  # (??) Test it, as there is a bug here now
+                #     # print(dump_replies(user, from_chat_id, target_user_id))  # (CDL) For testing only
+                #     return
+                # else:
+                #     # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
+                #     message.reply_text('Sorry, from_chat_id or target_user_id is NOT valid\n\n'
+                #                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                #                        'Then enter valid data in this format:\n'
+                #                        '/dump_replies from_chat_id target_user_id'
+                #                        )
 
                 # try:
                 #     dump_replies(user, from_chat_id, target_user_id) # (CDL)
