@@ -1,4 +1,4 @@
-import re
+import re, sys
 from pyrogram import Client, filters, idle
 # from datetime import datetime
 from config import config, keywords_chat_id, following_chat_id, mentions_chat_id, dump_all_from_selected_chat_chat_id, dump_replies_chat_id, \
@@ -163,7 +163,7 @@ def dump_replies(client, from_chat_id, target_user_id):
     chat_final_size = client.get_history_count(dump_replies_chat_id)
     client.send_message(dump_replies_chat_id,
                         "RESULTS:\n\n"
-                        f"Messages of target user (user_id {target_user_id} ) that had replies & all these replies were forwarded from chat with chat_ID {from_chat_id}\n\n"
+                        f"Messages of target user ( user_id {target_user_id} ) that had replies & all these replies were forwarded from chat with chat_ID {from_chat_id}\n\n"
                         f"Number of target user's messages that had replies: {original_messages_of_target_user_that_had_replies_counter}\n"
                         "(the same message was counted & forwarded several times, if it had several replies)\n\n"
                         f"Number of replies to messages of target user: {replies_to_original_messages_of_target_user_counter}\n\n"
@@ -563,7 +563,8 @@ def dump_replies_chat_input_handler(client, message):
             if len(args) == 2:
                 from_chat_id = args[0]
                 target_user_id = args[1]
-                try:
+
+                try:  # +Tested
                     check_from_chat_id = int(from_chat_id) # (?)
                 except ValueError:
                     message.reply_text('Sorry, from_chat_id is NOT valid\n\n'
@@ -571,6 +572,8 @@ def dump_replies_chat_input_handler(client, message):
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
+                    # sys.exit(1)  # (CDL) This line exits the script completely
+                    return
                 try:
                     check_target_user_id = int(target_user_id) # (?)
                 except ValueError:
@@ -579,7 +582,35 @@ def dump_replies_chat_input_handler(client, message):
                                        '/dump_replies from_chat_id target_user_id\n\n'
                                        'Use /findid command to find valid from_chat_id and target_user_id'
                                        )
-                dump_replies(user, from_chat_id, target_user_id)  # (CDL) Temporary solutions w/o verification below
+                    # sys.exit(1)  # (CDL) This line exits the script completely
+                    return
+
+                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
+                try:  # +Tested
+                    # print("-  (Jason Fried)  In life I try to do what FEELS RIGHT, as often as I possibly can. ")  # (CDL) For testing only
+                    client.get_chat(from_chat_id)
+                    # print("(Henry Miller)  All growth is a leap in the dark, a spontaneous unpremeditated act without the benefit of experience.")  # (CDL) For testing only
+                    # print("client.get_chat(from_chat_id)  ==  ", client.get_chat(from_chat_id))  # (CDL) For testing only
+                    # print("client.get_chat(from_chat_id)['id']  ==  ", client.get_chat(from_chat_id)["id"])  # (CDL) For testing only
+                except:
+                    message.reply_text('(*) Sorry, from_chat_id is NOT valid\n\n'
+                                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                                        'Then enter valid data in this format:\n'
+                                        '/dump_replies from_chat_id target_user_id'
+                                        )
+                    return
+                try:
+                    client.get_chat(target_user_id)
+                except:
+                    message.reply_text('(*) Sorry, target_user_id is NOT valid\n\n'
+                                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+                                        'Then enter valid data in this format:\n'
+                                        '/dump_replies from_chat_id target_user_id'
+                                        )
+                    return
+
+                # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
+                dump_replies(user, from_chat_id, target_user_id)
 
                 # (??) Is this "hasty" solution below acceptable for my case?
                 # print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
@@ -613,8 +644,6 @@ def dump_replies_chat_input_handler(client, message):
                 # print(find_chats(client, target_user_id))  # (CDL) For testing only
                 # print(type(find_chats(client, target_user_id)))  # (CDL) For testing only
 
-
-                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
 
                 # dialogs = find_chats(client, args)
                 # message.reply_text('\n'.join([' - '.join(dialog) for dialog in dialogs]) if len(
