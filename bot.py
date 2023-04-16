@@ -365,6 +365,9 @@ def mentions_handler(client, message):
     comm = args.pop(0)
     # print("priNt 'args':", args) # CDL (for testing purposes)
     # print("priNt 'comm':", comm) # CDL (for testing purposes)
+
+    global mentions_monitoring_switcher  # (??) Should 'global' keyword be used here or below?
+
     match comm:
         case 'help_general':
             message.reply_text(help_general_text)
@@ -377,46 +380,44 @@ def mentions_handler(client, message):
                 'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
+
         case 'on':
-            # mentions_monitoring_switcher.clear()
-            # mentions_monitoring_switcher.format('mentions_monitoring_switcher'='on') # Var1 (??)  TEST this line!
-
-            print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only  ***Use global var for testin?!
-            # mentions_monitoring_switcher = mentions_monitoring_switcher.replace("off", "on") # Var3 (??) Test it!
-            # mentions_monitoring_switcher.replace("off", "on")  # Var3 (??) Test it!
-
+            # global mentions_monitoring_switcher  # (?) Should 'global' keyword be used here?
+            # print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only  ***Use global var for testing?!
             mentions_monitoring_switcher_on = mentions_monitoring_switcher.replace("off", "on") # Var2 (?) TEST this line!
-            print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
-            print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
-
-            # save_mentions_switcher(mentions_monitoring_switcher_on) # Var2. (??) Test it!
+            # print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # print("mentions_monitoring_switcher_on == ", mentions_monitoring_switcher_on, "// tYpe == ", type(mentions_monitoring_switcher_on)) # (CDL) For testing only
+            mentions_monitoring_switcher = mentions_monitoring_switcher_on
+            # print(" ('GLOBAL') mentions_monitoring_switcher AFTER 'global' kEyWord == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
             save_mentions_switcher(mentions_monitoring_switcher_on) # Var3. (??) Test it!
             message.reply_text(
                 'Automatic monitoring is turned ON\n'
                 '"Mentions" feature is working now'
             )
-            print("mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # print(" // mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # (backup solution) mentions_monitoring_switcher.clear()
+            # (backup solution) mentions_monitoring_switcher.format('mentions_monitoring_switcher'='on') # (CDL) Var1. NOT tested
+            # mentions_monitoring_switcher = mentions_monitoring_switcher.replace("off", "on") # (CDL) Var3. NOT tested
+            # mentions_monitoring_switcher.replace("off", "on")  # (CDL) Var3. NOT tested
 
         case 'off':
-            # mentions_monitoring_switcher.clear()
-            # mentions_monitoring_switcher.format('off') # Var1 (??)  TEST this line!
-
-            print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
-            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off") # Var2 (??) TEST this line!
-            print("mentions_monitoring_switcher_off == ", mentions_monitoring_switcher_off, "// tYpe == ", type(mentions_monitoring_switcher_off)) # (CDL) For testing only
-
-            # var3 = mentions_monitoring_switcher.replace("on", "off")  # (CDL) Var4. For testing only
-            # save_mentions_switcher(mentions_monitoring_switcher) # Var3. (??) Test it!
-            # print("var3 == ", var3, "// tYpe == ", type(var3)) # (CDL) For testing only
-
-            print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # global mentions_monitoring_switcher  # (?) Should 'global' keyword be used here?
+            # print("mentions_monitoring_switcher BEFORE 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            mentions_monitoring_switcher_off = mentions_monitoring_switcher.replace("on", "off")
+            # print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # print("mentions_monitoring_switcher_off == ", mentions_monitoring_switcher_off, "// tYpe == ", type(mentions_monitoring_switcher_off)) # (CDL) For testing only
+            mentions_monitoring_switcher = mentions_monitoring_switcher_off
+            # print(" ('GLOBAL') mentions_monitoring_switcher AFTER 'global' kEyWord == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
             save_mentions_switcher(mentions_monitoring_switcher_off)  # Var2 (??) TEST this line!
-
             message.reply_text(
                 'Automatic monitoring is turned OFF\n'
                 '"Mentions" feature is NOT working now'
             )
-            print("mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # print(" // mentions_monitoring_switcher AFTER 'save_mentions_switcher()' is executed == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
+            # mentions_monitoring_switcher.clear()
+            # mentions_monitoring_switcher.format('off') # Var1 (??)  TEST this line!
+            # print("var3 == ", var3, "// tYpe == ", type(var3)) # (CDL) For testing only
+            # print("mentions_monitoring_switcher AFTER 'replace()' == ", mentions_monitoring_switcher, "// tYpe == ", type(mentions_monitoring_switcher)) # (CDL) For testing only
 
         case _:
             message.reply_text('Sorry, this command is not valid')
@@ -893,8 +894,7 @@ def not_my_messages_handler(client, message):
     # process keywords
     if message.text and not str(message.chat.id) in excluded_chats:
         # maybe search -> findall and mark all keywords?
-        keyword = re.search("|".join(keywords),
-                            message.text, re.IGNORECASE)
+        keyword = re.search("|".join(keywords), message.text, re.IGNORECASE)
         if len(keywords) and keyword:
             keywords_forward(client, message, keyword.group())
 
@@ -913,20 +913,18 @@ def not_my_messages_handler(client, message):
     #     mentions_forward(client, message)
 
     if message.mentioned:
-        print(" // 'mentions_monitoring_switcher' == ", mentions_monitoring_switcher, type(mentions_monitoring_switcher))  # (CDL) For testing only
-        print("aCCept reAliTy")  # (CDL) For testing only
-        # print(set(mentions_monitoring_switcher))
-        # print(type(set(mentions_monitoring_switcher)))
-        # print(mentions_monitoring_switcher[0])
-        c1 = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRroR with config.get()')  # (CDL) For testing only
-        print("c1 == ", c1, type(c1))  # (CDL) For testing only
-
-        # if mentions_monitoring_switcher == "on": # (??) This line does NOT work. Why?
+        # print(" // (line ~930) 'mentions_monitoring_switcher' == ", mentions_monitoring_switcher, type(mentions_monitoring_switcher))  # (CDL) For testing only
+        # print("aCCept reAliTy")  # (CDL) For testing only
+        # c1 = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRroR with config.get()')  # (CDL) For testing only  # (??) Why is the value of "c1" NOT updated?
+        # print("c1 ==", c1, "//", type(c1))  # (CDL) For testing only
         # if c1 == "on":  # (??) This line does NOT work. Why?
-        if c1 == "on":  # (??) This line does NOT work. Why?
-            print("(Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
+        # if c1 == "on":  # (??) This line does NOT work. Why?
+        # if "on" in mentions_monitoring_switcher:  # (??) Test this line!
+        if mentions_monitoring_switcher == "on":
+            # print(" (line ~940) (Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
             mentions_forward(client, message)
-
+        # else:  # (CDL) For testing only
+        #     print(" (pRintEd aFter 'else') (line ~940) (Doris Lessing)  Whatever you're meant to do, do it now. The conditions are always impossible.")  # (CDL) For testing only
 
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
@@ -1059,6 +1057,8 @@ def start_bot():
     if not globals()['mentions_monitoring_switcher']:
         # print("(V2. priNting fRom bot.py) 'globals()['mentions_monitoring_switcher']' == ", globals()['mentions_monitoring_switcher'])  # (CDL) For testing only
         config_set_and_save('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', 'on')
+    # else:  # (CDL) For testing only
+    #     print(" *** (Ray Dalio)  Find your imperfections & deal w/ them openly, instead of getting stuck hiding your mistakes & pretending to be perfect.")  # (CDL) For testing only
 
 
     # init message
