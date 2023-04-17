@@ -532,14 +532,48 @@ def dump_all_from_selected_chat_handler(client, message):
             message.reply_text('Sorry, this command is not valid')
 
 
+chat_id_is_not_valid_template_text = """
+Sorry, chat_id is NOT valid\n
+To find valid chat_id, please, enter manually: 
+/findid chat_title | @username | first_name last_name 
+"""
+
+user_id_is_not_valid_template_text = """
+Sorry, target_user_id is NOT valid\n
+To find valid target_user_id, please, enter manually: 
+/findid @username | first_name last_name | chat_title 
+"""
+
+
+def chat_id_validity_verification(client, chat_id_to_verify, app_chat_id):
+    try:
+        chat_id_to_verify = int(chat_id_to_verify)
+        client.get_chat(chat_id_to_verify)
+    except:
+        # raise WrongTelegramIdError
+        client.send_message(app_chat_id, chat_id_is_not_valid_template_text)
+        return
+
+
+def user_id_validity_verification(client, user_id_to_verify, app_chat_id):
+    try:
+        user_id_to_verify = int(user_id_to_verify)
+        client.get_chat(user_id_to_verify)
+    except:
+        # raise WrongTelegramIdError
+        client.send_message(app_chat_id, user_id_is_not_valid_template_text)
+        return
+
+
 # "8.Dump_replies" chat handler
 def dump_replies_chat_input_handler(client, message):
     args = message.command
     comm = args.pop(0)
+    app_chat_id = dump_replies_chat_id  # (?) Is it ok to use the same naming for this local variable?
     match comm:
         case 'help_general':
             # message.reply_text(help_general_text)
-            client.send_message(dump_replies_chat_id, help_general_text)
+            client.send_message(app_chat_id, help_general_text)
         case 'help':
             message.reply_text(
                 '/help - show Help options for this chat\n'
@@ -560,58 +594,63 @@ def dump_replies_chat_input_handler(client, message):
                                    '/dump_replies from_chat_id target_user_id\n\n'
                                    'Use /findid command to find valid from_chat_id and target_user_id'
                                    )
-                return  # (?) Is "return" necessary here?
+                return
             if len(args) == 2:
                 from_chat_id = args[0]
                 target_user_id = args[1]
+                chat_id_validity_verification(client, from_chat_id, app_chat_id)
+                user_id_validity_verification(client, target_user_id, app_chat_id)
+                dump_replies(user, from_chat_id, target_user_id)  # (?) Shall I use 'client' or 'user' ?   # user = Client("user")
 
-                try:  # +Tested
-                    check_from_chat_id = int(from_chat_id) # (?)
-                except ValueError:
-                    message.reply_text('Sorry, from_chat_id is NOT valid\n\n'
-                                       'Please, enter valid data in this format:\n'
-                                       '/dump_replies from_chat_id target_user_id\n\n'
-                                       'Use /findid command to find valid from_chat_id and target_user_id'
-                                       )
-                    # sys.exit(1)  # (CDL) This line exits the script completely
-                    return
-                try:
-                    check_target_user_id = int(target_user_id) # (?)
-                except ValueError:
-                    message.reply_text('Sorry, target_user_id is NOT valid\n\n'
-                                       'Please, enter valid data in this format:\n'
-                                       '/dump_replies from_chat_id target_user_id\n\n'
-                                       'Use /findid command to find valid from_chat_id and target_user_id'
-                                       )
-                    # sys.exit(1)  # (CDL) This line exits the script completely
-                    return
+            #
+            #     try:  # +Tested
+            #         check_from_chat_id = int(from_chat_id) # (?)
+            #     except ValueError:
+            #         message.reply_text('Sorry, from_chat_id is NOT valid\n\n'
+            #                            'Please, enter valid data in this format:\n'
+            #                            '/dump_replies from_chat_id target_user_id\n\n'
+            #                            'Use /findid command to find valid from_chat_id and target_user_id'
+            #                            )
+            #         # sys.exit(1)  # (CDL) This line exits the script completely
+            #         return
+            #     try:
+            #         check_target_user_id = int(target_user_id) # (?)
+            #     except ValueError:
+            #         message.reply_text('Sorry, target_user_id is NOT valid\n\n'
+            #                            'Please, enter valid data in this format:\n'
+            #                            '/dump_replies from_chat_id target_user_id\n\n'
+            #                            'Use /findid command to find valid from_chat_id and target_user_id'
+            #                            )
+            #         # sys.exit(1)  # (CDL) This line exits the script completely
+            #         return
+            #
+            #     # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
+            #     try:  # +Tested
+            #         # print("-  (Jason Fried)  In life I try to do what FEELS RIGHT, as often as I possibly can. ")  # (CDL) For testing only
+            #         client.get_chat(from_chat_id)
+            #         # print("(Henry Miller)  All growth is a leap in the dark, a spontaneous unpremeditated act without the benefit of experience.")  # (CDL) For testing only
+            #         # print("client.get_chat(from_chat_id)  ==  ", client.get_chat(from_chat_id))  # (CDL) For testing only
+            #         # print("client.get_chat(from_chat_id)['id']  ==  ", client.get_chat(from_chat_id)["id"])  # (CDL) For testing only
+            #     except:
+            #         message.reply_text('(*) Sorry, from_chat_id is NOT valid\n\n'
+            #                             'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+            #                             'Then enter valid data in this format:\n'
+            #                             '/dump_replies from_chat_id target_user_id'
+            #                             )
+            #         return
+            #     try:
+            #         client.get_chat(target_user_id)
+            #     except:
+            #         message.reply_text('(*) Sorry, target_user_id is NOT valid\n\n'
+            #                             'Use /findid command to find valid from_chat_id and target_user_id\n\n'
+            #                             'Then enter valid data in this format:\n'
+            #                             '/dump_replies from_chat_id target_user_id'
+            #                             )
+            #         return
+            #
+            #     # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
+            #     dump_replies(user, from_chat_id, target_user_id)
 
-                # Verifying "from_chat_id" and "target_user_id" are valid Telegram IDs:
-                try:  # +Tested
-                    # print("-  (Jason Fried)  In life I try to do what FEELS RIGHT, as often as I possibly can. ")  # (CDL) For testing only
-                    client.get_chat(from_chat_id)
-                    # print("(Henry Miller)  All growth is a leap in the dark, a spontaneous unpremeditated act without the benefit of experience.")  # (CDL) For testing only
-                    # print("client.get_chat(from_chat_id)  ==  ", client.get_chat(from_chat_id))  # (CDL) For testing only
-                    # print("client.get_chat(from_chat_id)['id']  ==  ", client.get_chat(from_chat_id)["id"])  # (CDL) For testing only
-                except:
-                    message.reply_text('(*) Sorry, from_chat_id is NOT valid\n\n'
-                                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
-                                        'Then enter valid data in this format:\n'
-                                        '/dump_replies from_chat_id target_user_id'
-                                        )
-                    return
-                try:
-                    client.get_chat(target_user_id)
-                except:
-                    message.reply_text('(*) Sorry, target_user_id is NOT valid\n\n'
-                                        'Use /findid command to find valid from_chat_id and target_user_id\n\n'
-                                        'Then enter valid data in this format:\n'
-                                        '/dump_replies from_chat_id target_user_id'
-                                        )
-                    return
-
-                # print('(Rumi) “As you start to walk out on the way, the way appears.”')  # (CDL) For testing only
-                dump_replies(user, from_chat_id, target_user_id)
 
                 # (??) Is this "hasty" solution below acceptable for my case?
                 # print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
