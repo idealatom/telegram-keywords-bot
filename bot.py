@@ -374,10 +374,12 @@ def mentions_handler(client, message):
         case 'help':
             message.reply_text(
                 '/help - show Help options for this chat\n'
-                '/help_general - show Help options for all chats\n\n'
-                '"1.Mentions" chat works automatically\n'
+                '/help_general - show Help options for all chats\n'
+                '/off - turn OFF "Mentions" feature\n'
+                '/on - turn ON "Mentions" feature (if you manually turned it off earlier)\n\n'
+                '"1.Mentions" feature works automatically (real-time 24/7 monitoring)\n'
                 'No need to enter any input in "1.Mentions" chat\n\n'
-                'Messages from all chats where your TG account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
+                'Messages from all chats where your Telegram account was mentioned (tagged) will be forwarded to "1.Mentions" chat\n'
                 'Replies to your messages are also counted as mentions'
             )
 
@@ -940,6 +942,8 @@ def not_my_messages_handler(client, message):
 
     # process mentions
     # message can be a reply with attachment with no text
+    if message.mentioned and mentions_monitoring_switcher == "on":
+        mentions_forward(client, message)
 
     # if "Turned_ON" in mentions_monitoring_switcher:
     #     print("aCCept reAliTy")  # (CDL) For testing only
@@ -951,7 +955,7 @@ def not_my_messages_handler(client, message):
     #     print(" (Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
     #     mentions_forward(client, message)
 
-    if message.mentioned:
+    # if message.mentioned:
         # print(" // (line ~930) 'mentions_monitoring_switcher' == ", mentions_monitoring_switcher, type(mentions_monitoring_switcher))  # (CDL) For testing only
         # print("aCCept reAliTy")  # (CDL) For testing only
         # c1 = config.get('chats_monitoring_switcher_section', 'mentions_monitoring_switcher', fallback='eRroR with config.get()')  # (CDL) For testing only  # (??) Why is the value of "c1" NOT updated?
@@ -959,11 +963,13 @@ def not_my_messages_handler(client, message):
         # if c1 == "on":  # (??) This line does NOT work. Why?
         # if c1 == "on":  # (??) This line does NOT work. Why?
         # if "on" in mentions_monitoring_switcher:  # (??) Test this line!
-        if mentions_monitoring_switcher == "on":
+
+        # if mentions_monitoring_switcher == "on":
             # print(" (line ~940) (Ben Franklin) Perform w/ courage what’s necessary, NO exceptions")  # (CDL) For testing only
-            mentions_forward(client, message)
+            # mentions_forward(client, message)
         # else:  # (CDL) For testing only
         #     print(" (pRintEd aFter 'else') (line ~940) (Doris Lessing)  Whatever you're meant to do, do it now. The conditions are always impossible.")  # (CDL) For testing only
+
 
     # process following
     if message.from_user and str(message.from_user.id) in following_set:
