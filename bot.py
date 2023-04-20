@@ -561,10 +561,10 @@ def chat_id_validity_verification(client, chat_id_to_verify, app_chat_id):
     try:
         chat_id_to_verify = int(chat_id_to_verify)
         client.get_chat(chat_id_to_verify)
-        print("(inSide 'try') tAke RiskS")
-        return True  # (?)
+        # print("(inSide 'try') tAke RiskS")
+        return True  # (?) Is this a 'best practice' solution?
     except:
-        print("(iNsidE 'except') aCcEpt rEaLity")
+        # print("(iNsidE 'except') aCcEpt rEaLity")
         client.send_message(app_chat_id, chat_id_is_not_valid_template_text)
         # raise Exception("JoMO")  # Test it
         # raise WrongTelegramIdError  # (??)
@@ -580,7 +580,10 @@ def user_id_validity_verification(client, user_id_to_verify, app_chat_id):
     try:
         user_id_to_verify = int(user_id_to_verify)
         client.get_chat(user_id_to_verify)
+        # print(" v2. (inSide 'try') tAke RiskS")
+        return True
     except:
+        # print("( v2. iNsidE 'except') aCcEpt rEaLity")
         client.send_message(app_chat_id, user_id_is_not_valid_template_text)
         # raise WrongTelegramIdError
         # pass #  (CDL) For testing only
@@ -620,14 +623,14 @@ def dump_replies_chat_input_handler(client, message):
             if len(args) == 2:
                 from_chat_id = args[0]
                 target_user_id = args[1]
-                print(chat_id_validity_verification(client, from_chat_id, app_chat_id))  # (?) (CDL) Outputs "None"
-                if chat_id_validity_verification(client, from_chat_id, app_chat_id):
-                    print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
-            #     print(chat_id_validity_verification(client, from_chat_id, app_chat_id))
-                # else:  #  (?) Is "else" necessary here?
-                #     print("pRinTed at thE eNd oF 'dump_replies' ")
-                # if chat_id_validity_verification(client, from_chat_id, app_chat_id) and user_id_validity_verification(client, target_user_id, app_chat_id):  # (???)  # How to code this line correctly?
-                    # dump_replies(user, from_chat_id, target_user_id)  # (?) Shall I use 'client' or 'user' ?   # user = Client("user")
+                # print(chat_id_validity_verification(client, from_chat_id, app_chat_id))  # (?) (CDL) Outputs "None"
+                # print(user_id_validity_verification(client, target_user_id, app_chat_id))  # (?) (CDL) Outputs "None"
+                if chat_id_validity_verification(client, from_chat_id, app_chat_id) and user_id_validity_verification(client, target_user_id, app_chat_id):  #  (??)  Is this an optimal solution or NOT a 'best practice'?
+                    # print("(Ray Dalio) bEcoMe an IMperFectioNist ")  # (CDL) For testing only
+                    dump_replies(user, from_chat_id, target_user_id)  # (?) TEST it!  # Shall I use 'client' or 'user' ?   # user = Client("user")
+                else:  #  (??) Is "else" necessary here?
+                    print("pRinTed aFter 'else' at thE eNd oF 'dump_replies' ")  # (CDL) For testing only
+
 
             #
             #     try:  # +Tested
