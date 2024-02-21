@@ -1,9 +1,11 @@
 version: "3"
 
 services:
-  main:
+  bot:
     build: .
     volumes:
-      - ".:/container1:rw"
-    restart: always
-
+      - .:/app
+    container_name: keywords_tg_bot
+    restart: unless-stopped
+    tty: true
+    stdin_open: true

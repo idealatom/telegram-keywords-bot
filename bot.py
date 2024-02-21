@@ -9,12 +9,10 @@ from config import config, keywords_chat_id, following_chat_id, mentions_chat_id
 
 # from threading import Timer
 
-# start app
-# (CDL) (OLD version that was working well)
-user = Client(
-    "user")  # (CDL) Temporarily rolled back to the OLD solution. Delete it after I test the new solution below
-# (?) (CDL) (NEW version, NOT tested yet)
-# user = Client(workdir="./config_resources", session_name="user_1", config_file="my_config.ini")  # (?) Test these updates w/ a new login session from scratch
+user = Client("user",
+    api_id=config.get('pyrogram', 'api_id'),
+    api_hash=config.get('pyrogram', 'api_hash')
+)
 
 # init chats
 chat_dict = {
@@ -48,7 +46,7 @@ def find_chats(client, args):
         except:
             return dialogs
     else:
-        for dialog in client.iter_dialogs():
+        for dialog in client.get_dialogs():
             search_str = ' '.join((str(dialog.chat.title), str(dialog.chat.first_name),
                                    str(dialog.chat.last_name), '@' + str(dialog.chat.username)))
             if re.search(' '.join(args), search_str, re.IGNORECASE):
@@ -70,10 +68,6 @@ def find_users(client, args):
     return result
 
 
-# def get_history_count(from_chat_id):   #  ? (test) Is this function necessary
-#     pass
-
-
 def dump_all_messages_of_target_user_from_selected_chat(client, from_chat_id, target_user_id):
     if client.get_history_count(from_chat_id) == 0:
         client.send_message(dump_replies_chat_id,
@@ -85,8 +79,7 @@ def dump_all_messages_of_target_user_from_selected_chat(client, from_chat_id, ta
     skipped_messages = 0
     # counter = 0
     # ++ Get ALL messages of the target user (via user ID) & forward them:  # Already tested
-    for message in client.iter_history(
-            from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
+    for message in client.get_chat_history(from_chat_id):
         # if message is None:  # (??) AttributeError: 'NoneType' object has no attribute 'id'
         # if type(message.from_user) == None:
         # if type(message.from_user) is None:
@@ -137,7 +130,7 @@ def dump_replies(client, from_chat_id, target_user_id):
     replies_to_original_messages_of_target_user_counter = 0
 
     # (?) About the code block below: is it the optimal solution?!
-    for message in client.iter_history(
+    for message in client.get_chat_history(
             from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         # print(message.from_user.id)  # (CDL) For testing only
         # print(type(message.from_user.id))  # (CDL) For testing only
@@ -207,7 +200,7 @@ def dump_replies(client, from_chat_id, target_user_id):
     # + Get the ORIGINAL message from any user if the selected (specified, target) message is a reply:  # Already tested
     # (?) (CDL) BUT: I can NOT get ANY details about this "reply" message itself with "reply_to_message" param
     # if message.reply_to_message:
-    #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
+    #     print(message.from_user.username, message.reply_to_message.id, message.reply_to_message.text)
 
     # if message.from_user.id == target_user_id:  #  ??
     #     print("\n\n1.'message.text' == \n", message.text)
@@ -233,7 +226,7 @@ def dump_replies(client, from_chat_id, target_user_id):
 
     # + (NOT relevant for my task?!) Get every original message from smb that target user made a reply to:
     # if message.from_user.id == target_user_id and message.reply_to_message:
-    #     print(message.from_user.username, message.reply_to_message.message_id, message.reply_to_message.text)
+    #     print(message.from_user.username, message.reply_to_message.id, message.reply_to_message.text)
 
     # if message.reply_to_message:
     #     print(message.reply_to_message.reply_to_message) # (CDL) Wrong
@@ -250,7 +243,7 @@ def dump_all_from_selected_chat(client, from_chat_id):
     skipped_service_messages = 0
     counter = 0
     # current_time = int(datetime.now().timestamp())
-    for message in client.iter_history(
+    for message in client.get_chat_history(
             from_chat_id):  # iter_history is used in Pyrogram v.1.4. instead of get_chat_history in v2.0.
         counter += 1
         if message.service:
@@ -291,13 +284,13 @@ list_of_ids_of_all_created_chats = [keywords_chat_id, following_chat_id, mention
 
 help_general_text = """
 ...
-(Beverly Sills) There are NO short cuts to any place worth going. 
+(Beverly Sills) There are NO short cuts to any place worth going.
 ...
 """  # (?) Add text w/ all instructions from the final version of ReadMe AFTER main changes in code are finished
 
 
 # command messages listener
-@user.on_message(filters.me & ~filters.edited & filters.command(filtered_commands_list))
+@user.on_message(filters.me & filters.command(filtered_commands_list))
 def command_messages_handler(client, message):
     # accept commands only for bot chat ids
     if not message.chat or not str(message.chat.id) in list_of_ids_of_all_created_chats:
@@ -324,7 +317,7 @@ def command_messages_handler(client, message):
 
 
 # (?) Variant N2:
-@user.on_message(filters.me & ~filters.edited & ~filters.command(filtered_commands_list))
+@user.on_message(filters.me & ~filters.command(filtered_commands_list))
 def not_command_handler(client, message):  # (?) Draft
 
     # accept commands only for bot chat ids
@@ -484,7 +477,7 @@ def findid_input_handler(client, message):
                 'To find Telegram ID of any chat (user / group / channel / bot / etc.)\n'
                 'Enter manually in "3.Find_Telegram_ID" chat:\n'
                 '/findid @username | first_name last_name | chat_title\n\n'
-                # '\tVariant 2: Forward manually any message from target chat to "3.Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n' 
+                # '\tVariant 2: Forward manually any message from target chat to "3.Find_Telegram_ID" chat. Get automatic reply with target chat ID\n\n'
                 '(Finding IDs may work slowly. Wait for Bot\'s reply)\n'
             )
         case 'findid':
@@ -546,14 +539,14 @@ def dump_all_from_selected_chat_handler(client, message):
 
 chat_id_is_not_valid_template_text = """
 Sorry, chat_id is NOT valid\n
-To find valid chat_id, please, enter manually: 
-/findid chat_title | @username | first_name last_name 
+To find valid chat_id, please, enter manually:
+/findid chat_title | @username | first_name last_name
 """
 
 user_id_is_not_valid_template_text = """
 Sorry, target_user_id is NOT valid\n
-To find valid target_user_id, please, enter manually: 
-/findid @username | first_name last_name | chat_title 
+To find valid target_user_id, please, enter manually:
+/findid @username | first_name last_name | chat_title
 """
 
 
@@ -964,7 +957,7 @@ def following_handler(client, message):
 
 # listen to only other users' messages;
 # skip message edits for now (TODO: handle edited messages) (?)
-@user.on_message(~filters.me & ~filters.edited)  # (?)
+@user.on_message(~filters.me)  # (?)
 def not_my_messages_handler(client, message):
     # process keywords
     if message.text and not str(message.chat.id) in excluded_chats:
@@ -1016,16 +1009,15 @@ def pinned_messages_handler(client, message):
 
 
 # process Deleted messages
-@user.on_deleted_messages(~filters.me)  # (?) "NOT-me" filter does NOT work correctly now
-def deleted_messages_handler(client,
-                             message):  # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
-    # print("2. (Watts)  At EVERY moment of life: you are already “there” = liberated = enlightened = in the optimal place / state / moment = where you tried & dreamed to get."!
-    deleted_messages_forward(client, message)
+# @user.on_deleted_messages(~filters.me)
+# def deleted_messages_handler(client, message):
+#     # https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_deleted_messages
+#     deleted_messages_forward(client, message)
 
 
 # process Edited messages
 # Variant N2   *** https://docs.pyrogram.org/api/decorators#pyrogram.Client.on_message
-@user.on_message(~filters.me & filters.edited & filters.private)  # (?)
+@user.on_edited_message(~filters.me & filters.private)
 def edited_messages_handler(client, message):
     edited_messages_forward(client, message)
 
@@ -1039,6 +1031,8 @@ def edited_messages_handler(client, message):
 
 
 def make_user_mention(user):
+    if user is None:
+        return '?'
     name = str(user.first_name) + ' ' + str(user.last_name).strip()
     return '[{}](tg://user?id={})'.format(name, user.id)
 
@@ -1097,10 +1091,10 @@ def deleted_messages_forward(client, message):
     # client.send_message(edited_and_deleted_chat_id, 'Deleted message {}:'.format(source))
     # message.forward(edited_and_deleted_chat_id)
     client.send_message(edited_and_deleted_chat_id, "Deleted message detected:\n"
-                                                    f"message_id: {message[0]['message_id']}\n"
-                                                    "(?) Date & time of deletion: ... \n"  # (?) Try tu use message_id OR just use the time of the notification
-                                                    "(later feature) Chat ID where deletion happened: ...\n"  # (?) Try to use message_id 
-                                                    "(later feature) Original message BEFORE being deleted: ..."
+                                                    f"message_id: {message[0].id}\n"
+                                                    # "(?) Date & time of deletion: ... \n"  # (?) Try tu use message_id OR just use the time of the notification
+                                                    f"Chat ID where deletion happened: {message[0].chat.id}\n"
+                                                    # "(later feature) Original message BEFORE being deleted: ..."
                         )
     client.mark_chat_unread(edited_and_deleted_chat_id)
 
